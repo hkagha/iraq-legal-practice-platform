@@ -14,13 +14,282 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      invitations: {
+        Row: {
+          accepted_at: string | null
+          created_at: string
+          email: string
+          expires_at: string
+          first_name: string | null
+          id: string
+          invited_by: string
+          last_name: string | null
+          organization_id: string
+          role: string
+          status: string
+          token: string
+        }
+        Insert: {
+          accepted_at?: string | null
+          created_at?: string
+          email: string
+          expires_at?: string
+          first_name?: string | null
+          id?: string
+          invited_by: string
+          last_name?: string | null
+          organization_id: string
+          role: string
+          status?: string
+          token?: string
+        }
+        Update: {
+          accepted_at?: string | null
+          created_at?: string
+          email?: string
+          expires_at?: string
+          first_name?: string | null
+          id?: string
+          invited_by?: string
+          last_name?: string | null
+          organization_id?: string
+          role?: string
+          status?: string
+          token?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invitations_invited_by_fkey"
+            columns: ["invited_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invitations_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      organizations: {
+        Row: {
+          address: string | null
+          address_ar: string | null
+          bank_account_number: string | null
+          bank_iban: string | null
+          bank_name: string | null
+          case_next_number: number | null
+          case_prefix: string | null
+          city: string | null
+          created_at: string
+          default_currency: string
+          default_language: string
+          default_payment_terms_days: number | null
+          default_tax_rate: number | null
+          email: string | null
+          errand_next_number: number | null
+          errand_prefix: string | null
+          governorate: string | null
+          id: string
+          invoice_footer_text: string | null
+          invoice_footer_text_ar: string | null
+          invoice_next_number: number | null
+          invoice_prefix: string | null
+          is_active: boolean
+          letterhead_url: string | null
+          logo_url: string | null
+          max_storage_mb: number
+          max_users: number
+          name: string
+          name_ar: string
+          phone: string | null
+          registration_number: string | null
+          slug: string
+          subscription_status: string
+          subscription_tier: string
+          tax_id: string | null
+          trial_ends_at: string | null
+          updated_at: string
+          website: string | null
+          working_days: string[] | null
+          working_hours_end: string | null
+          working_hours_start: string | null
+        }
+        Insert: {
+          address?: string | null
+          address_ar?: string | null
+          bank_account_number?: string | null
+          bank_iban?: string | null
+          bank_name?: string | null
+          case_next_number?: number | null
+          case_prefix?: string | null
+          city?: string | null
+          created_at?: string
+          default_currency?: string
+          default_language?: string
+          default_payment_terms_days?: number | null
+          default_tax_rate?: number | null
+          email?: string | null
+          errand_next_number?: number | null
+          errand_prefix?: string | null
+          governorate?: string | null
+          id?: string
+          invoice_footer_text?: string | null
+          invoice_footer_text_ar?: string | null
+          invoice_next_number?: number | null
+          invoice_prefix?: string | null
+          is_active?: boolean
+          letterhead_url?: string | null
+          logo_url?: string | null
+          max_storage_mb?: number
+          max_users?: number
+          name: string
+          name_ar: string
+          phone?: string | null
+          registration_number?: string | null
+          slug: string
+          subscription_status?: string
+          subscription_tier?: string
+          tax_id?: string | null
+          trial_ends_at?: string | null
+          updated_at?: string
+          website?: string | null
+          working_days?: string[] | null
+          working_hours_end?: string | null
+          working_hours_start?: string | null
+        }
+        Update: {
+          address?: string | null
+          address_ar?: string | null
+          bank_account_number?: string | null
+          bank_iban?: string | null
+          bank_name?: string | null
+          case_next_number?: number | null
+          case_prefix?: string | null
+          city?: string | null
+          created_at?: string
+          default_currency?: string
+          default_language?: string
+          default_payment_terms_days?: number | null
+          default_tax_rate?: number | null
+          email?: string | null
+          errand_next_number?: number | null
+          errand_prefix?: string | null
+          governorate?: string | null
+          id?: string
+          invoice_footer_text?: string | null
+          invoice_footer_text_ar?: string | null
+          invoice_next_number?: number | null
+          invoice_prefix?: string | null
+          is_active?: boolean
+          letterhead_url?: string | null
+          logo_url?: string | null
+          max_storage_mb?: number
+          max_users?: number
+          name?: string
+          name_ar?: string
+          phone?: string | null
+          registration_number?: string | null
+          slug?: string
+          subscription_status?: string
+          subscription_tier?: string
+          tax_id?: string | null
+          trial_ends_at?: string | null
+          updated_at?: string
+          website?: string | null
+          working_days?: string[] | null
+          working_hours_end?: string | null
+          working_hours_start?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          email: string
+          first_name: string
+          first_name_ar: string | null
+          id: string
+          is_active: boolean
+          job_title: string | null
+          job_title_ar: string | null
+          language_preference: string
+          last_active_at: string | null
+          last_name: string
+          last_name_ar: string | null
+          notification_preferences: Json | null
+          organization_id: string | null
+          phone: string | null
+          role: string
+          secondary_phone: string | null
+          timezone: string | null
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          first_name?: string
+          first_name_ar?: string | null
+          id: string
+          is_active?: boolean
+          job_title?: string | null
+          job_title_ar?: string | null
+          language_preference?: string
+          last_active_at?: string | null
+          last_name?: string
+          last_name_ar?: string | null
+          notification_preferences?: Json | null
+          organization_id?: string | null
+          phone?: string | null
+          role?: string
+          secondary_phone?: string | null
+          timezone?: string | null
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          email?: string
+          first_name?: string
+          first_name_ar?: string | null
+          id?: string
+          is_active?: boolean
+          job_title?: string | null
+          job_title_ar?: string | null
+          language_preference?: string
+          last_active_at?: string | null
+          last_name?: string
+          last_name_ar?: string | null
+          notification_preferences?: Json | null
+          organization_id?: string | null
+          phone?: string | null
+          role?: string
+          secondary_phone?: string | null
+          timezone?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_org_id: { Args: { _user_id: string }; Returns: string }
+      get_user_role: { Args: { _user_id: string }; Returns: string }
     }
     Enums: {
       [_ in never]: never
