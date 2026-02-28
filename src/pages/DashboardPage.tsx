@@ -1,5 +1,3 @@
-import { useNavigate } from 'react-router-dom';
-import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { DashboardSkeleton } from '@/components/SkeletonLoader';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
@@ -8,11 +6,10 @@ import UpcomingEventsWidget from '@/components/dashboard/UpcomingEventsWidget';
 import TasksDueSoonWidget from '@/components/dashboard/TasksDueSoonWidget';
 import RecentActivityWidget from '@/components/dashboard/RecentActivityWidget';
 import CasesByStatusChart from '@/components/dashboard/CasesByStatusChart';
-import RevenueTrendChart from '@/components/dashboard/RevenueTrendChart';
+import ErrandsByStatusChart from '@/components/dashboard/ErrandsByStatusChart';
 
 export default function DashboardPage() {
-  const { profile, isLoading } = useAuth();
-  const { t } = useLanguage();
+  const { isLoading } = useAuth();
 
   if (isLoading) return <DashboardSkeleton />;
 
@@ -37,7 +34,7 @@ export default function DashboardPage() {
       {/* Row 4 — Charts */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <CasesByStatusChart />
-        <RevenueTrendChart />
+        <ErrandsByStatusChart />
       </div>
     </div>
   );

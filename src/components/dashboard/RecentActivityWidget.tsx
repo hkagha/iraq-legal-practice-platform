@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Activity, Scale, UserPlus, Calendar, RefreshCw, MessageSquare, Pencil } from 'lucide-react';
+import { Activity, Scale, UserPlus, Calendar, RefreshCw, MessageSquare, Pencil, FileCheck, CheckCircle, CheckCircle2, XCircle } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ar as arLocale } from 'date-fns/locale';
 
@@ -13,7 +13,7 @@ interface ActivityItem {
   title: string;
   title_ar: string | null;
   created_at: string;
-  entity_type: 'case' | 'client';
+  entity_type: 'case' | 'client' | 'errand';
   entity_id: string;
 }
 
@@ -31,6 +31,10 @@ const ACTIVITY_ICON_MAP: Record<string, { icon: typeof Activity; color: string }
   client_updated: { icon: Pencil, color: '#3B82F6' },
   client_archived: { icon: UserPlus, color: '#64748B' },
   team_member_added: { icon: UserPlus, color: '#06B6D4' },
+  errand_created: { icon: FileCheck, color: '#8B5CF6' },
+  step_completed: { icon: CheckCircle, color: '#22C55E' },
+  errand_completed: { icon: CheckCircle2, color: '#C9A84C' },
+  errand_cancelled: { icon: XCircle, color: '#94A3B8' },
 };
 
 export default function RecentActivityWidget() {
@@ -43,7 +47,7 @@ export default function RecentActivityWidget() {
   useEffect(() => {
     if (!profile?.organization_id) return;
     const fetch = async () => {
-      const [caseRes, clientRes] = await Promise.all([
+      const [caseRes, clientRes, errandRes] = await Promise.all([
         supabase
           .from('case_activities')
           .select('id, activity_type, title, title_ar, created_at, case_id')
@@ -53,6 +57,12 @@ export default function RecentActivityWidget() {
         supabase
           .from('client_activities')
           .select('id, activity_type, title, title_ar, created_at, client_id')
+          .eq('organization_id', profile.organization_id!)
+          .order('created_at', { ascending: false })
+          .limit(10),
+        supabase
+          .from('errand_activities')
+          .select('id, activity_type, title, title_ar, created_at, errand_id')
           .eq('organization_id', profile.organization_id!)
           .order('created_at', { ascending: false })
           .limit(10),
@@ -68,8 +78,13 @@ export default function RecentActivityWidget() {
         title_ar: a.title_ar, created_at: a.created_at,
         entity_type: 'client', entity_id: a.client_id,
       }));
+      const errandItems: ActivityItem[] = (errandRes.data || []).map(a => ({
+        id: a.id, activity_type: a.activity_type, title: a.title,
+        title_ar: a.title_ar, created_at: a.created_at,
+        entity_type: 'errand', entity_id: a.errand_id,
+      }));
 
-      const merged = [...caseItems, ...clientItems]
+      const merged = [...caseItems, ...clientItems, ...errandItems]
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
         .slice(0, 10);
 
@@ -107,7 +122,7 @@ export default function RecentActivityWidget() {
           {activities.map(a => {
             const config = ACTIVITY_ICON_MAP[a.activity_type] || { icon: Activity, color: '#64748B' };
             const Icon = config.icon;
-            const link = a.entity_type === 'case' ? `/cases/${a.entity_id}` : `/clients/${a.entity_id}`;
+            const link = a.entity_type === 'case' ? `/cases/${a.entity_id}` : a.entity_type === 'errand' ? `/errands/${a.entity_id}` : `/clients/${a.entity_id}`;
 
             return (
               <div
