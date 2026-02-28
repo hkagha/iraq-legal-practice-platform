@@ -1778,7 +1778,89 @@
       "fullAccess": "Full access",
       "viewOnly": "View only",
       "noAccess": "No access",
-      "customNote": "Role permissions are system-defined and cannot be customized in this version."
+    "customNote": "Role permissions are system-defined and cannot be customized in this version."
+    }
+  },
+  "ai": {
+    "title": "AI Assistant",
+    "poweredBy": "Powered by AI",
+    "generating": "AI is generating...",
+    "regenerate": "Regenerate",
+    "copyResult": "Copy Result",
+    "insertResult": "Insert",
+    "disclaimer": "AI-generated content should be reviewed before use. It may contain errors.",
+    "notEnabled": "AI features are not enabled. Contact your administrator.",
+    "tokenLimitReached": "Monthly AI token limit reached. Resets on the 1st.",
+    "configRequired": "AI features require API configuration.",
+    "features": {
+      "documentDraft": "Draft Document",
+      "caseSummary": "Summarize Case",
+      "legalResearch": "Legal Research",
+      "autoCategorize": "Auto-Categorize",
+      "contractReview": "Review Contract",
+      "translation": "Translate",
+      "enhanceNote": "Enhance Note",
+      "chat": "AI Chat"
+    },
+    "draft": {
+      "title": "AI Document Drafting",
+      "subtitle": "Describe what you need and AI will draft it for you",
+      "promptLabel": "What do you want to draft?",
+      "promptPlaceholder": "e.g., Draft a power of attorney for client Ahmed Al-Rashid authorizing lawyer Sara Hassan to represent him in civil case #2026-001 before Baghdad Court of First Instance...",
+      "language": "Output Language",
+      "tone": "Tone",
+      "toneOptions": {
+        "formal": "Formal Legal",
+        "standard": "Standard",
+        "simplified": "Simplified"
+      },
+      "context": "Additional Context",
+      "contextPlaceholder": "Any additional details, specific clauses, or requirements...",
+      "generate": "Generate Draft",
+      "result": "Generated Draft",
+      "saveAsDocument": "Save as Document",
+      "useInTemplate": "Use in Template",
+      "editAndRefine": "Edit & Refine"
+    },
+    "summary": {
+      "title": "AI Case Summary",
+      "subtitle": "Generate a comprehensive summary of this case",
+      "generating": "Analyzing case data...",
+      "sections": "Summary Sections",
+      "overview": "Case Overview",
+      "keyFacts": "Key Facts",
+      "timeline": "Timeline of Events",
+      "currentStatus": "Current Status",
+      "nextSteps": "Recommended Next Steps",
+      "riskAssessment": "Risk Assessment",
+      "generate": "Generate Summary",
+      "lastGenerated": "Last generated",
+      "regenerate": "Regenerate Summary"
+    },
+    "research": {
+      "title": "AI Legal Research",
+      "subtitle": "Research Iraqi law and legal precedents",
+      "queryLabel": "Research Question",
+      "queryPlaceholder": "e.g., What are the legal requirements for company registration in Iraq?",
+      "jurisdiction": "Jurisdiction",
+      "iraqiLaw": "Iraqi Law",
+      "searching": "Researching...",
+      "results": "Research Results",
+      "disclaimer": "This research is AI-generated and should be verified with official legal sources.",
+      "sources": "Potential Sources",
+      "search": "Research"
+    },
+    "settings": {
+      "title": "AI Configuration",
+      "enabled": "AI Features Enabled",
+      "provider": "AI Provider",
+      "apiKey": "API Key",
+      "apiKeyHelper": "Your API key is encrypted and stored securely",
+      "model": "Model",
+      "monthlyLimit": "Monthly Token Limit",
+      "usageThisMonth": "Usage This Month",
+      "tokensUsed": "{{used}} / {{limit}} tokens used",
+      "resetDate": "Resets on the 1st of each month"
     }
   }
 }

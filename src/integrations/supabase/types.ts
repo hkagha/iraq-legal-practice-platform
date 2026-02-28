@@ -14,6 +14,72 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_usage_log: {
+        Row: {
+          completion_tokens: number
+          created_at: string
+          duration_ms: number | null
+          error_message: string | null
+          feature: string
+          id: string
+          input_preview: string | null
+          model: string | null
+          organization_id: string
+          output_preview: string | null
+          prompt_tokens: number
+          status: string
+          total_tokens: number
+          user_id: string
+        }
+        Insert: {
+          completion_tokens?: number
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          feature: string
+          id?: string
+          input_preview?: string | null
+          model?: string | null
+          organization_id: string
+          output_preview?: string | null
+          prompt_tokens?: number
+          status?: string
+          total_tokens?: number
+          user_id: string
+        }
+        Update: {
+          completion_tokens?: number
+          created_at?: string
+          duration_ms?: number | null
+          error_message?: string | null
+          feature?: string
+          id?: string
+          input_preview?: string | null
+          model?: string | null
+          organization_id?: string
+          output_preview?: string | null
+          prompt_tokens?: number
+          status?: string
+          total_tokens?: number
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "ai_usage_log_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "ai_usage_log_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billing_rates: {
         Row: {
           case_id: string | null
@@ -471,6 +537,8 @@ export type Database = {
       }
       cases: {
         Row: {
+          ai_summary: Json | null
+          ai_summary_generated_at: string | null
           billing_type: string | null
           case_number: string
           case_type: string
@@ -517,6 +585,8 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          ai_summary?: Json | null
+          ai_summary_generated_at?: string | null
           billing_type?: string | null
           case_number: string
           case_type: string
@@ -563,6 +633,8 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          ai_summary?: Json | null
+          ai_summary_generated_at?: string | null
           billing_type?: string | null
           case_number?: string
           case_type?: string
@@ -2268,6 +2340,10 @@ export type Database = {
         Row: {
           address: string | null
           address_ar: string | null
+          ai_enabled: boolean | null
+          ai_last_reset_date: string | null
+          ai_monthly_token_limit: number | null
+          ai_tokens_used_this_month: number | null
           bank_account_number: string | null
           bank_iban: string | null
           bank_name: string | null
@@ -2321,6 +2397,10 @@ export type Database = {
         Insert: {
           address?: string | null
           address_ar?: string | null
+          ai_enabled?: boolean | null
+          ai_last_reset_date?: string | null
+          ai_monthly_token_limit?: number | null
+          ai_tokens_used_this_month?: number | null
           bank_account_number?: string | null
           bank_iban?: string | null
           bank_name?: string | null
@@ -2374,6 +2454,10 @@ export type Database = {
         Update: {
           address?: string | null
           address_ar?: string | null
+          ai_enabled?: boolean | null
+          ai_last_reset_date?: string | null
+          ai_monthly_token_limit?: number | null
+          ai_tokens_used_this_month?: number | null
           bank_account_number?: string | null
           bank_iban?: string | null
           bank_name?: string | null
