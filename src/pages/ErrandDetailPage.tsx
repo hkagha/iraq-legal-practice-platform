@@ -29,6 +29,7 @@ import {
   RefreshCw, UserCog, CalendarClock, PlayCircle, CheckCircle2,
 } from 'lucide-react';
 import EntityDocumentsTab from '@/components/documents/EntityDocumentsTab';
+import ErrandRelatedTasks from '@/components/dashboard/ErrandRelatedTasks';
 
 const ERRAND_STATUSES = ['new','in_progress','awaiting_documents','submitted_to_government','under_review_by_government','additional_requirements','approved','rejected','completed','cancelled'] as const;
 
@@ -804,6 +805,9 @@ export default function ErrandDetailPage() {
               </button>
             )}
           </div>
+
+          {/* Related Tasks */}
+          <ErrandRelatedTasks errandId={id!} errandTitle={errandTitle} />
         </TabsContent>
 
         {/* ==================== DOCUMENTS TAB ==================== */}

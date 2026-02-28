@@ -2346,6 +2346,7 @@ export type Database = {
           priority: string
           recurrence_end_date: string | null
           recurrence_pattern: string | null
+          reminder_sent: boolean | null
           start_date: string | null
           status: string
           tags: string[] | null
@@ -2378,6 +2379,7 @@ export type Database = {
           priority?: string
           recurrence_end_date?: string | null
           recurrence_pattern?: string | null
+          reminder_sent?: boolean | null
           start_date?: string | null
           status?: string
           tags?: string[] | null
@@ -2410,6 +2412,7 @@ export type Database = {
           priority?: string
           recurrence_end_date?: string | null
           recurrence_pattern?: string | null
+          reminder_sent?: boolean | null
           start_date?: string | null
           status?: string
           tags?: string[] | null

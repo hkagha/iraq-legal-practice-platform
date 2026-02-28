@@ -9,7 +9,7 @@ interface EventItem {
   id: string;
   date: string;
   title: string;
-  type: 'hearing' | 'errand';
+  type: 'hearing' | 'errand' | 'event';
   entityId: string;
   entityNumber?: string;
 }
@@ -27,7 +27,7 @@ export default function UpcomingEventsWidget() {
       const today = new Date().toISOString().split('T')[0];
       const twoWeeks = new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0];
 
-      const [hearingsRes, errandsRes] = await Promise.all([
+      const [hearingsRes, errandsRes, calEventsRes] = await Promise.all([
         supabase
           .from('case_hearings')
           .select('id, hearing_date, hearing_time, hearing_type, case_id')
@@ -45,6 +45,15 @@ export default function UpcomingEventsWidget() {
           .lte('due_date', twoWeeks)
           .not('status', 'in', '("completed","cancelled","approved","rejected")')
           .order('due_date', { ascending: true })
+          .limit(5),
+        supabase
+          .from('calendar_events')
+          .select('id, title, title_ar, start_date, start_time, event_type, color, is_virtual')
+          .eq('organization_id', profile.organization_id!)
+          .gte('start_date', today)
+          .lte('start_date', twoWeeks)
+          .order('start_date', { ascending: true })
+          .order('start_time', { ascending: true })
           .limit(5),
       ]);
 
@@ -79,9 +88,17 @@ export default function UpcomingEventsWidget() {
         entityNumber: e.errand_number,
       }));
 
-      const merged = [...hearingItems, ...errandItems]
+      const calEventItems: EventItem[] = (calEventsRes.data || []).map(ev => ({
+        id: ev.id,
+        date: ev.start_date,
+        title: language === 'ar' && ev.title_ar ? ev.title_ar : ev.title,
+        type: 'event' as const,
+        entityId: ev.id,
+      }));
+
+      const merged = [...hearingItems, ...errandItems, ...calEventItems]
         .sort((a, b) => a.date.localeCompare(b.date))
-        .slice(0, 5);
+        .slice(0, 7);
 
       setEvents(merged);
       setLoading(false);
@@ -134,7 +151,19 @@ export default function UpcomingEventsWidget() {
             const month = monthNames[d.getMonth()];
             const day = d.getDate();
             const isHearing = ev.type === 'hearing';
-            const link = isHearing ? `/cases/${ev.entityId}` : `/errands/${ev.entityId}`;
+            const isEvent = ev.type === 'event';
+            const link = isHearing ? `/cases/${ev.entityId}` : isEvent ? '/calendar' : `/errands/${ev.entityId}`;
+
+            const badgeClass = isHearing
+              ? 'bg-[#FEF2F2] text-[#EF4444]'
+              : isEvent
+              ? 'bg-[#FFFBEB] text-[#C9A84C]'
+              : 'bg-[#F5F3FF] text-[#8B5CF6]';
+            const badgeText = isHearing
+              ? t('dashboard.hearing')
+              : isEvent
+              ? t('dashboard.meeting')
+              : t('dashboard.errandDue');
 
             return (
               <div key={ev.id} className="flex items-center gap-4 px-5 py-3 hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(link)}>
@@ -145,12 +174,8 @@ export default function UpcomingEventsWidget() {
                 <div className="flex-1 min-w-0">
                   <p className="text-body-md font-medium text-foreground truncate">{ev.title}</p>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className={`inline-flex items-center text-[11px] font-medium rounded-badge px-1.5 py-0.5 ${
-                      isHearing
-                        ? 'bg-[#FEF2F2] text-[#EF4444]'
-                        : 'bg-[#F5F3FF] text-[#8B5CF6]'
-                    }`}>
-                      {isHearing ? t('dashboard.hearing') : t('dashboard.errandDue')}
+                    <span className={`inline-flex items-center text-[11px] font-medium rounded-badge px-1.5 py-0.5 ${badgeClass}`}>
+                      {badgeText}
                     </span>
                   </div>
                 </div>

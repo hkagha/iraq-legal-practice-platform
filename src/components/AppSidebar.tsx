@@ -50,6 +50,8 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
   const [overdueErrandsCount, setOverdueErrandsCount] = useState(0);
   const [recentDocsCount, setRecentDocsCount] = useState(0);
   const [overdueInvoicesCount, setOverdueInvoicesCount] = useState(0);
+  const [overdueTasksCount, setOverdueTasksCount] = useState(0);
+  const [todayEventsCount, setTodayEventsCount] = useState(0);
 
   useEffect(() => {
     if (!profile?.organization_id) return;
@@ -57,7 +59,7 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
       const today = new Date().toISOString().split('T')[0];
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      const [urgentRes, overdueRes, recentDocsRes, overdueInvRes] = await Promise.all([
+      const [urgentRes, overdueRes, recentDocsRes, overdueInvRes, overdueTasksRes, todayEventsRes] = await Promise.all([
         supabase
           .from('cases')
           .select('*', { count: 'exact', head: true })
@@ -82,11 +84,24 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
           .eq('organization_id', profile.organization_id!)
           .lt('due_date', today)
           .in('status', ['sent', 'viewed', 'partially_paid']),
+        supabase
+          .from('tasks')
+          .select('*', { count: 'exact', head: true })
+          .eq('organization_id', profile.organization_id!)
+          .lt('due_date', today)
+          .not('status', 'in', '("completed","cancelled")'),
+        supabase
+          .from('calendar_events')
+          .select('*', { count: 'exact', head: true })
+          .eq('organization_id', profile.organization_id!)
+          .eq('start_date', today),
       ]);
       setHasUrgentCases((urgentRes.count || 0) > 0);
       setOverdueErrandsCount(overdueRes.count || 0);
       setRecentDocsCount(recentDocsRes.count || 0);
       setOverdueInvoicesCount(overdueInvRes.count || 0);
+      setOverdueTasksCount(overdueTasksRes.count || 0);
+      setTodayEventsCount(todayEventsRes.count || 0);
 
       // Auto-check overdue invoices — update status
       if ((overdueInvRes.count || 0) > 0) {
@@ -109,9 +124,9 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
     const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
     const Icon = item.icon;
     const label = t(`sidebar.${item.key}`);
-    const showDot = (item.key === 'cases' && hasUrgentCases) || (item.key === 'errands' && overdueErrandsCount > 0) || (item.key === 'timeTracking' && !!activeTimer);
-    const showCount = (item.key === 'errands' && overdueErrandsCount > 0) || (item.key === 'documents' && recentDocsCount > 0 && !isActive) || (item.key === 'billing' && overdueInvoicesCount > 0);
-    const countValue = item.key === 'errands' ? overdueErrandsCount : item.key === 'billing' ? overdueInvoicesCount : recentDocsCount;
+    const showDot = (item.key === 'cases' && hasUrgentCases) || (item.key === 'timeTracking' && !!activeTimer);
+    const showCount = (item.key === 'errands' && overdueErrandsCount > 0) || (item.key === 'documents' && recentDocsCount > 0 && !isActive) || (item.key === 'billing' && overdueInvoicesCount > 0) || (item.key === 'tasks' && overdueTasksCount > 0) || (item.key === 'calendar' && todayEventsCount > 0);
+    const countValue = item.key === 'errands' ? overdueErrandsCount : item.key === 'billing' ? overdueInvoicesCount : item.key === 'tasks' ? overdueTasksCount : item.key === 'calendar' ? todayEventsCount : recentDocsCount;
     const link = (
       <NavLink
         to={item.path}
@@ -140,7 +155,7 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
         {!collapsed && showCount && (
           <span className={cn(
             'text-[11px] font-semibold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1',
-            item.key === 'documents' ? 'bg-accent text-accent-foreground' : 'bg-destructive text-destructive-foreground',
+            item.key === 'documents' ? 'bg-accent text-accent-foreground' : item.key === 'calendar' ? 'bg-accent text-accent-foreground' : 'bg-destructive text-destructive-foreground',
           )}>
             {countValue}
           </span>
