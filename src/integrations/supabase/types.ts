@@ -75,6 +75,122 @@ export type Database = {
           },
         ]
       }
+      calendar_events: {
+        Row: {
+          case_id: string | null
+          client_id: string | null
+          color: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          description_ar: string | null
+          end_date: string | null
+          end_time: string | null
+          event_type: string
+          id: string
+          is_all_day: boolean | null
+          is_recurring: boolean | null
+          is_virtual: boolean | null
+          location: string | null
+          location_ar: string | null
+          organization_id: string
+          participants: string[] | null
+          recurrence_end_date: string | null
+          recurrence_pattern: string | null
+          start_date: string
+          start_time: string | null
+          title: string
+          title_ar: string | null
+          updated_at: string
+          virtual_link: string | null
+        }
+        Insert: {
+          case_id?: string | null
+          client_id?: string | null
+          color?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          description_ar?: string | null
+          end_date?: string | null
+          end_time?: string | null
+          event_type?: string
+          id?: string
+          is_all_day?: boolean | null
+          is_recurring?: boolean | null
+          is_virtual?: boolean | null
+          location?: string | null
+          location_ar?: string | null
+          organization_id: string
+          participants?: string[] | null
+          recurrence_end_date?: string | null
+          recurrence_pattern?: string | null
+          start_date: string
+          start_time?: string | null
+          title: string
+          title_ar?: string | null
+          updated_at?: string
+          virtual_link?: string | null
+        }
+        Update: {
+          case_id?: string | null
+          client_id?: string | null
+          color?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          description_ar?: string | null
+          end_date?: string | null
+          end_time?: string | null
+          event_type?: string
+          id?: string
+          is_all_day?: boolean | null
+          is_recurring?: boolean | null
+          is_virtual?: boolean | null
+          location?: string | null
+          location_ar?: string | null
+          organization_id?: string
+          participants?: string[] | null
+          recurrence_end_date?: string | null
+          recurrence_pattern?: string | null
+          start_date?: string
+          start_time?: string | null
+          title?: string
+          title_ar?: string | null
+          updated_at?: string
+          virtual_link?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendar_events_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_events_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendar_events_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       case_activities: {
         Row: {
           activity_type: string
@@ -2146,6 +2262,224 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      task_comments: {
+        Row: {
+          author_id: string
+          content: string
+          content_ar: string | null
+          created_at: string
+          id: string
+          organization_id: string
+          task_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          content_ar?: string | null
+          created_at?: string
+          id?: string
+          organization_id: string
+          task_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          content_ar?: string | null
+          created_at?: string
+          id?: string
+          organization_id?: string
+          task_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_comments_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_comments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_comments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tasks: {
+        Row: {
+          actual_minutes: number | null
+          assigned_by: string | null
+          assigned_to: string | null
+          case_id: string | null
+          checklist: Json | null
+          client_id: string | null
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          description_ar: string | null
+          due_date: string | null
+          due_time: string | null
+          errand_id: string | null
+          estimated_minutes: number | null
+          id: string
+          is_recurring: boolean | null
+          organization_id: string
+          parent_task_id: string | null
+          priority: string
+          recurrence_end_date: string | null
+          recurrence_pattern: string | null
+          start_date: string | null
+          status: string
+          tags: string[] | null
+          task_type: string
+          title: string
+          title_ar: string | null
+          updated_at: string
+        }
+        Insert: {
+          actual_minutes?: number | null
+          assigned_by?: string | null
+          assigned_to?: string | null
+          case_id?: string | null
+          checklist?: Json | null
+          client_id?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          description_ar?: string | null
+          due_date?: string | null
+          due_time?: string | null
+          errand_id?: string | null
+          estimated_minutes?: number | null
+          id?: string
+          is_recurring?: boolean | null
+          organization_id: string
+          parent_task_id?: string | null
+          priority?: string
+          recurrence_end_date?: string | null
+          recurrence_pattern?: string | null
+          start_date?: string | null
+          status?: string
+          tags?: string[] | null
+          task_type?: string
+          title: string
+          title_ar?: string | null
+          updated_at?: string
+        }
+        Update: {
+          actual_minutes?: number | null
+          assigned_by?: string | null
+          assigned_to?: string | null
+          case_id?: string | null
+          checklist?: Json | null
+          client_id?: string | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          description_ar?: string | null
+          due_date?: string | null
+          due_time?: string | null
+          errand_id?: string | null
+          estimated_minutes?: number | null
+          id?: string
+          is_recurring?: boolean | null
+          organization_id?: string
+          parent_task_id?: string | null
+          priority?: string
+          recurrence_end_date?: string | null
+          recurrence_pattern?: string | null
+          start_date?: string | null
+          status?: string
+          tags?: string[] | null
+          task_type?: string
+          title?: string
+          title_ar?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_errand_id_fkey"
+            columns: ["errand_id"]
+            isOneToOne: false
+            referencedRelation: "errands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_parent_task_id_fkey"
+            columns: ["parent_task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
             referencedColumns: ["id"]
           },
         ]
