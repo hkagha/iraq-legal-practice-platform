@@ -588,6 +588,30 @@
     },
     "kanban": {
       "noCards": "No cases"
+    },
+    "form": {
+      "basicInfo": "Basic Information",
+      "clientAndOpposing": "Client & Opposing Party",
+      "courtInfo": "Court Information",
+      "datesAndValue": "Key Dates & Value",
+      "billingConfig": "Billing Configuration",
+      "clientVisibility": "Client Visibility",
+      "createCase": "Create Case",
+      "updateCase": "Update Case",
+      "titleRequired": "Case title is required (minimum 5 characters)",
+      "caseTypeRequired": "Case type is required",
+      "priorityRequired": "Priority is required",
+      "clientRequired": "Client is required",
+      "invalidPercentage": "Percentage must be between 0 and 100"
+    },
+    "statusChange": {
+      "changeStatus": "Change Status",
+      "confirmClose": "Are you sure you want to close this case?",
+      "confirmArchive": "Are you sure you want to archive this case?",
+      "outcomeTitle": "Case Outcome",
+      "outcomeSummary": "Outcome Summary",
+      "outcomeDate": "Outcome Date",
+      "statusChanged": "Case status updated successfully"
     }
   }
 }
