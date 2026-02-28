@@ -468,5 +468,126 @@
       "companyTypeRequired": "نوع الشركة مطلوب",
       "remove": "إزالة"
     }
+  },
+  "cases": {
+    "title": "القضايا",
+    "subtitle": "إدارة القضايا القانونية لمكتب المحاماة",
+    "addCase": "قضية جديدة",
+    "editCase": "تعديل القضية",
+    "caseDetails": "تفاصيل القضية",
+    "caseNumber": "رقم القضية",
+    "totalCases": "إجمالي القضايا",
+    "activeCases": "القضايا النشطة",
+    "urgentCases": "القضايا العاجلة",
+    "fields": {
+      "title": "عنوان القضية",
+      "titleAr": "عنوان القضية (عربي)",
+      "description": "الوصف",
+      "descriptionAr": "الوصف (عربي)",
+      "caseType": "نوع القضية",
+      "courtType": "نوع المحكمة",
+      "courtName": "اسم المحكمة",
+      "courtNameAr": "اسم المحكمة (عربي)",
+      "courtLocation": "موقع المحكمة",
+      "courtCaseNumber": "رقم الدعوى في المحكمة",
+      "courtChamber": "الهيئة",
+      "judgeName": "اسم القاضي",
+      "judgeNameAr": "اسم القاضي (عربي)",
+      "client": "العميل",
+      "opposingParty": "الخصم",
+      "opposingPartyName": "اسم الخصم",
+      "opposingPartyNameAr": "اسم الخصم (عربي)",
+      "opposingPartyLawyer": "محامي الخصم",
+      "opposingPartyLawyerAr": "محامي الخصم (عربي)",
+      "opposingPartyPhone": "هاتف الخصم",
+      "filingDate": "تاريخ التقديم",
+      "statuteOfLimitations": "مدة التقادم",
+      "estimatedValue": "القيمة التقديرية",
+      "status": "الحالة",
+      "priority": "الأولوية",
+      "billingType": "نوع الفوترة",
+      "fixedFee": "أتعاب ثابتة",
+      "retainerAmount": "مبلغ التوكيل",
+      "contingencyPercentage": "نسبة من النتيجة %",
+      "hourlyRate": "السعر بالساعة",
+      "teamMembers": "أعضاء الفريق",
+      "visibleToClient": "مرئي للعميل",
+      "nextHearing": "الجلسة القادمة"
+    },
+    "caseTypes": {
+      "civil": "مدني",
+      "criminal": "جزائي",
+      "commercial": "تجاري",
+      "personal_status": "أحوال شخصية",
+      "labor": "عمل",
+      "administrative": "إداري",
+      "real_estate": "عقاري",
+      "family": "أسرة",
+      "corporate": "شركات",
+      "contract": "عقود",
+      "intellectual_property": "ملكية فكرية",
+      "tax": "ضريبي",
+      "customs": "جمركي",
+      "other": "أخرى"
+    },
+    "courtTypes": {
+      "court_of_first_instance": "محكمة البداءة",
+      "misdemeanor_court": "محكمة الجنح",
+      "felony_court": "محكمة الجنايات",
+      "criminal_court": "المحكمة الجزائية",
+      "personal_status_court": "محكمة الأحوال الشخصية",
+      "labor_court": "محكمة العمل",
+      "commercial_court": "المحكمة التجارية",
+      "administrative_court": "محكمة القضاء الإداري",
+      "court_of_appeal": "محكمة الاستئناف",
+      "court_of_cassation": "محكمة التمييز",
+      "federal_supreme_court": "المحكمة الاتحادية العليا",
+      "central_criminal_court": "المحكمة الجنائية المركزية",
+      "investigation_court": "محكمة التحقيق",
+      "other": "أخرى"
+    },
+    "billingTypes": {
+      "hourly": "بالساعة",
+      "fixed_fee": "أتعاب ثابتة",
+      "retainer": "توكيل",
+      "contingency": "نسبة من النتيجة",
+      "pro_bono": "مجاني"
+    },
+    "teamRoles": {
+      "lead": "المحامي الرئيسي",
+      "member": "عضو فريق",
+      "reviewer": "مراجع",
+      "observer": "مراقب"
+    },
+    "statuses": {
+      "intake": "استلام",
+      "active": "نشطة",
+      "pending_hearing": "بانتظار جلسة",
+      "pending_judgment": "بانتظار حكم",
+      "on_hold": "معلقة",
+      "won": "مكسوبة",
+      "lost": "خاسرة",
+      "settled": "تسوية",
+      "closed": "مغلقة",
+      "archived": "مؤرشفة"
+    },
+    "empty": {
+      "title": "لا توجد قضايا بعد",
+      "subtitle": "أنشئ أول قضية لبدء إدارة الشؤون القانونية",
+      "action": "إنشاء أول قضية"
+    },
+    "search": {
+      "placeholder": "البحث بالعنوان أو رقم القضية أو رقم الدعوى..."
+    },
+    "messages": {
+      "created": "تم إنشاء القضية بنجاح",
+      "updated": "تم تحديث القضية بنجاح",
+      "archived": "تم أرشفة القضية بنجاح",
+      "failedCreate": "فشل إنشاء القضية. يرجى المحاولة مرة أخرى.",
+      "failedUpdate": "فشل تحديث القضية. يرجى المحاولة مرة أخرى."
+    },
+    "kanban": {
+      "noCards": "لا توجد قضايا"
+    }
   }
 }

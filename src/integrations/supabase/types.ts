@@ -14,6 +14,461 @@ export type Database = {
   }
   public: {
     Tables: {
+      case_activities: {
+        Row: {
+          activity_type: string
+          actor_id: string | null
+          case_id: string
+          created_at: string
+          description: string | null
+          description_ar: string | null
+          id: string
+          metadata: Json | null
+          organization_id: string
+          title: string
+          title_ar: string | null
+        }
+        Insert: {
+          activity_type: string
+          actor_id?: string | null
+          case_id: string
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          title: string
+          title_ar?: string | null
+        }
+        Update: {
+          activity_type?: string
+          actor_id?: string | null
+          case_id?: string
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          title?: string
+          title_ar?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_activities_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "case_activities_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "case_activities_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      case_hearings: {
+        Row: {
+          adjournment_reason: string | null
+          adjournment_reason_ar: string | null
+          case_id: string
+          court_room: string | null
+          created_at: string
+          created_by: string | null
+          hearing_date: string
+          hearing_time: string | null
+          hearing_type: string
+          id: string
+          is_visible_to_client: boolean
+          judge_name: string | null
+          judge_name_ar: string | null
+          next_hearing_date: string | null
+          notes: string | null
+          notes_ar: string | null
+          organization_id: string
+          outcome: string | null
+          outcome_ar: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          adjournment_reason?: string | null
+          adjournment_reason_ar?: string | null
+          case_id: string
+          court_room?: string | null
+          created_at?: string
+          created_by?: string | null
+          hearing_date: string
+          hearing_time?: string | null
+          hearing_type: string
+          id?: string
+          is_visible_to_client?: boolean
+          judge_name?: string | null
+          judge_name_ar?: string | null
+          next_hearing_date?: string | null
+          notes?: string | null
+          notes_ar?: string | null
+          organization_id: string
+          outcome?: string | null
+          outcome_ar?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          adjournment_reason?: string | null
+          adjournment_reason_ar?: string | null
+          case_id?: string
+          court_room?: string | null
+          created_at?: string
+          created_by?: string | null
+          hearing_date?: string
+          hearing_time?: string | null
+          hearing_type?: string
+          id?: string
+          is_visible_to_client?: boolean
+          judge_name?: string | null
+          judge_name_ar?: string | null
+          next_hearing_date?: string | null
+          notes?: string | null
+          notes_ar?: string | null
+          organization_id?: string
+          outcome?: string | null
+          outcome_ar?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_hearings_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "case_hearings_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "case_hearings_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      case_notes: {
+        Row: {
+          author_id: string
+          case_id: string
+          content: string
+          content_ar: string | null
+          created_at: string
+          id: string
+          is_pinned: boolean
+          is_visible_to_client: boolean
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          case_id: string
+          content: string
+          content_ar?: string | null
+          created_at?: string
+          id?: string
+          is_pinned?: boolean
+          is_visible_to_client?: boolean
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          case_id?: string
+          content?: string
+          content_ar?: string | null
+          created_at?: string
+          id?: string
+          is_pinned?: boolean
+          is_visible_to_client?: boolean
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_notes_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "case_notes_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "case_notes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      case_team_members: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          case_id: string
+          id: string
+          organization_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          case_id: string
+          id?: string
+          organization_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          case_id?: string
+          id?: string
+          organization_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "case_team_members_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "case_team_members_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "case_team_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "case_team_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cases: {
+        Row: {
+          billing_type: string | null
+          case_number: string
+          case_type: string
+          client_id: string
+          closed_at: string | null
+          closed_by: string | null
+          contingency_percentage: number | null
+          court_case_number: string | null
+          court_chamber: string | null
+          court_location: string | null
+          court_location_ar: string | null
+          court_name: string | null
+          court_name_ar: string | null
+          court_type: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          description_ar: string | null
+          estimated_value: number | null
+          estimated_value_currency: string | null
+          filing_date: string | null
+          fixed_fee_amount: number | null
+          hourly_rate: number | null
+          id: string
+          is_visible_to_client: boolean
+          judge_name: string | null
+          judge_name_ar: string | null
+          opposing_party_lawyer: string | null
+          opposing_party_lawyer_ar: string | null
+          opposing_party_name: string | null
+          opposing_party_name_ar: string | null
+          opposing_party_phone: string | null
+          organization_id: string
+          outcome_date: string | null
+          outcome_summary: string | null
+          outcome_summary_ar: string | null
+          priority: string
+          retainer_amount: number | null
+          status: string
+          statute_of_limitations: string | null
+          title: string
+          title_ar: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          billing_type?: string | null
+          case_number: string
+          case_type: string
+          client_id: string
+          closed_at?: string | null
+          closed_by?: string | null
+          contingency_percentage?: number | null
+          court_case_number?: string | null
+          court_chamber?: string | null
+          court_location?: string | null
+          court_location_ar?: string | null
+          court_name?: string | null
+          court_name_ar?: string | null
+          court_type?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          description_ar?: string | null
+          estimated_value?: number | null
+          estimated_value_currency?: string | null
+          filing_date?: string | null
+          fixed_fee_amount?: number | null
+          hourly_rate?: number | null
+          id?: string
+          is_visible_to_client?: boolean
+          judge_name?: string | null
+          judge_name_ar?: string | null
+          opposing_party_lawyer?: string | null
+          opposing_party_lawyer_ar?: string | null
+          opposing_party_name?: string | null
+          opposing_party_name_ar?: string | null
+          opposing_party_phone?: string | null
+          organization_id: string
+          outcome_date?: string | null
+          outcome_summary?: string | null
+          outcome_summary_ar?: string | null
+          priority?: string
+          retainer_amount?: number | null
+          status?: string
+          statute_of_limitations?: string | null
+          title: string
+          title_ar?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          billing_type?: string | null
+          case_number?: string
+          case_type?: string
+          client_id?: string
+          closed_at?: string | null
+          closed_by?: string | null
+          contingency_percentage?: number | null
+          court_case_number?: string | null
+          court_chamber?: string | null
+          court_location?: string | null
+          court_location_ar?: string | null
+          court_name?: string | null
+          court_name_ar?: string | null
+          court_type?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          description_ar?: string | null
+          estimated_value?: number | null
+          estimated_value_currency?: string | null
+          filing_date?: string | null
+          fixed_fee_amount?: number | null
+          hourly_rate?: number | null
+          id?: string
+          is_visible_to_client?: boolean
+          judge_name?: string | null
+          judge_name_ar?: string | null
+          opposing_party_lawyer?: string | null
+          opposing_party_lawyer_ar?: string | null
+          opposing_party_name?: string | null
+          opposing_party_name_ar?: string | null
+          opposing_party_phone?: string | null
+          organization_id?: string
+          outcome_date?: string | null
+          outcome_summary?: string | null
+          outcome_summary_ar?: string | null
+          priority?: string
+          retainer_amount?: number | null
+          status?: string
+          statute_of_limitations?: string | null
+          title?: string
+          title_ar?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cases_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cases_closed_by_fkey"
+            columns: ["closed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cases_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cases_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cases_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_activities: {
         Row: {
           activity_type: string
