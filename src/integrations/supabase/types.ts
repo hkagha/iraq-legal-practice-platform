@@ -14,6 +14,76 @@ export type Database = {
   }
   public: {
     Tables: {
+      client_activities: {
+        Row: {
+          activity_type: string
+          actor_id: string | null
+          client_id: string
+          created_at: string
+          description: string | null
+          description_ar: string | null
+          id: string
+          metadata: Json | null
+          organization_id: string
+          related_entity_id: string | null
+          related_entity_type: string | null
+          title: string
+          title_ar: string | null
+        }
+        Insert: {
+          activity_type: string
+          actor_id?: string | null
+          client_id: string
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          title: string
+          title_ar?: string | null
+        }
+        Update: {
+          activity_type?: string
+          actor_id?: string | null
+          client_id?: string
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          related_entity_id?: string | null
+          related_entity_type?: string | null
+          title?: string
+          title_ar?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_activities_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_activities_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_activities_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_contacts: {
         Row: {
           client_id: string

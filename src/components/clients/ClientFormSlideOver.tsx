@@ -331,6 +331,18 @@ export default function ClientFormSlideOver({ isOpen, onClose, onSaved, editClie
         }
       }
 
+      // Log activity
+      if (clientId && profile?.organization_id) {
+        await supabase.from('client_activities').insert({
+          organization_id: profile.organization_id,
+          client_id: clientId,
+          actor_id: profile.id,
+          activity_type: isEdit ? 'client_updated' : 'client_created',
+          title: isEdit ? 'Updated client information' : 'Created new client',
+          title_ar: isEdit ? 'تم تحديث معلومات العميل' : 'تم إنشاء عميل جديد',
+        } as any);
+      }
+
       toast({ title: isEdit ? t('clients.messages.updated') : t('clients.messages.created') });
       setIsDirty(false);
       onSaved();
