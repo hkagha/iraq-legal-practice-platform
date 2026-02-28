@@ -46,6 +46,8 @@ import NotificationsPage from '@/pages/NotificationsPage';
 import ActivityFeedPage from '@/pages/ActivityFeedPage';
 import ReportsPage from '@/pages/ReportsPage';
 import FirmPerformanceReport from '@/pages/FirmPerformanceReport';
+import Employee360Report from '@/pages/Employee360Report';
+import FinancialSummaryReport from '@/pages/FinancialSummaryReport';
 const MessagesPage = () => <PlaceholderPage titleKey="sidebar.messages" icon={MessageSquare} />;
 const ResearchPage = () => <PlaceholderPage titleKey="sidebar.research" icon={Sparkles} />;
 const TeamPage = () => <PlaceholderPage titleKey="sidebar.team" icon={UserCog} />;
@@ -107,8 +109,8 @@ const App = () => (
                 <Route path="/billing/:id/edit" element={<InvoiceFormPage />} />
                 <Route path="/reports" element={<ReportsPage />} />
                 <Route path="/reports/firm-performance" element={<FirmPerformanceReport />} />
-                <Route path="/reports/employee-360" element={<PlaceholderPage titleKey="reports.employee360" icon={BarChart3} />} />
-                <Route path="/reports/financial" element={<PlaceholderPage titleKey="reports.financialSummary" icon={BarChart3} />} />
+                <Route path="/reports/employee-360" element={<Employee360Report />} />
+                <Route path="/reports/financial" element={<FinancialSummaryReport />} />
                 <Route path="/reports/cases" element={<PlaceholderPage titleKey="reports.caseAnalytics" icon={BarChart3} />} />
                 <Route path="/reports/errands" element={<PlaceholderPage titleKey="reports.errandAnalytics" icon={BarChart3} />} />
                 <Route path="/reports/clients" element={<PlaceholderPage titleKey="reports.clientAnalytics" icon={BarChart3} />} />
