@@ -5,7 +5,7 @@ import { PageHeader } from '@/components/ui/PageHeader';
 import { cn } from '@/lib/utils';
 import {
   Building, Palette, Receipt, Hash, Users, Shield, Mail,
-  User, Lock, Bell, Globe, CreditCard, Download, AlertTriangle,
+  User, Lock, Bell, Globe, CreditCard, Download, AlertTriangle, Sparkles,
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import GeneralSettings from '@/components/settings/GeneralSettings';
@@ -22,12 +22,13 @@ import LanguageAppearanceSection from '@/components/settings/LanguageAppearanceS
 import SubscriptionSection from '@/components/settings/SubscriptionSection';
 import DataExportSection from '@/components/settings/DataExportSection';
 import DangerZoneSection from '@/components/settings/DangerZoneSection';
+import AIConfigSettings from '@/components/settings/AIConfigSettings';
 
 type SectionKey = 
   | 'general' | 'branding' | 'billingConfig' | 'numbering'
   | 'teamMembers' | 'rolesPermissions' | 'invitations'
   | 'myProfile' | 'security' | 'notificationPrefs' | 'languageAppearance'
-  | 'subscription' | 'dataExport' | 'dangerZone';
+  | 'subscription' | 'aiConfig' | 'dataExport' | 'dangerZone';
 
 interface NavItem {
   key: SectionKey;
@@ -71,6 +72,7 @@ const navGroups: NavGroup[] = [
     groupKey: 'system',
     items: [
       { key: 'subscription', icon: CreditCard, adminOnly: true },
+      { key: 'aiConfig', icon: Sparkles, adminOnly: true },
       { key: 'dataExport', icon: Download, adminOnly: true },
       { key: 'dangerZone', icon: AlertTriangle, adminOnly: true },
     ],
@@ -105,6 +107,7 @@ export default function SettingsPage() {
       case 'notificationPrefs': return <NotificationPrefsSection />;
       case 'languageAppearance': return <LanguageAppearanceSection />;
       case 'subscription': return <SubscriptionSection />;
+      case 'aiConfig': return <AIConfigSettings />;
       case 'dataExport': return <DataExportSection />;
       case 'dangerZone': return <DangerZoneSection />;
       default: return null;

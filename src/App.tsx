@@ -59,6 +59,7 @@ const MessagesPage = () => <PlaceholderPage titleKey="sidebar.messages" icon={Me
 const ResearchPage = () => <PlaceholderPage titleKey="sidebar.research" icon={Sparkles} />;
 const TeamPage = () => <PlaceholderPage titleKey="sidebar.team" icon={UserCog} />;
 import SettingsPage from '@/pages/SettingsPage';
+import AIDocumentDraftPage from '@/pages/AIDocumentDraftPage';
 const ProfilePage = () => <PlaceholderPage titleKey="common.profile" icon={User} />;
 
 const PortalDashboard = () => <PlaceholderPage titleKey="clientPortal.myDashboard" icon={LayoutDashboard} />;
@@ -128,6 +129,7 @@ const App = () => (
                 <Route path="/research" element={<ResearchPage />} />
                 <Route path="/team" element={<TeamPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/ai/draft" element={<AIDocumentDraftPage />} />
                 <Route path="/notifications" element={<NotificationsPage />} />
                 <Route path="/activity" element={<ActivityFeedPage />} />
                 <Route path="/profile" element={<ProfilePage />} />

@@ -35,6 +35,7 @@ import { FormSearchSelect } from '@/components/ui/FormSearchSelect';
 import EntityDocumentsTab from '@/components/documents/EntityDocumentsTab';
 import CaseTimeBillingTab from '@/components/cases/CaseTimeBillingTab';
 import CaseQuickTasks from '@/components/tasks/CaseQuickTasks';
+import AICaseSummary from '@/components/cases/AICaseSummary';
 
 const CASE_STATUS_ORDER = ['intake','active','pending_hearing','pending_judgment','on_hold','won','lost','settled','closed'] as const;
 const STATUS_PROGRESS: Record<string, number> = {
@@ -622,6 +623,10 @@ export default function CaseDetailPage() {
 
         {/* OVERVIEW TAB */}
         <TabsContent value="overview" className="mt-6">
+          {/* AI Case Summary */}
+          <div className="mb-6">
+            <AICaseSummary caseData={caseData} clientInfo={clientInfo} hearings={hearings} notes={notes} />
+          </div>
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
             <div className="lg:col-span-3 space-y-4">
               {/* Case Summary */}
