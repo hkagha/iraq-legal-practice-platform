@@ -15,7 +15,21 @@ interface LanguageContextType {
 
 const translations: Record<Language, TranslationData> = { en, ar };
 
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+// Fallback for HMR edge-cases where the provider unmounts temporarily
+const fallbackT = (key: string) => {
+  const lang = (localStorage.getItem('qanuni_language') as Language) || 'en';
+  return getNestedValue(translations[lang], key) ?? key;
+};
+
+const defaultContext: LanguageContextType = {
+  language: ((localStorage.getItem('qanuni_language') as Language) || 'en'),
+  setLanguage: () => {},
+  t: fallbackT,
+  dir: (localStorage.getItem('qanuni_language') === 'ar' ? 'rtl' : 'ltr'),
+  isRTL: localStorage.getItem('qanuni_language') === 'ar',
+};
+
+const LanguageContext = createContext<LanguageContextType>(defaultContext);
 
 function getNestedValue(obj: TranslationData, path: string): string | undefined {
   const keys = path.split('.');
@@ -76,7 +90,5 @@ export function LanguageProvider({ children }: { children: ReactNode }) {
 }
 
 export function useLanguage() {
-  const context = useContext(LanguageContext);
-  if (!context) throw new Error('useLanguage must be used within a LanguageProvider');
-  return context;
+  return useContext(LanguageContext);
 }
