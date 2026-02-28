@@ -35,7 +35,7 @@ import ErrandFormPage from '@/pages/ErrandFormPage';
 import ErrandDetailPage from '@/pages/ErrandDetailPage';
 import ClientsPage from '@/pages/ClientsPage';
 import ClientDetailPage from '@/pages/ClientDetailPage';
-const CalendarPage = () => <PlaceholderPage titleKey="sidebar.calendar" icon={Calendar} />;
+import CalendarPage from '@/pages/CalendarPage';
 import TasksPage from '@/pages/TasksPage';
 import DocumentsPage from '@/pages/DocumentsPage';
 import TimeTrackingPage from '@/pages/TimeTrackingPage';
