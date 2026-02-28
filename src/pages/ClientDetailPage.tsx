@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import EntityDocumentsTab from '@/components/documents/EntityDocumentsTab';
+import ClientBillingTab from '@/components/clients/ClientBillingTab';
 
 const CLIENT_STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   active: { bg: '#F0FDF4', text: '#22C55E' },
@@ -772,12 +773,7 @@ export default function ClientDetailPage() {
 
         {/* BILLING TAB */}
         <TabsContent value="billing" className="mt-6">
-          <EmptyState
-            icon={Receipt}
-            title={t('clients.detail.noInvoicesYet')} titleAr={t('clients.detail.noInvoicesYet')}
-            actionLabel={t('clients.detail.createInvoice')} actionLabelAr={t('clients.detail.createInvoice')}
-            onAction={() => {}}
-          />
+          <ClientBillingTab clientId={id!} clientName={clientName} />
         </TabsContent>
 
         {/* ACTIVITY LOG TAB */}

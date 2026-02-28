@@ -3,6 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useTimer } from '@/contexts/TimerContext';
 import { cn } from '@/lib/utils';
 import {
   LayoutDashboard, Scale, FileCheck, Users, Calendar, CheckSquare,
@@ -43,10 +44,12 @@ interface AppSidebarProps {
 export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarProps) {
   const { t, isRTL, language } = useLanguage();
   const { profile } = useAuth();
+  const { activeTimer } = useTimer();
   const location = useLocation();
   const [hasUrgentCases, setHasUrgentCases] = useState(false);
   const [overdueErrandsCount, setOverdueErrandsCount] = useState(0);
   const [recentDocsCount, setRecentDocsCount] = useState(0);
+  const [overdueInvoicesCount, setOverdueInvoicesCount] = useState(0);
 
   useEffect(() => {
     if (!profile?.organization_id) return;
@@ -54,7 +57,7 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
       const today = new Date().toISOString().split('T')[0];
       const sevenDaysAgo = new Date();
       sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
-      const [urgentRes, overdueRes, recentDocsRes] = await Promise.all([
+      const [urgentRes, overdueRes, recentDocsRes, overdueInvRes] = await Promise.all([
         supabase
           .from('cases')
           .select('*', { count: 'exact', head: true })
@@ -73,10 +76,27 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
           .eq('organization_id', profile.organization_id!)
           .eq('status', 'active')
           .gte('created_at', sevenDaysAgo.toISOString()),
+        supabase
+          .from('invoices')
+          .select('*', { count: 'exact', head: true })
+          .eq('organization_id', profile.organization_id!)
+          .lt('due_date', today)
+          .in('status', ['sent', 'viewed', 'partially_paid']),
       ]);
       setHasUrgentCases((urgentRes.count || 0) > 0);
       setOverdueErrandsCount(overdueRes.count || 0);
       setRecentDocsCount(recentDocsRes.count || 0);
+      setOverdueInvoicesCount(overdueInvRes.count || 0);
+
+      // Auto-check overdue invoices — update status
+      if ((overdueInvRes.count || 0) > 0) {
+        await supabase
+          .from('invoices')
+          .update({ status: 'overdue' } as any)
+          .eq('organization_id', profile.organization_id!)
+          .lt('due_date', today)
+          .in('status', ['sent', 'viewed']);
+      }
     };
     check();
   }, [profile?.organization_id]);
@@ -89,9 +109,9 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
     const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
     const Icon = item.icon;
     const label = t(`sidebar.${item.key}`);
-    const showDot = (item.key === 'cases' && hasUrgentCases) || (item.key === 'errands' && overdueErrandsCount > 0);
-    const showCount = (item.key === 'errands' && overdueErrandsCount > 0) || (item.key === 'documents' && recentDocsCount > 0 && !isActive);
-    const countValue = item.key === 'errands' ? overdueErrandsCount : recentDocsCount;
+    const showDot = (item.key === 'cases' && hasUrgentCases) || (item.key === 'errands' && overdueErrandsCount > 0) || (item.key === 'timeTracking' && !!activeTimer);
+    const showCount = (item.key === 'errands' && overdueErrandsCount > 0) || (item.key === 'documents' && recentDocsCount > 0 && !isActive) || (item.key === 'billing' && overdueInvoicesCount > 0);
+    const countValue = item.key === 'errands' ? overdueErrandsCount : item.key === 'billing' ? overdueInvoicesCount : recentDocsCount;
     const link = (
       <NavLink
         to={item.path}
@@ -111,7 +131,7 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
         <div className="relative">
           <Icon className="h-5 w-5 shrink-0" />
           {showDot && !showCount && (
-            <span className="absolute -top-1 -end-1 h-2 w-2 rounded-full bg-[#EF4444]" />
+            <span className={cn('absolute -top-1 -end-1 h-2 w-2 rounded-full', item.key === 'timeTracking' ? 'bg-[#EF4444] animate-pulse' : 'bg-[#EF4444]')} />
           )}
         </div>
         {!collapsed && (

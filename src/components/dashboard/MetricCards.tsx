@@ -38,11 +38,17 @@ export default function MetricCards() {
   const { profile } = useAuth();
   const [activeCasesCount, setActiveCasesCount] = useState(0);
   const [activeErrandsCount, setActiveErrandsCount] = useState(0);
+  const [billableHours, setBillableHours] = useState(0);
+  const [outstandingAmount, setOutstandingAmount] = useState(0);
 
   useEffect(() => {
     if (!profile?.organization_id) return;
     const fetchCounts = async () => {
-      const [casesRes, errandsRes] = await Promise.all([
+      const now = new Date();
+      const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
+      const today = now.toISOString().split('T')[0];
+
+      const [casesRes, errandsRes, timeRes, invoiceRes] = await Promise.all([
         supabase
           .from('cases')
           .select('*', { count: 'exact', head: true })
@@ -53,12 +59,41 @@ export default function MetricCards() {
           .select('*', { count: 'exact', head: true })
           .eq('organization_id', profile.organization_id!)
           .in('status', ['new', 'in_progress', 'awaiting_documents', 'submitted_to_government', 'under_review_by_government', 'additional_requirements']),
+        supabase
+          .from('time_entries')
+          .select('duration_minutes')
+          .eq('organization_id', profile.organization_id!)
+          .eq('is_billable', true)
+          .eq('is_timer_running', false)
+          .gte('date', firstOfMonth)
+          .lte('date', today),
+        supabase
+          .from('invoices')
+          .select('balance_due')
+          .eq('organization_id', profile.organization_id!)
+          .in('status', ['sent', 'viewed', 'partially_paid']),
       ]);
       setActiveCasesCount(casesRes.count || 0);
       setActiveErrandsCount(errandsRes.count || 0);
+      const totalMins = (timeRes.data || []).reduce((s, e) => s + (e.duration_minutes || 0), 0);
+      setBillableHours(totalMins / 60);
+      const outstanding = (invoiceRes.data || []).reduce((s, inv) => s + (parseFloat(String(inv.balance_due)) || 0), 0);
+      setOutstandingAmount(outstanding);
     };
     fetchCounts();
   }, [profile?.organization_id]);
+
+  const formatHours = (h: number) => {
+    const formatted = h.toFixed(1);
+    return language === 'ar' ? `${parseFloat(formatted).toLocaleString('ar-IQ')} س` : `${formatted}h`;
+  };
+
+  const formatCurrency = (amount: number) => {
+    if (amount === 0) return language === 'ar' ? '٠ د.ع' : '0 IQD';
+    return language === 'ar'
+      ? `${amount.toLocaleString('ar-IQ')} د.ع`
+      : `${amount.toLocaleString()} IQD`;
+  };
 
   const cards: MetricCardProps[] = [
     {
@@ -89,7 +124,7 @@ export default function MetricCards() {
       icon: Clock,
       iconColor: '#22C55E',
       iconBg: '#F0FDF4',
-      value: language === 'ar' ? '٠ س' : '0h',
+      value: formatHours(billableHours),
       label: t('dashboard.billableHours'),
       href: '/time-tracking',
     },
@@ -97,7 +132,7 @@ export default function MetricCards() {
       icon: Receipt,
       iconColor: '#EF4444',
       iconBg: '#FEF2F2',
-      value: language === 'ar' ? '٠ د.ع' : '0 IQD',
+      value: formatCurrency(outstandingAmount),
       label: t('dashboard.outstandingInvoices'),
       href: '/billing',
     },

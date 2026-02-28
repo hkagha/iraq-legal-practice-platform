@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { FormSearchSelect } from '@/components/ui/FormSearchSelect';
 import EntityDocumentsTab from '@/components/documents/EntityDocumentsTab';
+import CaseTimeBillingTab from '@/components/cases/CaseTimeBillingTab';
 
 const CASE_STATUS_ORDER = ['intake','active','pending_hearing','pending_judgment','on_hold','won','lost','settled','closed'] as const;
 const STATUS_PROGRESS: Record<string, number> = {
@@ -164,6 +165,8 @@ export default function CaseDetailPage() {
 
   // Linked errands
   const [linkedErrands, setLinkedErrands] = useState<any[]>([]);
+  const [timeEntriesCount, setTimeEntriesCount] = useState(0);
+  const [invoicesCount, setInvoicesCount] = useState(0);
   const [showLinkErrandModal, setShowLinkErrandModal] = useState(false);
   const [linkableErrands, setLinkableErrands] = useState<{ value: string; label: string; subtitle?: string }[]>([]);
   const [selectedLinkErrand, setSelectedLinkErrand] = useState('');
@@ -218,9 +221,16 @@ export default function CaseDetailPage() {
   // Fetch linked errands
   useEffect(() => {
     if (!id) return;
-    supabase.from('errands').select('id,errand_number,title,title_ar,status,total_steps,completed_steps,progress_percentage')
-      .eq('case_id', id).order('created_at', { ascending: false })
-      .then(({ data }) => { if (data) setLinkedErrands(data); });
+    Promise.all([
+      supabase.from('errands').select('id,errand_number,title,title_ar,status,total_steps,completed_steps,progress_percentage')
+        .eq('case_id', id).order('created_at', { ascending: false }),
+      supabase.from('time_entries').select('*', { count: 'exact', head: true }).eq('case_id', id).eq('is_timer_running', false),
+      supabase.from('invoices').select('*', { count: 'exact', head: true }).eq('case_id', id),
+    ]).then(([errandsRes, teRes, invRes]) => {
+      if (errandsRes.data) setLinkedErrands(errandsRes.data);
+      setTimeEntriesCount(teRes.count || 0);
+      setInvoicesCount(invRes.count || 0);
+    });
   }, [id, caseData?.updated_at]);
 
   // Fetch linkable errands (same client, no case_id)
@@ -595,7 +605,7 @@ export default function CaseDetailPage() {
             { key: 'hearings', label: t('cases.detail.hearings'), count: hearings.length },
             { key: 'notes', label: t('cases.detail.notes'), count: notes.length },
             { key: 'documents', label: t('cases.detail.documents'), count: undefined },
-            { key: 'timeBilling', label: t('cases.detail.timeBilling'), count: 0 },
+            { key: 'timeBilling', label: t('cases.detail.timeBilling'), count: timeEntriesCount + invoicesCount },
             { key: 'activity', label: t('cases.detail.activity') },
           ].map(tab => (
             <TabsTrigger key={tab.key} value={tab.key} className={cn(
@@ -912,7 +922,7 @@ export default function CaseDetailPage() {
 
         {/* TIME & BILLING TAB */}
         <TabsContent value="timeBilling" className="mt-6">
-          <EmptyState icon={Clock} title={t('cases.detail.noTimeEntries')} titleAr={t('cases.detail.noTimeEntries')} actionLabel={t('cases.detail.logTime')} actionLabelAr={t('cases.detail.logTime')} onAction={() => {}} />
+          <CaseTimeBillingTab caseId={id!} clientId={caseData?.client_id} caseTitle={caseTitle} />
         </TabsContent>
 
         {/* ACTIVITY TAB */}

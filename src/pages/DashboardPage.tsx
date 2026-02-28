@@ -7,6 +7,7 @@ import TasksDueSoonWidget from '@/components/dashboard/TasksDueSoonWidget';
 import RecentActivityWidget from '@/components/dashboard/RecentActivityWidget';
 import CasesByStatusChart from '@/components/dashboard/CasesByStatusChart';
 import ErrandsByStatusChart from '@/components/dashboard/ErrandsByStatusChart';
+import RevenueTrendChart from '@/components/dashboard/RevenueTrendChart';
 
 export default function DashboardPage() {
   const { isLoading } = useAuth();
@@ -31,11 +32,14 @@ export default function DashboardPage() {
       {/* Row 3 — Activity */}
       <RecentActivityWidget />
 
-      {/* Row 4 — Charts */}
+      {/* Row 4 — Charts + Revenue */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <CasesByStatusChart />
         <ErrandsByStatusChart />
       </div>
+
+      {/* Row 5 — Revenue Trend */}
+      <RevenueTrendChart />
     </div>
   );
 }
