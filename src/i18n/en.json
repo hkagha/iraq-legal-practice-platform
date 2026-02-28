@@ -883,7 +883,8 @@
       "stepStarted": "Step started",
       "completed": "Errand completed successfully",
       "cancelled": "Errand cancelled",
-    "validationError": "Please fill in all required fields"
+      "validationError": "Please fill in all required fields"
+    }
   },
   "documents": {
     "title": "Documents",
