@@ -588,6 +588,30 @@
     },
     "kanban": {
       "noCards": "لا توجد قضايا"
+    },
+    "form": {
+      "basicInfo": "المعلومات الأساسية",
+      "clientAndOpposing": "العميل والطرف المقابل",
+      "courtInfo": "معلومات المحكمة",
+      "datesAndValue": "التواريخ والقيمة",
+      "billingConfig": "إعدادات الفوترة",
+      "clientVisibility": "إظهار للعميل",
+      "createCase": "إنشاء القضية",
+      "updateCase": "تحديث القضية",
+      "titleRequired": "عنوان القضية مطلوب (5 أحرف على الأقل)",
+      "caseTypeRequired": "نوع القضية مطلوب",
+      "priorityRequired": "الأولوية مطلوبة",
+      "clientRequired": "العميل مطلوب",
+      "invalidPercentage": "يجب أن تكون النسبة بين 0 و 100"
+    },
+    "statusChange": {
+      "changeStatus": "تغيير الحالة",
+      "confirmClose": "هل أنت متأكد من إغلاق هذه القضية؟",
+      "confirmArchive": "هل أنت متأكد من أرشفة هذه القضية؟",
+      "outcomeTitle": "نتيجة القضية",
+      "outcomeSummary": "ملخص النتيجة",
+      "outcomeDate": "تاريخ النتيجة",
+      "statusChanged": "تم تحديث حالة القضية بنجاح"
     }
   }
 }

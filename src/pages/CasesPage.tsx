@@ -8,16 +8,20 @@ import { FilterBar } from '@/components/ui/FilterBar';
 import { DataTable } from '@/components/ui/DataTable';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Skeleton } from '@/components/ui/skeleton';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { FormDatePicker } from '@/components/ui/FormDatePicker';
+import { FormTextarea } from '@/components/ui/FormTextarea';
 import { toast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ar as arLocale } from 'date-fns/locale';
 import {
   Scale, Briefcase, AlertTriangle, MoreHorizontal, Pencil, Eye, Archive,
-  List, Columns3, Calendar,
+  List, Columns3, Calendar, ArrowRight,
 } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
+  DropdownMenuSub, DropdownMenuSubTrigger, DropdownMenuSubContent, DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -93,6 +97,13 @@ export default function CasesPage() {
   const [pageSize, setPageSize] = useState(20);
   const [sortKey, setSortKey] = useState('created_at');
   const [sortDir, setSortDir] = useState<'asc' | 'desc'>('desc');
+
+  // Quick status change state
+  const [confirmStatusDialog, setConfirmStatusDialog] = useState<{ caseId: string; status: string } | null>(null);
+  const [outcomeModal, setOutcomeModal] = useState<{ caseId: string; status: string } | null>(null);
+  const [outcomeSummary, setOutcomeSummary] = useState('');
+  const [outcomeDate, setOutcomeDate] = useState<Date | undefined>(undefined);
+  const [isChangingStatus, setIsChangingStatus] = useState(false);
 
   const fetchCases = useCallback(async () => {
     setIsLoading(true);
@@ -192,6 +203,57 @@ export default function CasesPage() {
   };
   const clearAll = () => { setStatusFilter('all'); setTypeFilter('all'); setPriorityFilter('all'); setSearch(''); };
 
+  const handleQuickStatusChange = async (caseId: string, newStatus: string, summary?: string, date?: Date) => {
+    setIsChangingStatus(true);
+    try {
+      const payload: Record<string, any> = { status: newStatus, updated_by: profile?.id };
+      if (['closed', 'archived'].includes(newStatus)) {
+        payload.closed_at = new Date().toISOString();
+        payload.closed_by = profile?.id;
+      }
+      if (summary) payload.outcome_summary = summary;
+      if (date) payload.outcome_date = date.toISOString().split('T')[0];
+
+      const { error } = await supabase.from('cases').update(payload as any).eq('id', caseId);
+      if (error) throw error;
+
+      // Log activity
+      if (profile?.organization_id) {
+        await supabase.from('case_activities').insert({
+          case_id: caseId,
+          organization_id: profile.organization_id,
+          actor_id: profile.id,
+          activity_type: 'status_changed',
+          title: `Status changed to ${newStatus}`,
+          title_ar: `تم تغيير الحالة إلى ${t(`cases.statuses.${newStatus}`)}`,
+          metadata: { new_status: newStatus },
+        } as any);
+      }
+
+      toast({ title: t('cases.statusChange.statusChanged') });
+      fetchCases();
+      fetchStats();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setIsChangingStatus(false);
+      setConfirmStatusDialog(null);
+      setOutcomeModal(null);
+      setOutcomeSummary('');
+      setOutcomeDate(undefined);
+    }
+  };
+
+  const initiateStatusChange = (caseId: string, newStatus: string) => {
+    if (['closed', 'archived'].includes(newStatus)) {
+      setConfirmStatusDialog({ caseId, status: newStatus });
+    } else if (['won', 'lost', 'settled'].includes(newStatus)) {
+      setOutcomeModal({ caseId, status: newStatus });
+    } else {
+      handleQuickStatusChange(caseId, newStatus);
+    }
+  };
+
   const columns = [
     {
       key: 'case_number', label: 'Case #', labelAr: 'رقم القضية', sortable: true, width: '12%',
@@ -261,8 +323,30 @@ export default function CasesPage() {
               <DropdownMenuItem onClick={() => navigate(`/cases/${row.id}`)}>
                 <Eye size={14} className="me-2" /> {t('clients.viewDetails')}
               </DropdownMenuItem>
-              <DropdownMenuItem><Pencil size={14} className="me-2" /> {t('common.edit')}</DropdownMenuItem>
-              <DropdownMenuItem className="text-destructive"><Archive size={14} className="me-2" /> {t('clients.archive')}</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate(`/cases/${row.id}/edit`)}>
+                <Pencil size={14} className="me-2" /> {t('common.edit')}
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuSub>
+                <DropdownMenuSubTrigger>
+                  <ArrowRight size={14} className="me-2" /> {t('cases.statusChange.changeStatus')}
+                </DropdownMenuSubTrigger>
+                <DropdownMenuSubContent className="w-48">
+                  {CASE_STATUS_ORDER.map(s => (
+                    <DropdownMenuItem
+                      key={s}
+                      disabled={row.status === s}
+                      onClick={() => initiateStatusChange(row.id, s)}
+                    >
+                      <StatusBadge status={s} type="case" size="sm" />
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuSubContent>
+              </DropdownMenuSub>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem className="text-destructive" onClick={() => initiateStatusChange(row.id, 'archived')}>
+                <Archive size={14} className="me-2" /> {t('clients.archive')}
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
@@ -426,6 +510,54 @@ export default function CasesPage() {
             ))}
           </div>
         )
+      )}
+
+      {/* Confirm Status Dialog (close/archive) */}
+      <ConfirmDialog
+        isOpen={!!confirmStatusDialog}
+        onClose={() => setConfirmStatusDialog(null)}
+        onConfirm={() => confirmStatusDialog && handleQuickStatusChange(confirmStatusDialog.caseId, confirmStatusDialog.status)}
+        title={confirmStatusDialog?.status === 'archived' ? 'Archive Case' : 'Close Case'}
+        titleAr={confirmStatusDialog?.status === 'archived' ? 'أرشفة القضية' : 'إغلاق القضية'}
+        message={confirmStatusDialog?.status === 'archived' ? t('cases.statusChange.confirmArchive') : t('cases.statusChange.confirmClose')}
+        messageAr={confirmStatusDialog?.status === 'archived' ? t('cases.statusChange.confirmArchive') : t('cases.statusChange.confirmClose')}
+        type="warning"
+        isLoading={isChangingStatus}
+      />
+
+      {/* Outcome Modal (won/lost/settled) */}
+      {outcomeModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={() => setOutcomeModal(null)}>
+          <div className="absolute inset-0 bg-black/50" />
+          <div className="relative bg-card rounded-modal shadow-xl p-6 max-w-[480px] w-[90%] mx-auto space-y-4" onClick={e => e.stopPropagation()}>
+            <h3 className="text-heading-lg text-foreground">{t('cases.statusChange.outcomeTitle')}</h3>
+            <p className="text-body-sm text-muted-foreground">
+              {language === 'ar' ? `تغيير الحالة إلى: ${t(`cases.statuses.${outcomeModal.status}`)}` : `Changing status to: ${t(`cases.statuses.${outcomeModal.status}`)}`}
+            </p>
+            <div className="space-y-3">
+              <div>
+                <label className="text-label text-foreground mb-1.5 block">{t('cases.statusChange.outcomeSummary')}</label>
+                <FormTextarea value={outcomeSummary} onChange={e => setOutcomeSummary(e.target.value)} placeholder={t('cases.statusChange.outcomeSummary')} />
+              </div>
+              <div>
+                <label className="text-label text-foreground mb-1.5 block">{t('cases.statusChange.outcomeDate')}</label>
+                <FormDatePicker value={outcomeDate} onChange={setOutcomeDate} placeholder={t('cases.statusChange.outcomeDate')} />
+              </div>
+            </div>
+            <div className="flex gap-3 pt-2">
+              <Button variant="outline" className="flex-1" onClick={() => setOutcomeModal(null)} disabled={isChangingStatus}>
+                {t('common.cancel')}
+              </Button>
+              <Button
+                className="flex-1 bg-accent text-accent-foreground hover:bg-accent/90"
+                onClick={() => handleQuickStatusChange(outcomeModal.caseId, outcomeModal.status, outcomeSummary, outcomeDate)}
+                disabled={isChangingStatus}
+              >
+                {t('common.confirm')}
+              </Button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

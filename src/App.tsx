@@ -27,6 +27,7 @@ const queryClient = new QueryClient();
 // Main app placeholder pages
 // DashboardPage imported above
 import CasesPage from '@/pages/CasesPage';
+import CaseFormPage from '@/pages/CaseFormPage';
 const ErrandsPage = () => <PlaceholderPage titleKey="sidebar.errands" icon={FileCheck} />;
 import ClientsPage from '@/pages/ClientsPage';
 import ClientDetailPage from '@/pages/ClientDetailPage';
@@ -77,7 +78,8 @@ const App = () => (
               <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
                 <Route path="/dashboard" element={<DashboardPage />} />
                 <Route path="/cases" element={<CasesPage />} />
-                <Route path="/cases/new" element={<CasesPage />} />
+                <Route path="/cases/new" element={<CaseFormPage />} />
+                <Route path="/cases/:id/edit" element={<CaseFormPage />} />
                 <Route path="/cases/:id" element={<CasesPage />} />
                 <Route path="/errands" element={<ErrandsPage />} />
                 <Route path="/clients" element={<ClientsPage />} />
