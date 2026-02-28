@@ -812,7 +812,28 @@
       "useTemplate": "استخدام قالب",
       "selectTemplate": "اختر قالبًا لملء الخطوات تلقائيًا",
       "customSteps": "إنشاء خطوات مخصصة",
-      "noSteps": "لم يتم تحديد خطوات بعد"
+      "noSteps": "لم يتم تحديد خطوات بعد",
+      "templateAvailable": "قالب متاح",
+      "templatePrompt": "لدينا قالب جاهز لـ {{category}}. هل تريد استخدامه؟"
+    },
+    "form": {
+      "basicInfo": "المعلومات الأساسية",
+      "clientAndCase": "العميل والقضية المرتبطة",
+      "governmentAndDates": "الجهة الحكومية والتواريخ",
+      "workflowSteps": "خطوات سير العمل",
+      "feesCost": "الرسوم والتكلفة",
+      "visibility": "الرؤية",
+      "createErrand": "إنشاء المعاملة",
+      "updateErrand": "تحديث المعاملة",
+      "titleRequired": "عنوان المعاملة مطلوب (5 أحرف على الأقل)",
+      "categoryRequired": "التصنيف مطلوب",
+      "priorityRequired": "الأولوية مطلوبة",
+      "clientRequired": "العميل مطلوب",
+      "stepsRequired": "مطلوبة خطوة واحدة على الأقل",
+      "stepTitleRequired": "كل خطوة تحتاج عنوان",
+      "dueDateAfterStart": "تاريخ الاستحقاق يجب أن يكون بعد تاريخ البدء",
+      "failedCreate": "فشل في إنشاء المعاملة. حاول مرة أخرى.",
+      "failedUpdate": "فشل في تحديث المعاملة. حاول مرة أخرى."
     },
     "empty": {
       "title": "لا توجد معاملات بعد",
