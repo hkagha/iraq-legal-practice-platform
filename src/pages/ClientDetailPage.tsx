@@ -25,6 +25,7 @@ import {
   Users, FileText, Plus, X, Loader2, Calendar, RefreshCw, MessageSquare,
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
+import EntityDocumentsTab from '@/components/documents/EntityDocumentsTab';
 
 const CLIENT_STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   active: { bg: '#F0FDF4', text: '#22C55E' },
@@ -766,12 +767,7 @@ export default function ClientDetailPage() {
 
         {/* DOCUMENTS TAB */}
         <TabsContent value="documents" className="mt-6">
-          <EmptyState
-            icon={FileText}
-            title={t('clients.detail.noDocumentsYet')} titleAr={t('clients.detail.noDocumentsYet')}
-            actionLabel={t('clients.detail.uploadDocument')} actionLabelAr={t('clients.detail.uploadDocument')}
-            onAction={() => {}}
-          />
+          <EntityDocumentsTab entityType="client" entityId={id!} clientInfo={client ? { id: client.id, name: clientName } : undefined} />
         </TabsContent>
 
         {/* BILLING TAB */}

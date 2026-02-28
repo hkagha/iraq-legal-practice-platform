@@ -32,6 +32,7 @@ import {
   FileText, Loader2, AlertTriangle, Phone, ChevronDown, FileCheck, Search,
 } from 'lucide-react';
 import { FormSearchSelect } from '@/components/ui/FormSearchSelect';
+import EntityDocumentsTab from '@/components/documents/EntityDocumentsTab';
 
 const CASE_STATUS_ORDER = ['intake','active','pending_hearing','pending_judgment','on_hold','won','lost','settled','closed'] as const;
 const STATUS_PROGRESS: Record<string, number> = {
@@ -906,7 +907,7 @@ export default function CaseDetailPage() {
 
         {/* DOCUMENTS TAB */}
         <TabsContent value="documents" className="mt-6">
-          <EmptyState icon={FileText} title={t('cases.detail.noDocumentsYet')} titleAr={t('cases.detail.noDocumentsYet')} actionLabel={t('cases.detail.uploadDocument')} actionLabelAr={t('cases.detail.uploadDocument')} onAction={() => {}} />
+          <EntityDocumentsTab entityType="case" entityId={id!} caseInfo={caseData ? { id: caseData.id, case_number: caseData.case_number, title: caseData.title } : undefined} />
         </TabsContent>
 
         {/* TIME & BILLING TAB */}
