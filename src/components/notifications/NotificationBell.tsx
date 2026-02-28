@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
+import { playNotificationSound } from '@/lib/notificationSound';
 import {
   Bell, CheckSquare, Scale, FileCheck, Receipt, FileText,
   Calendar, AtSign, AlertTriangle, X,
@@ -128,9 +129,15 @@ export default function NotificationBell() {
     fetchNotifications();
   }, [fetchNotifications]);
 
-  // Realtime subscription
+  // Realtime subscription with sound
   useEffect(() => {
     if (!profile?.id) return;
+
+    // Fetch sound preference
+    let soundEnabled = true;
+    supabase.from('notification_preferences').select('sound_enabled').eq('user_id', profile.id).maybeSingle()
+      .then(({ data }) => { if (data) soundEnabled = data.sound_enabled ?? true; });
+
     const channel = supabase
       .channel('user-notifications')
       .on('postgres_changes', {
@@ -140,6 +147,10 @@ export default function NotificationBell() {
         filter: `user_id=eq.${profile.id}`,
       }, (payload) => {
         setNotifications(prev => [payload.new as Notification, ...prev]);
+        // Play sound if enabled and tab is visible
+        if (soundEnabled) {
+          playNotificationSound(0.3);
+        }
       })
       .subscribe();
     return () => { supabase.removeChannel(channel); };

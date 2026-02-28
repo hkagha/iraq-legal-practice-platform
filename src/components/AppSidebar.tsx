@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import {
   LayoutDashboard, Scale, FileCheck, Users, Calendar, CheckSquare,
   FileText, Clock, Receipt, BarChart3, MessageSquare, Sparkles,
-  UserCog, Settings, ChevronLeft, ChevronRight, Activity
+  UserCog, Settings, ChevronLeft, ChevronRight, Activity, Bell
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -27,6 +27,7 @@ const mainNavItems = [
 
 const secondaryNavItems = [
   { key: 'activity', path: '/activity', icon: Activity },
+  { key: 'notifications', path: '/notifications', icon: Bell },
   { key: 'messages', path: '/messages', icon: MessageSquare },
   { key: 'research', path: '/research', icon: Sparkles },
 ];
@@ -53,6 +54,7 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
   const [overdueInvoicesCount, setOverdueInvoicesCount] = useState(0);
   const [overdueTasksCount, setOverdueTasksCount] = useState(0);
   const [todayEventsCount, setTodayEventsCount] = useState(0);
+  const [unreadNotifCount, setUnreadNotifCount] = useState(0);
 
   useEffect(() => {
     if (!profile?.organization_id) return;
@@ -104,6 +106,16 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
       setOverdueTasksCount(overdueTasksRes.count || 0);
       setTodayEventsCount(todayEventsRes.count || 0);
 
+      // Unread notifications count
+      if (profile?.id) {
+        const { count: unreadCount } = await supabase
+          .from('notifications')
+          .select('*', { count: 'exact', head: true })
+          .eq('user_id', profile.id)
+          .eq('is_read', false);
+        setUnreadNotifCount(unreadCount || 0);
+      }
+
       // Auto-check overdue invoices — update status
       if ((overdueInvRes.count || 0) > 0) {
         await supabase
@@ -115,7 +127,10 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
       }
     };
     check();
-  }, [profile?.organization_id]);
+    // Refresh every 60 seconds
+    const interval = setInterval(check, 60000);
+    return () => clearInterval(interval);
+  }, [profile?.organization_id, profile?.id]);
 
   const CollapseIcon = isRTL
     ? (collapsed ? ChevronLeft : ChevronRight)
@@ -126,8 +141,8 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
     const Icon = item.icon;
     const label = t(`sidebar.${item.key}`);
     const showDot = (item.key === 'cases' && hasUrgentCases) || (item.key === 'timeTracking' && !!activeTimer);
-    const showCount = (item.key === 'errands' && overdueErrandsCount > 0) || (item.key === 'documents' && recentDocsCount > 0 && !isActive) || (item.key === 'billing' && overdueInvoicesCount > 0) || (item.key === 'tasks' && overdueTasksCount > 0) || (item.key === 'calendar' && todayEventsCount > 0);
-    const countValue = item.key === 'errands' ? overdueErrandsCount : item.key === 'billing' ? overdueInvoicesCount : item.key === 'tasks' ? overdueTasksCount : item.key === 'calendar' ? todayEventsCount : recentDocsCount;
+    const showCount = (item.key === 'errands' && overdueErrandsCount > 0) || (item.key === 'documents' && recentDocsCount > 0 && !isActive) || (item.key === 'billing' && overdueInvoicesCount > 0) || (item.key === 'tasks' && overdueTasksCount > 0) || (item.key === 'calendar' && todayEventsCount > 0) || (item.key === 'notifications' && unreadNotifCount > 0);
+    const countValue = item.key === 'errands' ? overdueErrandsCount : item.key === 'billing' ? overdueInvoicesCount : item.key === 'tasks' ? overdueTasksCount : item.key === 'calendar' ? todayEventsCount : item.key === 'notifications' ? unreadNotifCount : recentDocsCount;
     const link = (
       <NavLink
         to={item.path}
