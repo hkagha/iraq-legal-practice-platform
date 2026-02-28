@@ -813,6 +813,458 @@ export type Database = {
           },
         ]
       }
+      errand_activities: {
+        Row: {
+          activity_type: string
+          actor_id: string | null
+          created_at: string
+          description: string | null
+          description_ar: string | null
+          errand_id: string
+          id: string
+          metadata: Json | null
+          organization_id: string
+          title: string
+          title_ar: string | null
+        }
+        Insert: {
+          activity_type: string
+          actor_id?: string | null
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          errand_id: string
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          title: string
+          title_ar?: string | null
+        }
+        Update: {
+          activity_type?: string
+          actor_id?: string | null
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          errand_id?: string
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          title?: string
+          title_ar?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "errand_activities_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "errand_activities_errand_id_fkey"
+            columns: ["errand_id"]
+            isOneToOne: false
+            referencedRelation: "errands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "errand_activities_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      errand_documents: {
+        Row: {
+          created_at: string
+          document_type: string | null
+          errand_id: string
+          errand_step_id: string | null
+          file_name: string
+          file_name_ar: string | null
+          file_path: string
+          file_size_bytes: number | null
+          file_type: string | null
+          id: string
+          is_visible_to_client: boolean | null
+          organization_id: string
+          uploaded_by: string | null
+        }
+        Insert: {
+          created_at?: string
+          document_type?: string | null
+          errand_id: string
+          errand_step_id?: string | null
+          file_name: string
+          file_name_ar?: string | null
+          file_path: string
+          file_size_bytes?: number | null
+          file_type?: string | null
+          id?: string
+          is_visible_to_client?: boolean | null
+          organization_id: string
+          uploaded_by?: string | null
+        }
+        Update: {
+          created_at?: string
+          document_type?: string | null
+          errand_id?: string
+          errand_step_id?: string | null
+          file_name?: string
+          file_name_ar?: string | null
+          file_path?: string
+          file_size_bytes?: number | null
+          file_type?: string | null
+          id?: string
+          is_visible_to_client?: boolean | null
+          organization_id?: string
+          uploaded_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "errand_documents_errand_id_fkey"
+            columns: ["errand_id"]
+            isOneToOne: false
+            referencedRelation: "errands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "errand_documents_errand_step_id_fkey"
+            columns: ["errand_step_id"]
+            isOneToOne: false
+            referencedRelation: "errand_steps"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "errand_documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "errand_documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      errand_steps: {
+        Row: {
+          assigned_to: string | null
+          attachments_count: number | null
+          completed_at: string | null
+          completed_by: string | null
+          created_at: string
+          description: string | null
+          description_ar: string | null
+          due_date: string | null
+          errand_id: string
+          id: string
+          is_required: boolean | null
+          notes: string | null
+          notes_ar: string | null
+          organization_id: string
+          status: string
+          step_number: number
+          title: string
+          title_ar: string | null
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          attachments_count?: number | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          due_date?: string | null
+          errand_id: string
+          id?: string
+          is_required?: boolean | null
+          notes?: string | null
+          notes_ar?: string | null
+          organization_id: string
+          status?: string
+          step_number: number
+          title: string
+          title_ar?: string | null
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          attachments_count?: number | null
+          completed_at?: string | null
+          completed_by?: string | null
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          due_date?: string | null
+          errand_id?: string
+          id?: string
+          is_required?: boolean | null
+          notes?: string | null
+          notes_ar?: string | null
+          organization_id?: string
+          status?: string
+          step_number?: number
+          title?: string
+          title_ar?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "errand_steps_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "errand_steps_completed_by_fkey"
+            columns: ["completed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "errand_steps_errand_id_fkey"
+            columns: ["errand_id"]
+            isOneToOne: false
+            referencedRelation: "errands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "errand_steps_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      errand_templates: {
+        Row: {
+          category: string
+          created_at: string
+          description: string | null
+          description_ar: string | null
+          id: string
+          is_system: boolean | null
+          name: string
+          name_ar: string | null
+          organization_id: string | null
+          steps: Json
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          id?: string
+          is_system?: boolean | null
+          name: string
+          name_ar?: string | null
+          organization_id?: string | null
+          steps?: Json
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          id?: string
+          is_system?: boolean | null
+          name?: string
+          name_ar?: string | null
+          organization_id?: string | null
+          steps?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "errand_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      errands: {
+        Row: {
+          assigned_to: string | null
+          case_id: string | null
+          category: string
+          client_id: string
+          completed_date: string | null
+          completed_steps: number | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          description_ar: string | null
+          due_date: string | null
+          errand_number: string
+          fees_paid: boolean | null
+          government_department: string | null
+          government_department_ar: string | null
+          government_entity: string | null
+          government_entity_ar: string | null
+          government_fees: number | null
+          government_fees_currency: string | null
+          id: string
+          is_visible_to_client: boolean
+          organization_id: string
+          outcome_notes: string | null
+          outcome_notes_ar: string | null
+          priority: string
+          progress_percentage: number | null
+          reference_number: string | null
+          rejection_reason: string | null
+          rejection_reason_ar: string | null
+          service_fee: number | null
+          service_fee_currency: string | null
+          start_date: string | null
+          status: string
+          title: string
+          title_ar: string | null
+          total_cost: number | null
+          total_steps: number | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          assigned_to?: string | null
+          case_id?: string | null
+          category: string
+          client_id: string
+          completed_date?: string | null
+          completed_steps?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          description_ar?: string | null
+          due_date?: string | null
+          errand_number?: string
+          fees_paid?: boolean | null
+          government_department?: string | null
+          government_department_ar?: string | null
+          government_entity?: string | null
+          government_entity_ar?: string | null
+          government_fees?: number | null
+          government_fees_currency?: string | null
+          id?: string
+          is_visible_to_client?: boolean
+          organization_id: string
+          outcome_notes?: string | null
+          outcome_notes_ar?: string | null
+          priority?: string
+          progress_percentage?: number | null
+          reference_number?: string | null
+          rejection_reason?: string | null
+          rejection_reason_ar?: string | null
+          service_fee?: number | null
+          service_fee_currency?: string | null
+          start_date?: string | null
+          status?: string
+          title: string
+          title_ar?: string | null
+          total_cost?: number | null
+          total_steps?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          assigned_to?: string | null
+          case_id?: string | null
+          category?: string
+          client_id?: string
+          completed_date?: string | null
+          completed_steps?: number | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          description_ar?: string | null
+          due_date?: string | null
+          errand_number?: string
+          fees_paid?: boolean | null
+          government_department?: string | null
+          government_department_ar?: string | null
+          government_entity?: string | null
+          government_entity_ar?: string | null
+          government_fees?: number | null
+          government_fees_currency?: string | null
+          id?: string
+          is_visible_to_client?: boolean
+          organization_id?: string
+          outcome_notes?: string | null
+          outcome_notes_ar?: string | null
+          priority?: string
+          progress_percentage?: number | null
+          reference_number?: string | null
+          rejection_reason?: string | null
+          rejection_reason_ar?: string | null
+          service_fee?: number | null
+          service_fee_currency?: string | null
+          start_date?: string | null
+          status?: string
+          title?: string
+          title_ar?: string | null
+          total_cost?: number | null
+          total_steps?: number | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "errands_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "errands_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "errands_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "errands_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "errands_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "errands_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       invitations: {
         Row: {
           accepted_at: string | null
