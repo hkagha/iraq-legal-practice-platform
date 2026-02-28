@@ -28,6 +28,7 @@ import {
   XCircle, RotateCcw, CheckCircle, Upload, Paperclip, Download, Trash2,
   RefreshCw, UserCog, CalendarClock, PlayCircle, CheckCircle2,
 } from 'lucide-react';
+import EntityDocumentsTab from '@/components/documents/EntityDocumentsTab';
 
 const ERRAND_STATUSES = ['new','in_progress','awaiting_documents','submitted_to_government','under_review_by_government','additional_requirements','approved','rejected','completed','cancelled'] as const;
 
@@ -864,6 +865,15 @@ export default function ErrandDetailPage() {
               </table>
             </div>
           )}
+
+          {/* General Documents (unified documents table) */}
+          <div className="mt-8">
+            <EntityDocumentsTab
+              entityType="errand"
+              entityId={id!}
+              errandInfo={errand ? { id: errand.id, errand_number: errand.errand_number, title: errand.title } : undefined}
+            />
+          </div>
         </TabsContent>
 
         {/* ==================== DETAILS TAB ==================== */}
