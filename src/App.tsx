@@ -44,7 +44,8 @@ import InvoiceFormPage from '@/pages/InvoiceFormPage';
 import InvoiceDetailPage from '@/pages/InvoiceDetailPage';
 import NotificationsPage from '@/pages/NotificationsPage';
 import ActivityFeedPage from '@/pages/ActivityFeedPage';
-const ReportsPage = () => <PlaceholderPage titleKey="sidebar.reports" icon={BarChart3} />;
+import ReportsPage from '@/pages/ReportsPage';
+import FirmPerformanceReport from '@/pages/FirmPerformanceReport';
 const MessagesPage = () => <PlaceholderPage titleKey="sidebar.messages" icon={MessageSquare} />;
 const ResearchPage = () => <PlaceholderPage titleKey="sidebar.research" icon={Sparkles} />;
 const TeamPage = () => <PlaceholderPage titleKey="sidebar.team" icon={UserCog} />;
@@ -105,6 +106,14 @@ const App = () => (
                 <Route path="/billing/:id" element={<InvoiceDetailPage />} />
                 <Route path="/billing/:id/edit" element={<InvoiceFormPage />} />
                 <Route path="/reports" element={<ReportsPage />} />
+                <Route path="/reports/firm-performance" element={<FirmPerformanceReport />} />
+                <Route path="/reports/employee-360" element={<PlaceholderPage titleKey="reports.employee360" icon={BarChart3} />} />
+                <Route path="/reports/financial" element={<PlaceholderPage titleKey="reports.financialSummary" icon={BarChart3} />} />
+                <Route path="/reports/cases" element={<PlaceholderPage titleKey="reports.caseAnalytics" icon={BarChart3} />} />
+                <Route path="/reports/errands" element={<PlaceholderPage titleKey="reports.errandAnalytics" icon={BarChart3} />} />
+                <Route path="/reports/clients" element={<PlaceholderPage titleKey="reports.clientAnalytics" icon={BarChart3} />} />
+                <Route path="/reports/time" element={<PlaceholderPage titleKey="reports.timeUtilization" icon={BarChart3} />} />
+                <Route path="/reports/billing-aging" element={<PlaceholderPage titleKey="reports.billingAging" icon={BarChart3} />} />
                 <Route path="/messages" element={<MessagesPage />} />
                 <Route path="/research" element={<ResearchPage />} />
                 <Route path="/team" element={<TeamPage />} />
