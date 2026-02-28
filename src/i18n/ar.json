@@ -116,6 +116,55 @@
     "settled": "تسوية",
     "closed": "مغلقة"
   },
+  "statuses": {
+    "case": {
+      "intake": "استلام",
+      "active": "نشطة",
+      "pending_hearing": "بانتظار جلسة",
+      "pending_judgment": "بانتظار حكم",
+      "on_hold": "معلقة",
+      "won": "مكسوبة",
+      "lost": "خاسرة",
+      "settled": "تمت التسوية",
+      "closed": "مغلقة",
+      "archived": "مؤرشفة"
+    },
+    "errand": {
+      "new": "جديدة",
+      "in_progress": "قيد التنفيذ",
+      "awaiting_documents": "بانتظار مستندات",
+      "submitted_to_government": "مقدمة للجهة الحكومية",
+      "under_review_by_government": "قيد المراجعة",
+      "additional_requirements": "متطلبات إضافية",
+      "approved": "موافق عليها",
+      "rejected": "مرفوضة",
+      "completed": "مكتملة",
+      "cancelled": "ملغاة"
+    },
+    "task": {
+      "todo": "للتنفيذ",
+      "in_progress": "قيد التنفيذ",
+      "in_review": "قيد المراجعة",
+      "completed": "مكتملة",
+      "cancelled": "ملغاة"
+    },
+    "invoice": {
+      "draft": "مسودة",
+      "sent": "مرسلة",
+      "viewed": "تم الاطلاع",
+      "partially_paid": "مدفوعة جزئياً",
+      "paid": "مدفوعة",
+      "overdue": "متأخرة",
+      "cancelled": "ملغاة",
+      "written_off": "شُطبت"
+    },
+    "priority": {
+      "low": "منخفضة",
+      "medium": "متوسطة",
+      "high": "عالية",
+      "urgent": "عاجلة"
+    }
+  },
   "common": {
     "save": "حفظ",
     "cancel": "إلغاء",
@@ -164,7 +213,8 @@
     "of": "من",
     "showing": "عرض",
     "to": "إلى",
-    "entries": "سجلات"
+    "entries": "سجلات",
+    "clearAll": "مسح الكل"
   },
   "placeholder": {
     "underDevelopment": "هذا القسم قيد التطوير",
