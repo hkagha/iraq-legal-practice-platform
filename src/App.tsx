@@ -29,6 +29,7 @@ const queryClient = new QueryClient();
 const CasesPage = () => <PlaceholderPage titleKey="sidebar.cases" icon={Scale} />;
 const ErrandsPage = () => <PlaceholderPage titleKey="sidebar.errands" icon={FileCheck} />;
 import ClientsPage from '@/pages/ClientsPage';
+import ClientDetailPage from '@/pages/ClientDetailPage';
 const CalendarPage = () => <PlaceholderPage titleKey="sidebar.calendar" icon={Calendar} />;
 const TasksPage = () => <PlaceholderPage titleKey="sidebar.tasks" icon={CheckSquare} />;
 const DocumentsPage = () => <PlaceholderPage titleKey="sidebar.documents" icon={FileText} />;
@@ -80,7 +81,7 @@ const App = () => (
                 <Route path="/cases/:id" element={<CasesPage />} />
                 <Route path="/errands" element={<ErrandsPage />} />
                 <Route path="/clients" element={<ClientsPage />} />
-                <Route path="/clients/:id" element={<ClientsPage />} />
+                <Route path="/clients/:id" element={<ClientDetailPage />} />
                 <Route path="/calendar" element={<CalendarPage />} />
                 <Route path="/tasks" element={<TasksPage />} />
                 <Route path="/documents" element={<DocumentsPage />} />
