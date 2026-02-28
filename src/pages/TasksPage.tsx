@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { format, isBefore, isToday, isTomorrow, addDays, startOfDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 import TaskFormModal from '@/components/tasks/TaskFormModal';
+import TaskDetailSlideOver from '@/components/tasks/TaskDetailSlideOver';
 
 const TASK_TYPES = [
   'general', 'research', 'drafting', 'review', 'filing',
@@ -51,6 +52,7 @@ export default function TasksPage() {
   const [viewMode, setViewMode] = useState<'list' | 'kanban'>('list');
   const [showFormModal, setShowFormModal] = useState(false);
   const [editTask, setEditTask] = useState<any>(null);
+  const [detailTaskId, setDetailTaskId] = useState<string | null>(null);
   const [deleteTask, setDeleteTask] = useState<any>(null);
   const [showCompleted, setShowCompleted] = useState(false);
 
@@ -232,7 +234,7 @@ export default function TasksPage() {
           className="h-5 w-5"
         />
         <span className={cn('w-2 h-2 rounded-full flex-shrink-0', PRIORITY_DOT[task.priority])} />
-        <div className="flex-1 min-w-0 cursor-pointer" onClick={() => { setEditTask(task); setShowFormModal(true); }}>
+        <div className="flex-1 min-w-0 cursor-pointer" onClick={() => setDetailTaskId(task.id)}>
           <p className={cn('text-body-md font-medium text-foreground truncate', isComplete && 'line-through text-muted-foreground')}>
             {language === 'ar' && task.title_ar ? task.title_ar : task.title}
           </p>
@@ -298,7 +300,7 @@ export default function TasksPage() {
         key={task.id}
         draggable
         onDragStart={(e) => handleDragStart(e, task.id)}
-        onClick={() => { setEditTask(task); setShowFormModal(true); }}
+        onClick={() => setDetailTaskId(task.id)}
         className={cn(
           'bg-card border border-border rounded-lg p-3 mb-2 cursor-pointer hover:shadow-md transition-shadow relative',
           dragTaskId === task.id && 'opacity-50'
@@ -449,6 +451,14 @@ export default function TasksPage() {
           )}
         </div>
       )}
+
+      {/* Detail SlideOver */}
+      <TaskDetailSlideOver
+        isOpen={!!detailTaskId}
+        onClose={() => setDetailTaskId(null)}
+        taskId={detailTaskId}
+        onUpdated={() => { fetchTasks(); fetchStats(); }}
+      />
 
       {/* Form modal */}
       {showFormModal && (
