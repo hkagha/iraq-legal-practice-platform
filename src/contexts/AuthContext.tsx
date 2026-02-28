@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useCallback, useRef, type ReactNode } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useLanguage } from '@/contexts/LanguageContext';
 import type { User, Session } from '@supabase/supabase-js';
 
 interface Profile {
@@ -61,7 +60,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [organization, setOrganization] = useState<Organization | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { language } = useLanguage();
   const activityInterval = useRef<NodeJS.Timeout | null>(null);
 
   const fetchProfile = useCallback(async (userId: string) => {
@@ -198,7 +196,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const getFullName = () => {
     if (!profile) return '';
-    if (language === 'ar' && profile.first_name_ar && profile.last_name_ar) {
+    const lang = localStorage.getItem('qanuni_language') || 'en';
+    if (lang === 'ar' && profile.first_name_ar && profile.last_name_ar) {
       return `${profile.first_name_ar} ${profile.last_name_ar}`;
     }
     return `${profile.first_name} ${profile.last_name}`;
