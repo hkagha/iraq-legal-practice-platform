@@ -744,6 +744,10 @@
     "totalErrands": "إجمالي المعاملات",
     "activeErrands": "المعاملات النشطة",
     "overdueErrands": "المعاملات المتأخرة",
+    "linkedErrands": "المعاملات المرتبطة",
+    "linkErrand": "ربط معاملة",
+    "noLinkedErrands": "لا توجد معاملات مرتبطة",
+    "createErrandForClient": "إنشاء معاملة جديدة",
     "categories": {
       "company_registration": "تسجيل شركة",
       "company_renewal": "تجديد شركة",

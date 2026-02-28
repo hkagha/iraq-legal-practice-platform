@@ -744,6 +744,10 @@
     "totalErrands": "Total Errands",
     "activeErrands": "Active Errands",
     "overdueErrands": "Overdue Errands",
+    "linkedErrands": "Linked Errands",
+    "linkErrand": "Link Errand",
+    "noLinkedErrands": "No linked errands",
+    "createErrandForClient": "Create New Errand",
     "categories": {
       "company_registration": "Company Registration",
       "company_renewal": "Company Renewal",

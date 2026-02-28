@@ -331,6 +331,12 @@ export default function ErrandDetailPage() {
         if (allRequiredDone && errand.status !== 'completed') setAllStepsCompletePrompt(true);
       } else if (newStatus === 'in_progress') {
         toast({ title: t('errands.messages.stepStarted') });
+        // Auto-transition: if errand is 'new', move to 'in_progress'
+        if (errand.status === 'new') {
+          await supabase.from('errands').update({ status: 'in_progress', updated_by: profile.id } as any).eq('id', errand.id);
+          await logActivity('status_changed', 'Status auto-changed to in_progress', 'تم تغيير الحالة تلقائياً إلى قيد التنفيذ');
+          setErrand(prev => prev ? { ...prev, status: 'in_progress' } : prev);
+        }
       }
     } catch (err: any) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
@@ -421,6 +427,13 @@ export default function ErrandDetailPage() {
 
       await logActivity('document_uploaded', `Document "${uploadFile.name}" uploaded`, `تم رفع المستند "${uploadFile.name}"`);
       toast({ title: t('errands.detail.documentUploaded') });
+
+      // Auto-transition: if errand is 'awaiting_documents', move to 'in_progress'
+      if (errand.status === 'awaiting_documents') {
+        await supabase.from('errands').update({ status: 'in_progress', updated_by: profile.id } as any).eq('id', errand.id);
+        await logActivity('status_changed', 'Status auto-changed to in_progress (document uploaded)', 'تم تغيير الحالة تلقائياً إلى قيد التنفيذ (تم رفع مستند)');
+      }
+
       setUploadModal(false); setUploadFile(null); setUploadDocType('attachment');
       setUploadStepId(''); setUploadFileNameAr(''); setUploadVisible(true);
       fetchErrand();
