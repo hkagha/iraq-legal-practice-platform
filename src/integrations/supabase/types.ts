@@ -1401,6 +1401,67 @@ export type Database = {
           },
         ]
       }
+      errand_notes: {
+        Row: {
+          author_id: string
+          content: string
+          content_ar: string | null
+          created_at: string
+          errand_id: string
+          id: string
+          is_pinned: boolean
+          is_visible_to_client: boolean
+          organization_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          content_ar?: string | null
+          created_at?: string
+          errand_id: string
+          id?: string
+          is_pinned?: boolean
+          is_visible_to_client?: boolean
+          organization_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          content_ar?: string | null
+          created_at?: string
+          errand_id?: string
+          id?: string
+          is_pinned?: boolean
+          is_visible_to_client?: boolean
+          organization_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "errand_notes_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "errand_notes_errand_id_fkey"
+            columns: ["errand_id"]
+            isOneToOne: false
+            referencedRelation: "errands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "errand_notes_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       errand_steps: {
         Row: {
           assigned_to: string | null

@@ -30,6 +30,7 @@ import {
 } from 'lucide-react';
 import EntityDocumentsTab from '@/components/documents/EntityDocumentsTab';
 import ErrandRelatedTasks from '@/components/dashboard/ErrandRelatedTasks';
+import ErrandNotesSection from '@/components/collaboration/ErrandNotesSection';
 
 const ERRAND_STATUSES = ['new','in_progress','awaiting_documents','submitted_to_government','under_review_by_government','additional_requirements','approved','rejected','completed','cancelled'] as const;
 
@@ -983,6 +984,9 @@ export default function ErrandDetailPage() {
               )}
             </div>
           </div>
+
+          {/* Internal Notes */}
+          <ErrandNotesSection errandId={errand.id} errandTitle={errandTitle} />
         </TabsContent>
 
         {/* ==================== ACTIVITY TAB ==================== */}

@@ -42,6 +42,8 @@ import TimeTrackingPage from '@/pages/TimeTrackingPage';
 import BillingPage from '@/pages/BillingPage';
 import InvoiceFormPage from '@/pages/InvoiceFormPage';
 import InvoiceDetailPage from '@/pages/InvoiceDetailPage';
+import NotificationsPage from '@/pages/NotificationsPage';
+import ActivityFeedPage from '@/pages/ActivityFeedPage';
 const ReportsPage = () => <PlaceholderPage titleKey="sidebar.reports" icon={BarChart3} />;
 const MessagesPage = () => <PlaceholderPage titleKey="sidebar.messages" icon={MessageSquare} />;
 const ResearchPage = () => <PlaceholderPage titleKey="sidebar.research" icon={Sparkles} />;
@@ -107,6 +109,8 @@ const App = () => (
                 <Route path="/research" element={<ResearchPage />} />
                 <Route path="/team" element={<TeamPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/notifications" element={<NotificationsPage />} />
+                <Route path="/activity" element={<ActivityFeedPage />} />
                 <Route path="/profile" element={<ProfilePage />} />
               </Route>
 

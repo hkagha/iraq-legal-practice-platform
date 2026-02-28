@@ -54,6 +54,7 @@
     "settings": "الإعدادات",
     "research": "البحث القانوني الذكي",
     "messages": "الرسائل",
+    "activity": "سجل النشاط",
     "collapse": "طي القائمة الجانبية",
     "expand": "توسيع القائمة الجانبية"
   },
@@ -1466,5 +1467,26 @@
       "from": "من",
       "to": "إلى"
     }
+  },
+  "collaboration": {
+    "activityFeed": "سجل النشاط",
+    "activityFeedSubtitle": "كل ما يحدث في مكتبك",
+    "allTeam": "جميع الفريق",
+    "showMore": "عرض المزيد",
+    "showLess": "عرض أقل",
+    "mentions": {
+      "mentionSomeone": "أذكر شخصاً",
+      "mentionedYou": "ذكرك",
+      "inCaseNote": "في ملاحظة قضية",
+      "inTaskComment": "في تعليق مهمة",
+      "inErrandNote": "في ملاحظة معاملة"
+    },
+    "internalNotes": "ملاحظات داخلية",
+    "addNote": "إضافة ملاحظة",
+    "postNote": "نشر الملاحظة",
+    "pinNote": "تثبيت الملاحظة",
+    "unpinNote": "إلغاء التثبيت",
+    "visibleToClient": "مرئي للعميل",
+    "hiddenFromClient": "مخفي عن العميل"
   }
 }
