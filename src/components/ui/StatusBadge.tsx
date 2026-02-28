@@ -46,6 +46,9 @@ const COLOR_MAP: Record<string, Record<string, { bg: string; text: string }>> = 
   },
   invoice: {
     draft: { bg: '#F1F5F9', text: '#64748B' },
+    submitted: { bg: '#EFF6FF', text: '#3B82F6' },
+    approved: { bg: '#F0FDF4', text: '#22C55E' },
+    invoiced: { bg: '#FFF8E1', text: '#C9A84C' },
     sent: { bg: '#EFF6FF', text: '#3B82F6' },
     viewed: { bg: '#F5F3FF', text: '#8B5CF6' },
     partially_paid: { bg: '#FFFBEB', text: '#F59E0B' },
