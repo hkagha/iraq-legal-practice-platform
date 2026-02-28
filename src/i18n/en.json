@@ -977,6 +977,36 @@
       "uploadNew": "Upload New Version",
       "versionNumber": "Version {{n}}"
     },
+    "bulk": {
+      "selected": "{{n}} selected",
+      "download": "Download",
+      "changeCategory": "Change Category",
+      "shareWithClient": "Share with Client",
+      "hideFromClient": "Hide from Client",
+      "archive": "Archive",
+      "delete": "Delete",
+      "clearSelection": "Clear selection"
+    },
+    "folders": {
+      "title": "Folders",
+      "allDocuments": "All Documents",
+      "cases": "Cases",
+      "errands": "Errands",
+      "clients": "Clients",
+      "templates": "Templates",
+      "general": "General"
+    },
+    "storage": {
+      "used": "{{used}} of {{max}} used",
+      "almostFull": "Storage almost full! Upgrade your plan.",
+      "warning": "Storage usage is high"
+    },
+    "ai": {
+      "autoCategorize": "Auto-categorize",
+      "comingSoon": "AI auto-categorization coming soon"
+    },
+    "rename": "Rename",
+    "renamed": "Document renamed",
     "empty": {
       "title": "No documents yet",
       "subtitle": "Upload your first document or create one from a template",

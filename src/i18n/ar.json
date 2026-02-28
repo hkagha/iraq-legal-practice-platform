@@ -976,6 +976,36 @@
       "uploadNew": "رفع إصدار جديد",
       "versionNumber": "الإصدار {{n}}"
     },
+    "bulk": {
+      "selected": "{{n}} محدد",
+      "download": "تحميل",
+      "changeCategory": "تغيير التصنيف",
+      "shareWithClient": "مشاركة مع العميل",
+      "hideFromClient": "إخفاء عن العميل",
+      "archive": "أرشفة",
+      "delete": "حذف",
+      "clearSelection": "إلغاء التحديد"
+    },
+    "folders": {
+      "title": "المجلدات",
+      "allDocuments": "جميع المستندات",
+      "cases": "القضايا",
+      "errands": "المعاملات",
+      "clients": "العملاء",
+      "templates": "القوالب",
+      "general": "عام"
+    },
+    "storage": {
+      "used": "{{used}} من {{max}} مستخدم",
+      "almostFull": "المساحة شبه ممتلئة! قم بترقية خطتك.",
+      "warning": "استخدام المساحة مرتفع"
+    },
+    "ai": {
+      "autoCategorize": "تصنيف تلقائي",
+      "comingSoon": "التصنيف التلقائي بالذكاء الاصطناعي قريباً"
+    },
+    "rename": "إعادة تسمية",
+    "renamed": "تم إعادة تسمية المستند",
     "empty": {
       "title": "لا توجد مستندات بعد",
       "subtitle": "ارفع أول مستند أو أنشئ واحداً من قالب",

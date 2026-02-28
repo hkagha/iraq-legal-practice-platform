@@ -3,6 +3,7 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { cn } from '@/lib/utils';
 import {
   LayoutDashboard, Scale, FileCheck, Users, Calendar, CheckSquare,
   FileText, Clock, Receipt, BarChart3, MessageSquare, Sparkles,
@@ -45,12 +46,15 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
   const location = useLocation();
   const [hasUrgentCases, setHasUrgentCases] = useState(false);
   const [overdueErrandsCount, setOverdueErrandsCount] = useState(0);
+  const [recentDocsCount, setRecentDocsCount] = useState(0);
 
   useEffect(() => {
     if (!profile?.organization_id) return;
     const check = async () => {
       const today = new Date().toISOString().split('T')[0];
-      const [urgentRes, overdueRes] = await Promise.all([
+      const sevenDaysAgo = new Date();
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+      const [urgentRes, overdueRes, recentDocsRes] = await Promise.all([
         supabase
           .from('cases')
           .select('*', { count: 'exact', head: true })
@@ -63,9 +67,16 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
           .eq('organization_id', profile.organization_id!)
           .lt('due_date', today)
           .not('status', 'in', '("completed","cancelled","approved","rejected")'),
+        supabase
+          .from('documents')
+          .select('*', { count: 'exact', head: true })
+          .eq('organization_id', profile.organization_id!)
+          .eq('status', 'active')
+          .gte('created_at', sevenDaysAgo.toISOString()),
       ]);
       setHasUrgentCases((urgentRes.count || 0) > 0);
       setOverdueErrandsCount(overdueRes.count || 0);
+      setRecentDocsCount(recentDocsRes.count || 0);
     };
     check();
   }, [profile?.organization_id]);
@@ -79,7 +90,8 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
     const Icon = item.icon;
     const label = t(`sidebar.${item.key}`);
     const showDot = (item.key === 'cases' && hasUrgentCases) || (item.key === 'errands' && overdueErrandsCount > 0);
-    const showCount = item.key === 'errands' && overdueErrandsCount > 0;
+    const showCount = (item.key === 'errands' && overdueErrandsCount > 0) || (item.key === 'documents' && recentDocsCount > 0 && !isActive);
+    const countValue = item.key === 'errands' ? overdueErrandsCount : recentDocsCount;
     const link = (
       <NavLink
         to={item.path}
@@ -106,8 +118,11 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
           <span className="text-body-md font-medium truncate flex-1">{label}</span>
         )}
         {!collapsed && showCount && (
-          <span className="text-[11px] font-semibold rounded-full bg-destructive text-destructive-foreground min-w-[18px] h-[18px] flex items-center justify-center px-1">
-            {overdueErrandsCount}
+          <span className={cn(
+            'text-[11px] font-semibold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1',
+            item.key === 'documents' ? 'bg-accent text-accent-foreground' : 'bg-destructive text-destructive-foreground',
+          )}>
+            {countValue}
           </span>
         )}
       </NavLink>

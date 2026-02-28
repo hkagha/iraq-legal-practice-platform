@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Activity, Scale, UserPlus, Calendar, RefreshCw, MessageSquare, Pencil, FileCheck, CheckCircle, CheckCircle2, XCircle } from 'lucide-react';
+import { Activity, Scale, UserPlus, Calendar, RefreshCw, MessageSquare, Pencil, FileCheck, CheckCircle, CheckCircle2, XCircle, Upload, Download, GitBranch, Eye } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ar as arLocale } from 'date-fns/locale';
 
@@ -35,6 +35,11 @@ const ACTIVITY_ICON_MAP: Record<string, { icon: typeof Activity; color: string }
   step_completed: { icon: CheckCircle, color: '#22C55E' },
   errand_completed: { icon: CheckCircle2, color: '#C9A84C' },
   errand_cancelled: { icon: XCircle, color: '#94A3B8' },
+  uploaded: { icon: Upload, color: '#22C55E' },
+  downloaded: { icon: Download, color: '#3B82F6' },
+  version_created: { icon: GitBranch, color: '#C9A84C' },
+  shared_with_client: { icon: Eye, color: '#8B5CF6' },
+  renamed: { icon: Pencil, color: '#3B82F6' },
 };
 
 export default function RecentActivityWidget() {

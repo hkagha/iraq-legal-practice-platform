@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils';
 import {
   Upload, X, Trash2, FileText, File, Image, Sheet, FileType, Loader2, Check, AlertCircle,
 } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024;
 const ALLOWED_TYPES = [
@@ -325,7 +326,19 @@ export default function DocumentUploadModal({
                   <>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <label className="text-body-sm font-medium text-foreground mb-1 block">{t('documents.fields.category')} *</label>
+                        <div className="flex items-center gap-2 mb-1">
+                          <label className="text-body-sm font-medium text-foreground">{t('documents.fields.category')} *</label>
+                          {getExt(entry.file.name) === 'pdf' && entry.category === 'general' && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <button type="button" className="text-[11px] text-accent flex items-center gap-0.5 hover:underline" onClick={e => { e.preventDefault(); toast.info(language === 'ar' ? 'التصنيف التلقائي بالذكاء الاصطناعي قريباً' : 'AI auto-categorization coming soon'); }}>
+                                  ✨ {language === 'ar' ? 'تصنيف تلقائي' : 'Auto-categorize'}
+                                </button>
+                              </TooltipTrigger>
+                              <TooltipContent>{language === 'ar' ? 'التصنيف التلقائي بالذكاء الاصطناعي قريباً' : 'AI auto-categorization coming soon'}</TooltipContent>
+                            </Tooltip>
+                          )}
+                        </div>
                         <FormSelect value={entry.category} onValueChange={v => updateFile(entry.id, { category: v })} options={categoryOptions} />
                       </div>
                       <div>
