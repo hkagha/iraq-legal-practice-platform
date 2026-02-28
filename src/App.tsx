@@ -17,6 +17,7 @@ import RegisterPage from "@/pages/RegisterPage";
 import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import NotFound from "./pages/NotFound";
 import InviteAcceptPage from "@/pages/InviteAcceptPage";
+import SuperAdminPage from "@/pages/SuperAdminPage";
 
 import {
   LayoutDashboard, Scale, FileCheck, Users, Calendar, CheckSquare,
@@ -147,7 +148,7 @@ const App = () => (
               {/* Admin */}
               <Route path="/admin" element={<ProtectedRoute allowedRoles={['super_admin', 'sales_admin']}><AdminLayout /></ProtectedRoute>}>
                 <Route index element={<Navigate to="/admin/dashboard" replace />} />
-                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="dashboard" element={<SuperAdminPage />} />
                 <Route path="organizations" element={<AdminOrgs />} />
                 <Route path="users" element={<AdminUsers />} />
                 <Route path="subscriptions" element={<AdminSubs />} />
