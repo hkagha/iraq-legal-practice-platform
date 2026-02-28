@@ -14,14 +14,14 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 
 const mainNavItems = [
   { key: 'dashboard', path: '/dashboard', icon: LayoutDashboard },
+  { key: 'clients', path: '/clients', icon: Users },
   { key: 'cases', path: '/cases', icon: Scale },
   { key: 'errands', path: '/errands', icon: FileCheck },
-  { key: 'clients', path: '/clients', icon: Users },
-  { key: 'calendar', path: '/calendar', icon: Calendar },
-  { key: 'tasks', path: '/tasks', icon: CheckSquare },
   { key: 'documents', path: '/documents', icon: FileText },
   { key: 'timeTracking', path: '/time-tracking', icon: Clock },
   { key: 'billing', path: '/billing', icon: Receipt },
+  { key: 'tasks', path: '/tasks', icon: CheckSquare },
+  { key: 'calendar', path: '/calendar', icon: Calendar },
   { key: 'reports', path: '/reports', icon: BarChart3 },
 ];
 

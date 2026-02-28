@@ -48,6 +48,11 @@ import ReportsPage from '@/pages/ReportsPage';
 import FirmPerformanceReport from '@/pages/FirmPerformanceReport';
 import Employee360Report from '@/pages/Employee360Report';
 import FinancialSummaryReport from '@/pages/FinancialSummaryReport';
+import CaseAnalyticsReport from '@/pages/CaseAnalyticsReport';
+import ErrandAnalyticsReport from '@/pages/ErrandAnalyticsReport';
+import ClientAnalyticsReport from '@/pages/ClientAnalyticsReport';
+import TimeUtilizationReport from '@/pages/TimeUtilizationReport';
+import BillingAgingReport from '@/pages/BillingAgingReport';
 const MessagesPage = () => <PlaceholderPage titleKey="sidebar.messages" icon={MessageSquare} />;
 const ResearchPage = () => <PlaceholderPage titleKey="sidebar.research" icon={Sparkles} />;
 const TeamPage = () => <PlaceholderPage titleKey="sidebar.team" icon={UserCog} />;
@@ -111,11 +116,11 @@ const App = () => (
                 <Route path="/reports/firm-performance" element={<FirmPerformanceReport />} />
                 <Route path="/reports/employee-360" element={<Employee360Report />} />
                 <Route path="/reports/financial" element={<FinancialSummaryReport />} />
-                <Route path="/reports/cases" element={<PlaceholderPage titleKey="reports.caseAnalytics" icon={BarChart3} />} />
-                <Route path="/reports/errands" element={<PlaceholderPage titleKey="reports.errandAnalytics" icon={BarChart3} />} />
-                <Route path="/reports/clients" element={<PlaceholderPage titleKey="reports.clientAnalytics" icon={BarChart3} />} />
-                <Route path="/reports/time" element={<PlaceholderPage titleKey="reports.timeUtilization" icon={BarChart3} />} />
-                <Route path="/reports/billing-aging" element={<PlaceholderPage titleKey="reports.billingAging" icon={BarChart3} />} />
+                <Route path="/reports/cases" element={<CaseAnalyticsReport />} />
+                <Route path="/reports/errands" element={<ErrandAnalyticsReport />} />
+                <Route path="/reports/clients" element={<ClientAnalyticsReport />} />
+                <Route path="/reports/time" element={<TimeUtilizationReport />} />
+                <Route path="/reports/billing-aging" element={<BillingAgingReport />} />
                 <Route path="/messages" element={<MessagesPage />} />
                 <Route path="/research" element={<ResearchPage />} />
                 <Route path="/team" element={<TeamPage />} />
