@@ -594,7 +594,7 @@ export default function CaseDetailPage() {
             { key: 'overview', label: t('cases.detail.overview') },
             { key: 'hearings', label: t('cases.detail.hearings'), count: hearings.length },
             { key: 'notes', label: t('cases.detail.notes'), count: notes.length },
-            { key: 'documents', label: t('cases.detail.documents'), count: 0 },
+            { key: 'documents', label: t('cases.detail.documents'), count: undefined },
             { key: 'timeBilling', label: t('cases.detail.timeBilling'), count: 0 },
             { key: 'activity', label: t('cases.detail.activity') },
           ].map(tab => (

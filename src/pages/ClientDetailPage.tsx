@@ -434,7 +434,7 @@ export default function ClientDetailPage() {
             { key: 'overview', label: t('clients.tabs.overview') },
             { key: 'cases', label: t('clients.tabs.cases'), count: String(totalCasesCount) },
             { key: 'errands', label: t('clients.tabs.errands'), count: String(totalErrandsCount) },
-            { key: 'documents', label: t('clients.tabs.documents'), count: '0' },
+            { key: 'documents', label: t('clients.tabs.documents') },
             { key: 'billing', label: t('clients.tabs.billing'), count: '0 IQD' },
             { key: 'activity', label: t('clients.tabs.activity') },
           ].map(tab => (
