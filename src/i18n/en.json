@@ -812,7 +812,28 @@
       "useTemplate": "Use Template",
       "selectTemplate": "Select a template to auto-fill steps",
       "customSteps": "Create custom steps",
-      "noSteps": "No steps defined yet"
+      "noSteps": "No steps defined yet",
+      "templateAvailable": "Template Available",
+      "templatePrompt": "We have a pre-built template for {{category}}. Would you like to use it?"
+    },
+    "form": {
+      "basicInfo": "Basic Information",
+      "clientAndCase": "Client & Related Case",
+      "governmentAndDates": "Government Entity & Dates",
+      "workflowSteps": "Workflow Steps",
+      "feesCost": "Fees & Cost",
+      "visibility": "Visibility",
+      "createErrand": "Create Errand",
+      "updateErrand": "Update Errand",
+      "titleRequired": "Errand title is required (minimum 5 characters)",
+      "categoryRequired": "Category is required",
+      "priorityRequired": "Priority is required",
+      "clientRequired": "Client is required",
+      "stepsRequired": "At least one step is required",
+      "stepTitleRequired": "Each step must have a title",
+      "dueDateAfterStart": "Due date must be after start date",
+      "failedCreate": "Failed to create errand. Please try again.",
+      "failedUpdate": "Failed to update errand. Please try again."
     },
     "empty": {
       "title": "No errands yet",
