@@ -4,26 +4,24 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { AuthProvider } from "@/contexts/AuthContext";
+import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import MainLayout from "@/layouts/MainLayout";
 import ClientLayout from "@/layouts/ClientLayout";
 import AdminLayout from "@/layouts/AdminLayout";
 import PlaceholderPage from "@/components/PlaceholderPage";
+import LoginPage from "@/pages/LoginPage";
+import RegisterPage from "@/pages/RegisterPage";
+import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import NotFound from "./pages/NotFound";
 
-// Icons for placeholder pages
 import {
   LayoutDashboard, Scale, FileCheck, Users, Calendar, CheckSquare,
   FileText, Clock, Receipt, BarChart3, MessageSquare, Sparkles,
-  UserCog, Settings, User, LogIn, UserPlus, KeyRound,
-  Building, CreditCard, Megaphone
+  UserCog, Settings, User, Building, CreditCard, Megaphone
 } from "lucide-react";
 
 const queryClient = new QueryClient();
-
-// Auth placeholder pages
-const LoginPage = () => <PlaceholderPage titleKey="auth.login" icon={LogIn} />;
-const RegisterPage = () => <PlaceholderPage titleKey="auth.register" icon={UserPlus} />;
-const ForgotPasswordPage = () => <PlaceholderPage titleKey="auth.forgotPassword" icon={KeyRound} />;
 
 // Main app placeholder pages
 const DashboardPage = () => <PlaceholderPage titleKey="dashboard.title" icon={LayoutDashboard} />;
@@ -42,7 +40,6 @@ const TeamPage = () => <PlaceholderPage titleKey="sidebar.team" icon={UserCog} /
 const SettingsPage = () => <PlaceholderPage titleKey="sidebar.settings" icon={Settings} />;
 const ProfilePage = () => <PlaceholderPage titleKey="common.profile" icon={User} />;
 
-// Client portal placeholders
 const PortalDashboard = () => <PlaceholderPage titleKey="clientPortal.myDashboard" icon={LayoutDashboard} />;
 const PortalCases = () => <PlaceholderPage titleKey="clientPortal.myCases" icon={Scale} />;
 const PortalErrands = () => <PlaceholderPage titleKey="clientPortal.myErrands" icon={FileCheck} />;
@@ -51,7 +48,6 @@ const PortalMessages = () => <PlaceholderPage titleKey="sidebar.messages" icon={
 const PortalInvoices = () => <PlaceholderPage titleKey="clientPortal.invoices" icon={Receipt} />;
 const PortalProfile = () => <PlaceholderPage titleKey="clientPortal.myProfile" icon={User} />;
 
-// Admin placeholders
 const AdminDashboard = () => <PlaceholderPage titleKey="admin.dashboard" icon={LayoutDashboard} />;
 const AdminOrgs = () => <PlaceholderPage titleKey="admin.organizations" icon={Building} />;
 const AdminUsers = () => <PlaceholderPage titleKey="admin.allUsers" icon={Users} />;
@@ -63,67 +59,69 @@ const AdminAnnouncements = () => <PlaceholderPage titleKey="admin.announcements"
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            {/* Public routes */}
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <AuthProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/login" element={<LoginPage />} />
+              <Route path="/register" element={<RegisterPage />} />
+              <Route path="/forgot-password" element={<ForgotPasswordPage />} />
 
-            {/* Main app routes */}
-            <Route element={<MainLayout />}>
-              <Route path="/dashboard" element={<DashboardPage />} />
-              <Route path="/cases" element={<CasesPage />} />
-              <Route path="/cases/new" element={<CasesPage />} />
-              <Route path="/cases/:id" element={<CasesPage />} />
-              <Route path="/errands" element={<ErrandsPage />} />
-              <Route path="/clients" element={<ClientsPage />} />
-              <Route path="/clients/:id" element={<ClientsPage />} />
-              <Route path="/calendar" element={<CalendarPage />} />
-              <Route path="/tasks" element={<TasksPage />} />
-              <Route path="/documents" element={<DocumentsPage />} />
-              <Route path="/time-tracking" element={<TimeTrackingPage />} />
-              <Route path="/billing" element={<BillingPage />} />
-              <Route path="/reports" element={<ReportsPage />} />
-              <Route path="/messages" element={<MessagesPage />} />
-              <Route path="/research" element={<ResearchPage />} />
-              <Route path="/team" element={<TeamPage />} />
-              <Route path="/settings" element={<SettingsPage />} />
-              <Route path="/profile" element={<ProfilePage />} />
-            </Route>
+              {/* Protected main routes */}
+              <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+                <Route path="/dashboard" element={<DashboardPage />} />
+                <Route path="/cases" element={<CasesPage />} />
+                <Route path="/cases/new" element={<CasesPage />} />
+                <Route path="/cases/:id" element={<CasesPage />} />
+                <Route path="/errands" element={<ErrandsPage />} />
+                <Route path="/clients" element={<ClientsPage />} />
+                <Route path="/clients/:id" element={<ClientsPage />} />
+                <Route path="/calendar" element={<CalendarPage />} />
+                <Route path="/tasks" element={<TasksPage />} />
+                <Route path="/documents" element={<DocumentsPage />} />
+                <Route path="/time-tracking" element={<TimeTrackingPage />} />
+                <Route path="/billing" element={<BillingPage />} />
+                <Route path="/reports" element={<ReportsPage />} />
+                <Route path="/messages" element={<MessagesPage />} />
+                <Route path="/research" element={<ResearchPage />} />
+                <Route path="/team" element={<TeamPage />} />
+                <Route path="/settings" element={<SettingsPage />} />
+                <Route path="/profile" element={<ProfilePage />} />
+              </Route>
 
-            {/* Client portal routes */}
-            <Route path="/portal" element={<ClientLayout />}>
-              <Route index element={<Navigate to="/portal/dashboard" replace />} />
-              <Route path="dashboard" element={<PortalDashboard />} />
-              <Route path="cases" element={<PortalCases />} />
-              <Route path="errands" element={<PortalErrands />} />
-              <Route path="documents" element={<PortalDocuments />} />
-              <Route path="messages" element={<PortalMessages />} />
-              <Route path="invoices" element={<PortalInvoices />} />
-              <Route path="profile" element={<PortalProfile />} />
-            </Route>
+              {/* Client portal */}
+              <Route path="/portal" element={<ProtectedRoute allowedRoles={['client']}><ClientLayout /></ProtectedRoute>}>
+                <Route index element={<Navigate to="/portal/dashboard" replace />} />
+                <Route path="dashboard" element={<PortalDashboard />} />
+                <Route path="cases" element={<PortalCases />} />
+                <Route path="errands" element={<PortalErrands />} />
+                <Route path="documents" element={<PortalDocuments />} />
+                <Route path="messages" element={<PortalMessages />} />
+                <Route path="invoices" element={<PortalInvoices />} />
+                <Route path="profile" element={<PortalProfile />} />
+              </Route>
 
-            {/* Admin routes */}
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route index element={<Navigate to="/admin/dashboard" replace />} />
-              <Route path="dashboard" element={<AdminDashboard />} />
-              <Route path="organizations" element={<AdminOrgs />} />
-              <Route path="users" element={<AdminUsers />} />
-              <Route path="subscriptions" element={<AdminSubs />} />
-              <Route path="analytics" element={<AdminAnalytics />} />
-              <Route path="settings" element={<AdminSettings />} />
-              <Route path="announcements" element={<AdminAnnouncements />} />
-            </Route>
+              {/* Admin */}
+              <Route path="/admin" element={<ProtectedRoute allowedRoles={['super_admin', 'sales_admin']}><AdminLayout /></ProtectedRoute>}>
+                <Route index element={<Navigate to="/admin/dashboard" replace />} />
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="organizations" element={<AdminOrgs />} />
+                <Route path="users" element={<AdminUsers />} />
+                <Route path="subscriptions" element={<AdminSubs />} />
+                <Route path="analytics" element={<AdminAnalytics />} />
+                <Route path="settings" element={<AdminSettings />} />
+                <Route path="announcements" element={<AdminAnnouncements />} />
+              </Route>
 
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </AuthProvider>
     </LanguageProvider>
   </QueryClientProvider>
 );
