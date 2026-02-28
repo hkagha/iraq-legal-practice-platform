@@ -2553,6 +2553,78 @@ export type Database = {
           },
         ]
       }
+      saved_reports: {
+        Row: {
+          created_at: string
+          created_by: string
+          date_range_end: string | null
+          date_range_start: string | null
+          description: string | null
+          description_ar: string | null
+          filters: Json | null
+          id: string
+          is_scheduled: boolean | null
+          last_generated_at: string | null
+          name: string
+          name_ar: string | null
+          organization_id: string
+          report_type: string
+          schedule_frequency: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          date_range_end?: string | null
+          date_range_start?: string | null
+          description?: string | null
+          description_ar?: string | null
+          filters?: Json | null
+          id?: string
+          is_scheduled?: boolean | null
+          last_generated_at?: string | null
+          name: string
+          name_ar?: string | null
+          organization_id: string
+          report_type: string
+          schedule_frequency?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          date_range_end?: string | null
+          date_range_start?: string | null
+          description?: string | null
+          description_ar?: string | null
+          filters?: Json | null
+          id?: string
+          is_scheduled?: boolean | null
+          last_generated_at?: string | null
+          name?: string
+          name_ar?: string | null
+          organization_id?: string
+          report_type?: string
+          schedule_frequency?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_reports_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "saved_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       task_comments: {
         Row: {
           author_id: string
