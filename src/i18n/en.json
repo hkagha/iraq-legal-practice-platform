@@ -1647,5 +1647,63 @@
       "resetCounter": "Reset Counter",
       "resetConfirm": "This will reset the counter. Are you sure?"
     }
+  },
+  "team": {
+    "title": "Team Members",
+    "subtitle": "Manage your firm's team",
+    "inviteMember": "Invite Member",
+    "membersCount": "{{n}} members",
+    "you": "(You)",
+    "active": "Active",
+    "inactive": "Inactive",
+    "pending": "Pending",
+    "editProfile": "Edit Profile",
+    "changeRole": "Change Role",
+    "deactivate": "Deactivate",
+    "activate": "Activate",
+    "removeFromOrg": "Remove from Organization",
+    "removeConfirm": "Remove {{name}} from this organization? They will lose access to all data.",
+    "lastAdmin": "Cannot remove the last administrator",
+    "invite": {
+      "title": "Invite Team Member",
+      "email": "Email Address",
+      "name": "Full Name",
+      "role": "Role",
+      "message": "Personal Message",
+      "send": "Send Invitation",
+      "created": "Invitation created!",
+      "shareLink": "Share this link with the invitee",
+      "copyLink": "Copy Link",
+      "linkCopied": "Link copied!",
+      "expires": "This link expires in 7 days",
+      "resend": "Resend",
+      "cancel": "Cancel Invitation",
+      "expired": "This invitation has expired",
+      "alreadyUsed": "This invitation has already been used",
+      "welcome": "Welcome to {{org}}! You've been invited as a {{role}}.",
+      "accept": "Accept Invitation"
+    },
+    "roles": {
+      "firm_admin": "Admin",
+      "lawyer": "Lawyer",
+      "paralegal": "Paralegal",
+      "secretary": "Secretary",
+      "accountant": "Accountant",
+      "descriptions": {
+        "firm_admin": "Full access to all features and settings",
+        "lawyer": "Manage cases, errands, clients, billing",
+        "paralegal": "Manage cases, errands, documents, tasks",
+        "secretary": "View cases, manage calendar, documents",
+        "accountant": "Manage billing, invoices, payments, reports"
+      }
+    },
+    "permissions": {
+      "title": "Roles & Permissions",
+      "subtitle": "System-defined role permissions",
+      "fullAccess": "Full access",
+      "viewOnly": "View only",
+      "noAccess": "No access",
+      "customNote": "Role permissions are system-defined and cannot be customized in this version."
+    }
   }
 }

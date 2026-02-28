@@ -16,6 +16,7 @@ import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import NotFound from "./pages/NotFound";
+import InviteAcceptPage from "@/pages/InviteAcceptPage";
 
 import {
   LayoutDashboard, Scale, FileCheck, Users, Calendar, CheckSquare,
@@ -90,6 +91,7 @@ const App = () => (
               <Route path="/login" element={<LoginPage />} />
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+              <Route path="/invite/:token" element={<InviteAcceptPage />} />
 
               {/* Protected main routes */}
               <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>

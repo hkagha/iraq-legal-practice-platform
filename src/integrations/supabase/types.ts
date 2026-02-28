@@ -1856,6 +1856,7 @@ export type Database = {
           invited_by: string
           last_name: string | null
           organization_id: string
+          personal_message: string | null
           role: string
           status: string
           token: string
@@ -1870,6 +1871,7 @@ export type Database = {
           invited_by: string
           last_name?: string | null
           organization_id: string
+          personal_message?: string | null
           role: string
           status?: string
           token?: string
@@ -1884,6 +1886,7 @@ export type Database = {
           invited_by?: string
           last_name?: string | null
           organization_id?: string
+          personal_message?: string | null
           role?: string
           status?: string
           token?: string
