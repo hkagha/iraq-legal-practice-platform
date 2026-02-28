@@ -56,7 +56,7 @@ import BillingAgingReport from '@/pages/BillingAgingReport';
 const MessagesPage = () => <PlaceholderPage titleKey="sidebar.messages" icon={MessageSquare} />;
 const ResearchPage = () => <PlaceholderPage titleKey="sidebar.research" icon={Sparkles} />;
 const TeamPage = () => <PlaceholderPage titleKey="sidebar.team" icon={UserCog} />;
-const SettingsPage = () => <PlaceholderPage titleKey="sidebar.settings" icon={Settings} />;
+import SettingsPage from '@/pages/SettingsPage';
 const ProfilePage = () => <PlaceholderPage titleKey="common.profile" icon={User} />;
 
 const PortalDashboard = () => <PlaceholderPage titleKey="clientPortal.myDashboard" icon={LayoutDashboard} />;

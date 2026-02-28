@@ -1568,5 +1568,83 @@
       "clientGrowth": "نمو العملاء",
       "topClients": "أفضل العملاء حسب الإيرادات"
     }
+  },
+  "settings": {
+    "title": "الإعدادات",
+    "subtitle": "إدارة مؤسستك وفريقك وتفضيلاتك",
+    "saved": "تم حفظ الإعدادات",
+    "saveChanges": "حفظ التغييرات",
+    "sections": {
+      "general": "عام",
+      "branding": "الهوية البصرية",
+      "billingConfig": "إعدادات الفوترة",
+      "numbering": "الترقيم",
+      "teamMembers": "أعضاء الفريق",
+      "rolesPermissions": "الأدوار والصلاحيات",
+      "invitations": "الدعوات",
+      "myProfile": "ملفي الشخصي",
+      "security": "الأمان",
+      "notificationPrefs": "تفضيلات الإشعارات",
+      "languageAppearance": "اللغة والمظهر",
+      "subscription": "الاشتراك والخطة",
+      "dataExport": "تصدير البيانات",
+      "dangerZone": "منطقة الخطر"
+    },
+    "groups": {
+      "organization": "المؤسسة",
+      "team": "الفريق",
+      "personal": "شخصي",
+      "system": "النظام"
+    },
+    "org": {
+      "name": "اسم المؤسسة",
+      "nameAr": "اسم المؤسسة (عربي)",
+      "type": "نوع المؤسسة",
+      "industryFocus": "التخصص",
+      "phone": "الهاتف",
+      "email": "البريد الإلكتروني",
+      "address": "العنوان",
+      "city": "المدينة",
+      "governorate": "المحافظة",
+      "country": "الدولة",
+      "website": "الموقع الإلكتروني",
+      "taxId": "الرقم الضريبي / رقم التسجيل"
+    },
+    "branding": {
+      "logo": "شعار المؤسسة",
+      "uploadLogo": "رفع الشعار",
+      "removeLogo": "إزالة الشعار",
+      "maxSize": "الحد الأقصى ٢ ميجابايت، PNG/JPG/SVG",
+      "invoiceBranding": "هوية الفاتورة",
+      "invoiceHeader": "نص رأس الفاتورة",
+      "invoiceFooter": "نص ذيل الفاتورة",
+      "defaultTerms": "الشروط والأحكام الافتراضية",
+      "bankDetails": "التفاصيل البنكية",
+      "bankName": "اسم البنك",
+      "accountNumber": "رقم الحساب",
+      "iban": "الآيبان",
+      "swiftCode": "رمز السويفت"
+    },
+    "billingConfig": {
+      "defaultRate": "سعر الساعة الافتراضي",
+      "defaultCurrency": "العملة الافتراضية",
+      "paymentTerms": "شروط الدفع (أيام)",
+      "taxRate": "نسبة الضريبة الافتراضية",
+      "workingDays": "أيام العمل",
+      "workingHours": "ساعات العمل",
+      "startTime": "وقت البدء",
+      "endTime": "وقت الانتهاء"
+    },
+    "numbering": {
+      "title": "الترقيم التلقائي",
+      "subtitle": "إعداد طريقة ترقيم القضايا والمعاملات والفواتير",
+      "casePrefix": "بادئة رقم القضية",
+      "errandPrefix": "بادئة رقم المعاملة",
+      "invoicePrefix": "بادئة رقم الفاتورة",
+      "nextNumber": "الرقم التالي",
+      "preview": "معاينة",
+      "resetCounter": "إعادة تعيين العداد",
+      "resetConfirm": "سيؤدي هذا إلى إعادة تعيين العداد. هل أنت متأكد؟"
+    }
   }
 }

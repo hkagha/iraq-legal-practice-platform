@@ -2268,21 +2268,30 @@ export type Database = {
           bank_account_number: string | null
           bank_iban: string | null
           bank_name: string | null
+          bank_name_ar: string | null
+          bank_swift_code: string | null
           case_next_number: number | null
           case_prefix: string | null
           city: string | null
+          city_ar: string | null
           created_at: string
           default_currency: string
+          default_hourly_rate: number | null
           default_language: string
           default_payment_terms_days: number | null
           default_tax_rate: number | null
+          default_terms: string | null
+          default_terms_ar: string | null
           email: string | null
           errand_next_number: number | null
           errand_prefix: string | null
           governorate: string | null
           id: string
+          industry_focus: string | null
           invoice_footer_text: string | null
           invoice_footer_text_ar: string | null
+          invoice_header_text: string | null
+          invoice_header_text_ar: string | null
           invoice_next_number: number | null
           invoice_prefix: string | null
           is_active: boolean
@@ -2292,6 +2301,7 @@ export type Database = {
           max_users: number
           name: string
           name_ar: string
+          org_type: string | null
           phone: string | null
           registration_number: string | null
           slug: string
@@ -2311,21 +2321,30 @@ export type Database = {
           bank_account_number?: string | null
           bank_iban?: string | null
           bank_name?: string | null
+          bank_name_ar?: string | null
+          bank_swift_code?: string | null
           case_next_number?: number | null
           case_prefix?: string | null
           city?: string | null
+          city_ar?: string | null
           created_at?: string
           default_currency?: string
+          default_hourly_rate?: number | null
           default_language?: string
           default_payment_terms_days?: number | null
           default_tax_rate?: number | null
+          default_terms?: string | null
+          default_terms_ar?: string | null
           email?: string | null
           errand_next_number?: number | null
           errand_prefix?: string | null
           governorate?: string | null
           id?: string
+          industry_focus?: string | null
           invoice_footer_text?: string | null
           invoice_footer_text_ar?: string | null
+          invoice_header_text?: string | null
+          invoice_header_text_ar?: string | null
           invoice_next_number?: number | null
           invoice_prefix?: string | null
           is_active?: boolean
@@ -2335,6 +2354,7 @@ export type Database = {
           max_users?: number
           name: string
           name_ar: string
+          org_type?: string | null
           phone?: string | null
           registration_number?: string | null
           slug: string
@@ -2354,21 +2374,30 @@ export type Database = {
           bank_account_number?: string | null
           bank_iban?: string | null
           bank_name?: string | null
+          bank_name_ar?: string | null
+          bank_swift_code?: string | null
           case_next_number?: number | null
           case_prefix?: string | null
           city?: string | null
+          city_ar?: string | null
           created_at?: string
           default_currency?: string
+          default_hourly_rate?: number | null
           default_language?: string
           default_payment_terms_days?: number | null
           default_tax_rate?: number | null
+          default_terms?: string | null
+          default_terms_ar?: string | null
           email?: string | null
           errand_next_number?: number | null
           errand_prefix?: string | null
           governorate?: string | null
           id?: string
+          industry_focus?: string | null
           invoice_footer_text?: string | null
           invoice_footer_text_ar?: string | null
+          invoice_header_text?: string | null
+          invoice_header_text_ar?: string | null
           invoice_next_number?: number | null
           invoice_prefix?: string | null
           is_active?: boolean
@@ -2378,6 +2407,7 @@ export type Database = {
           max_users?: number
           name?: string
           name_ar?: string
+          org_type?: string | null
           phone?: string | null
           registration_number?: string | null
           slug?: string

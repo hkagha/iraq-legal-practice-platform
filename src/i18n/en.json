@@ -1569,5 +1569,83 @@
       "clientGrowth": "Client Growth",
       "topClients": "Top Clients by Revenue"
     }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Manage your organization, team, and preferences",
+    "saved": "Settings saved",
+    "saveChanges": "Save Changes",
+    "sections": {
+      "general": "General",
+      "branding": "Branding",
+      "billingConfig": "Billing Configuration",
+      "numbering": "Numbering",
+      "teamMembers": "Team Members",
+      "rolesPermissions": "Roles & Permissions",
+      "invitations": "Invitations",
+      "myProfile": "My Profile",
+      "security": "Security",
+      "notificationPrefs": "Notification Preferences",
+      "languageAppearance": "Language & Appearance",
+      "subscription": "Subscription & Plan",
+      "dataExport": "Data Export",
+      "dangerZone": "Danger Zone"
+    },
+    "groups": {
+      "organization": "Organization",
+      "team": "Team",
+      "personal": "Personal",
+      "system": "System"
+    },
+    "org": {
+      "name": "Organization Name",
+      "nameAr": "Organization Name (Arabic)",
+      "type": "Organization Type",
+      "industryFocus": "Industry Focus",
+      "phone": "Phone",
+      "email": "Email",
+      "address": "Address",
+      "city": "City",
+      "governorate": "Governorate",
+      "country": "Country",
+      "website": "Website",
+      "taxId": "Tax ID / Registration Number"
+    },
+    "branding": {
+      "logo": "Organization Logo",
+      "uploadLogo": "Upload Logo",
+      "removeLogo": "Remove Logo",
+      "maxSize": "Max 2MB, PNG/JPG/SVG",
+      "invoiceBranding": "Invoice Branding",
+      "invoiceHeader": "Invoice Header Text",
+      "invoiceFooter": "Invoice Footer Text",
+      "defaultTerms": "Default Terms & Conditions",
+      "bankDetails": "Bank Details",
+      "bankName": "Bank Name",
+      "accountNumber": "Account Number",
+      "iban": "IBAN",
+      "swiftCode": "SWIFT Code"
+    },
+    "billingConfig": {
+      "defaultRate": "Default Hourly Rate",
+      "defaultCurrency": "Default Currency",
+      "paymentTerms": "Payment Terms (days)",
+      "taxRate": "Default Tax Rate",
+      "workingDays": "Working Days",
+      "workingHours": "Working Hours",
+      "startTime": "Start Time",
+      "endTime": "End Time"
+    },
+    "numbering": {
+      "title": "Auto-Numbering",
+      "subtitle": "Configure how cases, errands, and invoices are numbered",
+      "casePrefix": "Case Number Prefix",
+      "errandPrefix": "Errand Number Prefix",
+      "invoicePrefix": "Invoice Number Prefix",
+      "nextNumber": "Next number",
+      "preview": "Preview",
+      "resetCounter": "Reset Counter",
+      "resetConfirm": "This will reset the counter. Are you sure?"
+    }
   }
 }
