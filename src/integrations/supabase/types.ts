@@ -1977,6 +1977,154 @@ export type Database = {
           },
         ]
       }
+      notification_preferences: {
+        Row: {
+          created_at: string
+          email_enabled: boolean | null
+          id: string
+          organization_id: string
+          preferences: Json
+          quiet_hours_enabled: boolean | null
+          quiet_hours_end: string | null
+          quiet_hours_start: string | null
+          updated_at: string
+          user_id: string
+          whatsapp_enabled: boolean | null
+        }
+        Insert: {
+          created_at?: string
+          email_enabled?: boolean | null
+          id?: string
+          organization_id: string
+          preferences?: Json
+          quiet_hours_enabled?: boolean | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          updated_at?: string
+          user_id: string
+          whatsapp_enabled?: boolean | null
+        }
+        Update: {
+          created_at?: string
+          email_enabled?: boolean | null
+          id?: string
+          organization_id?: string
+          preferences?: Json
+          quiet_hours_enabled?: boolean | null
+          quiet_hours_end?: string | null
+          quiet_hours_start?: string | null
+          updated_at?: string
+          user_id?: string
+          whatsapp_enabled?: boolean | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_preferences_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notification_preferences_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          actor_id: string | null
+          body: string | null
+          body_ar: string | null
+          created_at: string
+          email_delivered: boolean | null
+          email_delivered_at: string | null
+          entity_id: string | null
+          entity_type: string | null
+          id: string
+          in_app_delivered: boolean | null
+          is_read: boolean
+          notification_type: string
+          organization_id: string
+          priority: string
+          read_at: string | null
+          title: string
+          title_ar: string | null
+          user_id: string
+          whatsapp_delivered: boolean | null
+          whatsapp_delivered_at: string | null
+        }
+        Insert: {
+          actor_id?: string | null
+          body?: string | null
+          body_ar?: string | null
+          created_at?: string
+          email_delivered?: boolean | null
+          email_delivered_at?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          in_app_delivered?: boolean | null
+          is_read?: boolean
+          notification_type: string
+          organization_id: string
+          priority?: string
+          read_at?: string | null
+          title: string
+          title_ar?: string | null
+          user_id: string
+          whatsapp_delivered?: boolean | null
+          whatsapp_delivered_at?: string | null
+        }
+        Update: {
+          actor_id?: string | null
+          body?: string | null
+          body_ar?: string | null
+          created_at?: string
+          email_delivered?: boolean | null
+          email_delivered_at?: string | null
+          entity_id?: string | null
+          entity_type?: string | null
+          id?: string
+          in_app_delivered?: boolean | null
+          is_read?: boolean
+          notification_type?: string
+          organization_id?: string
+          priority?: string
+          read_at?: string | null
+          title?: string
+          title_ar?: string | null
+          user_id?: string
+          whatsapp_delivered?: boolean | null
+          whatsapp_delivered_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           address: string | null
@@ -2619,6 +2767,22 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_notification: {
+        Args: {
+          p_actor_id?: string
+          p_body?: string
+          p_body_ar?: string
+          p_entity_id?: string
+          p_entity_type?: string
+          p_notification_type: string
+          p_organization_id: string
+          p_priority?: string
+          p_title: string
+          p_title_ar?: string
+          p_user_id: string
+        }
+        Returns: string
+      }
       get_user_org_id: { Args: { _user_id: string }; Returns: string }
       get_user_role: { Args: { _user_id: string }; Returns: string }
     }

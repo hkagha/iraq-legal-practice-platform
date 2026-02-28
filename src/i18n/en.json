@@ -1409,5 +1409,62 @@
   "todaySchedule": {
     "title": "Today",
     "nothingScheduled": "Nothing scheduled for today"
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAllRead": "Mark all as read",
+    "clearAll": "Clear all",
+    "viewAll": "View all notifications",
+    "noNotifications": "No notifications",
+    "noNotificationsSubtitle": "You're all caught up!",
+    "unreadCount": "{{n}} unread",
+    "justNow": "Just now",
+    "minutesAgo": "{{n}}m ago",
+    "hoursAgo": "{{n}}h ago",
+    "daysAgo": "{{n}}d ago",
+    "today": "Today",
+    "yesterday": "Yesterday",
+    "earlier": "Earlier",
+    "preferences": "Notification Preferences",
+    "types": {
+      "task_assigned": "Task Assigned",
+      "task_due_today": "Task Due Today",
+      "task_due_tomorrow": "Task Due Tomorrow",
+      "task_overdue": "Task Overdue",
+      "task_completed": "Task Completed",
+      "task_comment": "New Comment on Task",
+      "task_mentioned": "Mentioned in Task",
+      "case_assigned": "Case Assigned",
+      "case_status_changed": "Case Status Changed",
+      "case_hearing_tomorrow": "Hearing Tomorrow",
+      "case_hearing_today": "Hearing Today",
+      "case_note_added": "New Case Note",
+      "case_mentioned": "Mentioned in Case Note",
+      "case_deadline_approaching": "Case Deadline Approaching",
+      "errand_assigned": "Errand Assigned",
+      "errand_status_changed": "Errand Status Changed",
+      "errand_step_completed": "Errand Step Completed",
+      "errand_overdue": "Errand Overdue",
+      "errand_mentioned": "Mentioned in Errand",
+      "invoice_overdue": "Invoice Overdue",
+      "payment_received": "Payment Received",
+      "document_shared": "Document Shared",
+      "event_reminder": "Event Reminder",
+      "event_invitation": "Event Invitation",
+      "mention": "You were mentioned"
+    },
+    "channels": {
+      "inApp": "In-App",
+      "email": "Email",
+      "whatsapp": "WhatsApp"
+    },
+    "settings": {
+      "emailEnabled": "Enable email notifications",
+      "whatsappEnabled": "Enable WhatsApp notifications",
+      "quietHours": "Quiet Hours",
+      "quietHoursDesc": "No notifications during these hours",
+      "from": "From",
+      "to": "To"
+    }
   }
 }

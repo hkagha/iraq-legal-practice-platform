@@ -3,12 +3,13 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Search, Bell, Menu, User, Settings, LogOut, Scale, Users as UsersIcon, FileCheck, CheckSquare, Calendar } from 'lucide-react';
+import { Search, Menu, User, Settings, LogOut, Scale, Users as UsersIcon, FileCheck, CheckSquare, Calendar } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
 import { StatusBadge } from '@/components/ui/StatusBadge';
+import NotificationBell from '@/components/notifications/NotificationBell';
 
 interface TopHeaderProps {
   onMenuClick?: () => void;
@@ -282,10 +283,7 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
           {language === 'en' ? 'AR' : 'EN'}
         </button>
 
-        <button className="h-9 w-9 rounded-button flex items-center justify-center hover:bg-secondary transition-colors relative">
-          <Bell className="h-5 w-5 text-foreground" />
-          <span className="absolute top-1 end-1 h-2 w-2 rounded-full bg-error" />
-        </button>
+        <NotificationBell />
 
         {/* Avatar dropdown */}
         <DropdownMenu>
