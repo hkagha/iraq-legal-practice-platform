@@ -1408,5 +1408,62 @@
   "todaySchedule": {
     "title": "اليوم",
     "nothingScheduled": "لا يوجد جدول لهذا اليوم"
+  },
+  "notifications": {
+    "title": "الإشعارات",
+    "markAllRead": "تعيين الكل كمقروء",
+    "clearAll": "مسح الكل",
+    "viewAll": "عرض جميع الإشعارات",
+    "noNotifications": "لا توجد إشعارات",
+    "noNotificationsSubtitle": "أنت على اطلاع بكل شيء!",
+    "unreadCount": "{{n}} غير مقروءة",
+    "justNow": "الآن",
+    "minutesAgo": "منذ {{n}} د",
+    "hoursAgo": "منذ {{n}} س",
+    "daysAgo": "منذ {{n}} ي",
+    "today": "اليوم",
+    "yesterday": "أمس",
+    "earlier": "سابقاً",
+    "preferences": "تفضيلات الإشعارات",
+    "types": {
+      "task_assigned": "تم إسناد مهمة",
+      "task_due_today": "مهمة مستحقة اليوم",
+      "task_due_tomorrow": "مهمة مستحقة غداً",
+      "task_overdue": "مهمة متأخرة",
+      "task_completed": "تم إكمال مهمة",
+      "task_comment": "تعليق جديد على مهمة",
+      "task_mentioned": "تم ذكرك في مهمة",
+      "case_assigned": "تم تعيينك في قضية",
+      "case_status_changed": "تغيرت حالة القضية",
+      "case_hearing_tomorrow": "جلسة غداً",
+      "case_hearing_today": "جلسة اليوم",
+      "case_note_added": "ملاحظة جديدة في القضية",
+      "case_mentioned": "تم ذكرك في ملاحظة قضية",
+      "case_deadline_approaching": "اقتراب موعد نهائي للقضية",
+      "errand_assigned": "تم إسناد معاملة",
+      "errand_status_changed": "تغيرت حالة المعاملة",
+      "errand_step_completed": "تم إكمال خطوة معاملة",
+      "errand_overdue": "معاملة متأخرة",
+      "errand_mentioned": "تم ذكرك في معاملة",
+      "invoice_overdue": "فاتورة متأخرة",
+      "payment_received": "تم استلام دفعة",
+      "document_shared": "تم مشاركة مستند",
+      "event_reminder": "تذكير بحدث",
+      "event_invitation": "دعوة لحدث",
+      "mention": "تم ذكرك"
+    },
+    "channels": {
+      "inApp": "داخل التطبيق",
+      "email": "البريد الإلكتروني",
+      "whatsapp": "الواتساب"
+    },
+    "settings": {
+      "emailEnabled": "تفعيل إشعارات البريد الإلكتروني",
+      "whatsappEnabled": "تفعيل إشعارات الواتساب",
+      "quietHours": "ساعات الهدوء",
+      "quietHoursDesc": "لا إشعارات خلال هذه الساعات",
+      "from": "من",
+      "to": "إلى"
+    }
   }
 }
