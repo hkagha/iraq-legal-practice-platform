@@ -14,6 +14,67 @@ export type Database = {
   }
   public: {
     Tables: {
+      billing_rates: {
+        Row: {
+          case_id: string | null
+          created_at: string
+          currency: string
+          effective_from: string
+          effective_to: string | null
+          id: string
+          is_default: boolean | null
+          organization_id: string
+          rate: number
+          user_id: string | null
+        }
+        Insert: {
+          case_id?: string | null
+          created_at?: string
+          currency?: string
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          is_default?: boolean | null
+          organization_id: string
+          rate: number
+          user_id?: string | null
+        }
+        Update: {
+          case_id?: string | null
+          created_at?: string
+          currency?: string
+          effective_from?: string
+          effective_to?: string | null
+          id?: string
+          is_default?: boolean | null
+          organization_id?: string
+          rate?: number
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "billing_rates_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_rates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "billing_rates_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       case_activities: {
         Row: {
           activity_type: string
@@ -1595,6 +1656,211 @@ export type Database = {
           },
         ]
       }
+      invoice_line_items: {
+        Row: {
+          created_at: string
+          description: string
+          description_ar: string | null
+          id: string
+          invoice_id: string
+          line_type: string
+          organization_id: string
+          quantity: number
+          sort_order: number
+          time_entry_id: string | null
+          total: number | null
+          unit_price: number
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          description_ar?: string | null
+          id?: string
+          invoice_id: string
+          line_type?: string
+          organization_id: string
+          quantity?: number
+          sort_order?: number
+          time_entry_id?: string | null
+          total?: number | null
+          unit_price?: number
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          description_ar?: string | null
+          id?: string
+          invoice_id?: string
+          line_type?: string
+          organization_id?: string
+          quantity?: number
+          sort_order?: number
+          time_entry_id?: string | null
+          total?: number | null
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoice_line_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_line_items_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoice_line_items_time_entry_id_fkey"
+            columns: ["time_entry_id"]
+            isOneToOne: false
+            referencedRelation: "time_entries"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      invoices: {
+        Row: {
+          amount_paid: number | null
+          balance_due: number | null
+          case_id: string | null
+          client_id: string
+          created_at: string
+          created_by: string
+          currency: string
+          discount_amount: number | null
+          discount_percentage: number | null
+          discount_type: string | null
+          due_date: string
+          footer_text: string | null
+          footer_text_ar: string | null
+          id: string
+          invoice_number: string
+          issue_date: string
+          notes: string | null
+          notes_ar: string | null
+          organization_id: string
+          paid_at: string | null
+          sent_at: string | null
+          status: string
+          subtotal: number
+          tax_amount: number | null
+          tax_rate: number | null
+          terms: string | null
+          terms_ar: string | null
+          total_amount: number | null
+          updated_at: string
+          updated_by: string | null
+          viewed_at: string | null
+        }
+        Insert: {
+          amount_paid?: number | null
+          balance_due?: number | null
+          case_id?: string | null
+          client_id: string
+          created_at?: string
+          created_by: string
+          currency?: string
+          discount_amount?: number | null
+          discount_percentage?: number | null
+          discount_type?: string | null
+          due_date?: string
+          footer_text?: string | null
+          footer_text_ar?: string | null
+          id?: string
+          invoice_number?: string
+          issue_date?: string
+          notes?: string | null
+          notes_ar?: string | null
+          organization_id: string
+          paid_at?: string | null
+          sent_at?: string | null
+          status?: string
+          subtotal?: number
+          tax_amount?: number | null
+          tax_rate?: number | null
+          terms?: string | null
+          terms_ar?: string | null
+          total_amount?: number | null
+          updated_at?: string
+          updated_by?: string | null
+          viewed_at?: string | null
+        }
+        Update: {
+          amount_paid?: number | null
+          balance_due?: number | null
+          case_id?: string | null
+          client_id?: string
+          created_at?: string
+          created_by?: string
+          currency?: string
+          discount_amount?: number | null
+          discount_percentage?: number | null
+          discount_type?: string | null
+          due_date?: string
+          footer_text?: string | null
+          footer_text_ar?: string | null
+          id?: string
+          invoice_number?: string
+          issue_date?: string
+          notes?: string | null
+          notes_ar?: string | null
+          organization_id?: string
+          paid_at?: string | null
+          sent_at?: string | null
+          status?: string
+          subtotal?: number
+          tax_amount?: number | null
+          tax_rate?: number | null
+          terms?: string | null
+          terms_ar?: string | null
+          total_amount?: number | null
+          updated_at?: string
+          updated_by?: string | null
+          viewed_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_updated_by_fkey"
+            columns: ["updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           address: string | null
@@ -1727,6 +1993,86 @@ export type Database = {
         }
         Relationships: []
       }
+      payments: {
+        Row: {
+          amount: number
+          client_id: string
+          created_at: string
+          created_by: string
+          currency: string
+          id: string
+          invoice_id: string
+          notes: string | null
+          notes_ar: string | null
+          organization_id: string
+          payment_date: string
+          payment_method: string
+          receipt_url: string | null
+          reference_number: string | null
+        }
+        Insert: {
+          amount: number
+          client_id: string
+          created_at?: string
+          created_by: string
+          currency?: string
+          id?: string
+          invoice_id: string
+          notes?: string | null
+          notes_ar?: string | null
+          organization_id: string
+          payment_date?: string
+          payment_method: string
+          receipt_url?: string | null
+          reference_number?: string | null
+        }
+        Update: {
+          amount?: number
+          client_id?: string
+          created_at?: string
+          created_by?: string
+          currency?: string
+          id?: string
+          invoice_id?: string
+          notes?: string | null
+          notes_ar?: string | null
+          organization_id?: string
+          payment_date?: string
+          payment_method?: string
+          receipt_url?: string | null
+          reference_number?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "invoices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "payments_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null
@@ -1800,6 +2146,133 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      time_entries: {
+        Row: {
+          approved_at: string | null
+          approved_by: string | null
+          billing_rate: number | null
+          billing_rate_currency: string | null
+          case_id: string | null
+          client_id: string | null
+          created_at: string
+          date: string
+          description: string
+          description_ar: string | null
+          duration_minutes: number
+          end_time: string | null
+          errand_id: string | null
+          id: string
+          invoice_id: string | null
+          invoice_line_item_id: string | null
+          is_billable: boolean
+          is_timer_running: boolean | null
+          organization_id: string
+          start_time: string | null
+          status: string
+          timer_started_at: string | null
+          total_amount: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          approved_at?: string | null
+          approved_by?: string | null
+          billing_rate?: number | null
+          billing_rate_currency?: string | null
+          case_id?: string | null
+          client_id?: string | null
+          created_at?: string
+          date?: string
+          description: string
+          description_ar?: string | null
+          duration_minutes: number
+          end_time?: string | null
+          errand_id?: string | null
+          id?: string
+          invoice_id?: string | null
+          invoice_line_item_id?: string | null
+          is_billable?: boolean
+          is_timer_running?: boolean | null
+          organization_id: string
+          start_time?: string | null
+          status?: string
+          timer_started_at?: string | null
+          total_amount?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          approved_at?: string | null
+          approved_by?: string | null
+          billing_rate?: number | null
+          billing_rate_currency?: string | null
+          case_id?: string | null
+          client_id?: string | null
+          created_at?: string
+          date?: string
+          description?: string
+          description_ar?: string | null
+          duration_minutes?: number
+          end_time?: string | null
+          errand_id?: string | null
+          id?: string
+          invoice_id?: string | null
+          invoice_line_item_id?: string | null
+          is_billable?: boolean
+          is_timer_running?: boolean | null
+          organization_id?: string
+          start_time?: string | null
+          status?: string
+          timer_started_at?: string | null
+          total_amount?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "time_entries_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_entries_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_entries_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_entries_errand_id_fkey"
+            columns: ["errand_id"]
+            isOneToOne: false
+            referencedRelation: "errands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_entries_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_entries_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]

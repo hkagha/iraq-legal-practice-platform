@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Outlet } from 'react-router-dom';
 import AppSidebar from '@/components/AppSidebar';
 import TopHeader from '@/components/TopHeader';
+import GlobalTimerBar from '@/components/time-tracking/GlobalTimerBar';
 
 export default function MainLayout() {
   const [collapsed, setCollapsed] = useState(() => {
@@ -46,6 +47,7 @@ export default function MainLayout() {
           showMenu
           onMenuClick={() => setMobileOpen(true)}
         />
+        <GlobalTimerBar />
         <main className="flex-1 overflow-y-auto p-6 2xl:p-8">
           <div className="max-w-[1400px] mx-auto">
             <Outlet />
