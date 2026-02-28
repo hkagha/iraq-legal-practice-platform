@@ -34,6 +34,7 @@ import {
 import { FormSearchSelect } from '@/components/ui/FormSearchSelect';
 import EntityDocumentsTab from '@/components/documents/EntityDocumentsTab';
 import CaseTimeBillingTab from '@/components/cases/CaseTimeBillingTab';
+import CaseQuickTasks from '@/components/tasks/CaseQuickTasks';
 
 const CASE_STATUS_ORDER = ['intake','active','pending_hearing','pending_judgment','on_hold','won','lost','settled','closed'] as const;
 const STATUS_PROGRESS: Record<string, number> = {
@@ -726,6 +727,9 @@ export default function CaseDetailPage() {
                   </div>
                 ))}
               </div>
+
+              {/* Quick Tasks */}
+              {caseData && <CaseQuickTasks caseId={caseData.id} />}
             </div>
 
             {/* Right column */}
