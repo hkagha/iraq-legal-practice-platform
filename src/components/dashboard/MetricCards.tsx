@@ -1,5 +1,8 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Scale, FileCheck, CheckSquare, Clock, Receipt, type LucideIcon } from 'lucide-react';
 
 interface MetricCardProps {
@@ -32,13 +35,28 @@ function MetricCard({ icon: Icon, iconColor, iconBg, value, label, href }: Metri
 
 export default function MetricCards() {
   const { t, language } = useLanguage();
+  const { profile } = useAuth();
+  const [activeCasesCount, setActiveCasesCount] = useState(0);
+
+  useEffect(() => {
+    if (!profile?.organization_id) return;
+    const fetchCounts = async () => {
+      const { count } = await supabase
+        .from('cases')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', profile.organization_id!)
+        .in('status', ['active', 'pending_hearing', 'pending_judgment', 'intake']);
+      setActiveCasesCount(count || 0);
+    };
+    fetchCounts();
+  }, [profile?.organization_id]);
 
   const cards: MetricCardProps[] = [
     {
       icon: Scale,
       iconColor: '#3B82F6',
       iconBg: '#EFF6FF',
-      value: '0',
+      value: String(activeCasesCount),
       label: t('dashboard.activeCases'),
       href: '/cases',
     },

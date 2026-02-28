@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import {
   LayoutDashboard, Scale, FileCheck, Users, Calendar, CheckSquare,
   FileText, Clock, Receipt, BarChart3, MessageSquare, Sparkles,
@@ -39,7 +41,23 @@ interface AppSidebarProps {
 
 export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarProps) {
   const { t, isRTL, language } = useLanguage();
+  const { profile } = useAuth();
   const location = useLocation();
+  const [hasUrgentCases, setHasUrgentCases] = useState(false);
+
+  useEffect(() => {
+    if (!profile?.organization_id) return;
+    const check = async () => {
+      const { count } = await supabase
+        .from('cases')
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', profile.organization_id!)
+        .eq('priority', 'urgent')
+        .not('status', 'in', '("closed","archived")');
+      setHasUrgentCases((count || 0) > 0);
+    };
+    check();
+  }, [profile?.organization_id]);
 
   const CollapseIcon = isRTL
     ? (collapsed ? ChevronLeft : ChevronRight)
@@ -49,6 +67,7 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
     const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
     const Icon = item.icon;
     const label = t(`sidebar.${item.key}`);
+    const showDot = item.key === 'cases' && hasUrgentCases;
 
     const link = (
       <NavLink
@@ -66,7 +85,12 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
         {isActive && (
           <div className={`absolute ${isRTL ? 'right-0 rounded-l-sm' : 'left-0 rounded-r-sm'} top-1.5 bottom-1.5 w-[3px] bg-accent`} />
         )}
-        <Icon className="h-5 w-5 shrink-0" />
+        <div className="relative">
+          <Icon className="h-5 w-5 shrink-0" />
+          {showDot && (
+            <span className="absolute -top-1 -end-1 h-2 w-2 rounded-full bg-[#EF4444]" />
+          )}
+        </div>
         {!collapsed && <span className="text-body-md font-medium truncate">{label}</span>}
       </NavLink>
     );
@@ -96,7 +120,6 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
         ${collapsed ? 'w-[72px]' : 'w-[260px]'}
       `}
     >
-      {/* Sidebar Header */}
       <div className="h-16 flex items-center border-b border-white/10 px-4 shrink-0">
         <div className={`flex flex-col ${collapsed ? 'items-center w-full' : ''}`}>
           <span className="text-[22px] font-bold text-white leading-tight">
@@ -110,7 +133,6 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
         </div>
       </div>
 
-      {/* Navigation */}
       <nav className="flex-1 overflow-y-auto py-3 space-y-0.5">
         {mainNavItems.map(renderNavItem)}
         {divider}
@@ -119,7 +141,6 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
         {bottomNavItems.map(renderNavItem)}
       </nav>
 
-      {/* Sidebar Footer */}
       <div className="shrink-0 border-t border-white/10 h-16 flex items-center justify-between px-3">
         {!collapsed && (
           <span className="text-body-sm text-white/50 truncate">

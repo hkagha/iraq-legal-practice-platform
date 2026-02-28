@@ -1,15 +1,26 @@
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Search, Bell, Menu, User, Settings, LogOut } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
+import { Search, Bell, Menu, User, Settings, LogOut, Scale, Users as UsersIcon } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
+import { StatusBadge } from '@/components/ui/StatusBadge';
 
 interface TopHeaderProps {
   onMenuClick?: () => void;
   showMenu?: boolean;
+}
+
+interface SearchResult {
+  id: string;
+  type: 'case' | 'client';
+  title: string;
+  subtitle: string;
+  status?: string;
 }
 
 export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
@@ -17,10 +28,84 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
   const { profile, getFullName, getInitials, signOut, isRole } = useAuth();
   const navigate = useNavigate();
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [results, setResults] = useState<SearchResult[]>([]);
+  const [showResults, setShowResults] = useState(false);
+  const [searching, setSearching] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<NodeJS.Timeout>();
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/login');
   };
+
+  const doSearch = useCallback(async (q: string) => {
+    if (!q || q.length < 2 || !profile?.organization_id) {
+      setResults([]);
+      return;
+    }
+    setSearching(true);
+    const pattern = `%${q}%`;
+
+    const [casesRes, clientsRes] = await Promise.all([
+      supabase
+        .from('cases')
+        .select('id, title, title_ar, case_number, status')
+        .eq('organization_id', profile.organization_id!)
+        .or(`title.ilike.${pattern},case_number.ilike.${pattern},title_ar.ilike.${pattern}`)
+        .limit(5),
+      supabase
+        .from('clients')
+        .select('id, first_name, last_name, company_name, client_type, email')
+        .eq('organization_id', profile.organization_id!)
+        .or(`first_name.ilike.${pattern},last_name.ilike.${pattern},company_name.ilike.${pattern},email.ilike.${pattern}`)
+        .limit(5),
+    ]);
+
+    const caseResults: SearchResult[] = (casesRes.data || []).map(c => ({
+      id: c.id,
+      type: 'case',
+      title: language === 'ar' && c.title_ar ? c.title_ar : c.title,
+      subtitle: c.case_number,
+      status: c.status,
+    }));
+
+    const clientResults: SearchResult[] = (clientsRes.data || []).map(c => ({
+      id: c.id,
+      type: 'client',
+      title: c.client_type === 'company' ? (c.company_name || '') : `${c.first_name || ''} ${c.last_name || ''}`.trim(),
+      subtitle: c.email || c.client_type,
+    }));
+
+    setResults([...caseResults, ...clientResults]);
+    setSearching(false);
+  }, [profile?.organization_id, language]);
+
+  useEffect(() => {
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    if (searchQuery.length < 2) { setResults([]); return; }
+    debounceRef.current = setTimeout(() => doSearch(searchQuery), 300);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, [searchQuery, doSearch]);
+
+  // Close on click outside
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(e.target as Node)) setShowResults(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const handleResultClick = (r: SearchResult) => {
+    setShowResults(false);
+    setSearchQuery('');
+    navigate(r.type === 'case' ? `/cases/${r.id}` : `/clients/${r.id}`);
+  };
+
+  const caseResults = results.filter(r => r.type === 'case');
+  const clientResultsFiltered = results.filter(r => r.type === 'client');
 
   return (
     <header className="h-16 bg-card shadow-xs flex items-center px-4 gap-3 shrink-0 z-10">
@@ -34,16 +119,63 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
       )}
 
       <div className="flex-1 flex justify-center">
-        <div className="relative w-full max-w-[400px]">
+        <div className="relative w-full max-w-[400px]" ref={searchRef}>
           <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <input
             type="text"
+            value={searchQuery}
+            onChange={e => { setSearchQuery(e.target.value); setShowResults(true); }}
+            onFocus={() => { if (results.length > 0) setShowResults(true); }}
+            onKeyDown={e => { if (e.key === 'Escape') setShowResults(false); }}
             placeholder={t('search.placeholder')}
             className="w-full h-10 bg-secondary border border-border rounded-card ps-9 pe-12 text-body-md text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-colors"
           />
           <kbd className="absolute end-3 top-1/2 -translate-y-1/2 hidden sm:inline-flex h-5 items-center rounded bg-slate-200 px-1.5 text-[11px] font-medium text-slate-500">
             ⌘K
           </kbd>
+
+          {/* Search Results Dropdown */}
+          {showResults && searchQuery.length >= 2 && (
+            <div className="absolute top-full mt-1 inset-x-0 bg-card border border-border rounded-card shadow-lg z-50 max-h-[360px] overflow-y-auto">
+              {results.length === 0 && !searching && (
+                <div className="p-4 text-center text-body-sm text-muted-foreground">
+                  {language === 'ar' ? `لم يتم العثور على نتائج لـ '${searchQuery}'` : `No results found for '${searchQuery}'`}
+                </div>
+              )}
+              {searching && (
+                <div className="p-4 text-center text-body-sm text-muted-foreground">{t('common.loading')}</div>
+              )}
+              {caseResults.length > 0 && (
+                <>
+                  <div className="px-3 py-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{t('sidebar.cases')}</div>
+                  {caseResults.map(r => (
+                    <button key={r.id} onClick={() => handleResultClick(r)} className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 transition-colors text-start">
+                      <Scale size={16} className="text-muted-foreground flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-body-md text-foreground truncate">{r.title}</p>
+                        <p className="text-body-sm text-muted-foreground font-mono">{r.subtitle}</p>
+                      </div>
+                      {r.status && <StatusBadge status={r.status} type="case" size="sm" />}
+                    </button>
+                  ))}
+                </>
+              )}
+              {clientResultsFiltered.length > 0 && (
+                <>
+                  <div className="px-3 py-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider border-t border-border">{t('sidebar.clients')}</div>
+                  {clientResultsFiltered.map(r => (
+                    <button key={r.id} onClick={() => handleResultClick(r)} className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 transition-colors text-start">
+                      <UsersIcon size={16} className="text-muted-foreground flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-body-md text-foreground truncate">{r.title}</p>
+                        <p className="text-body-sm text-muted-foreground">{r.subtitle}</p>
+                      </div>
+                    </button>
+                  ))}
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -68,7 +200,6 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
             </button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-[220px] shadow-lg rounded-card p-1">
-            {/* User info */}
             <DropdownMenuLabel className="px-3 py-2">
               <div className="flex items-center gap-3">
                 <div className="h-8 w-8 rounded-avatar bg-accent text-accent-foreground flex items-center justify-center text-body-sm font-semibold">

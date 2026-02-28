@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -19,11 +19,10 @@ import {
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
 } from '@/components/ui/dialog';
-import { Link } from 'react-router-dom';
 import {
   Mail, Phone, MapPin, Pencil, MoreHorizontal, Archive, UserPlus,
   FileDown, Scale, Briefcase, FileCheck, Receipt, ArrowLeft,
-  Users, FileText, Plus, X, Loader2,
+  Users, FileText, Plus, X, Loader2, Calendar, RefreshCw, MessageSquare,
 } from 'lucide-react';
 
 const CLIENT_STATUS_COLORS: Record<string, { bg: string; text: string }> = {
@@ -73,6 +72,17 @@ interface Activity {
   actor_id: string | null;
 }
 
+interface CaseRow {
+  id: string;
+  case_number: string;
+  title: string;
+  title_ar: string | null;
+  case_type: string;
+  status: string;
+  priority: string;
+  created_at: string;
+}
+
 export default function ClientDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -85,6 +95,14 @@ export default function ClientDetailPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
+
+  // Cases
+  const [clientCases, setClientCases] = useState<CaseRow[]>([]);
+  const [totalCasesCount, setTotalCasesCount] = useState(0);
+  const [activeCasesCount, setActiveCasesCount] = useState(0);
+  const [casesLoading, setCasesLoading] = useState(true);
+  const [casesStatusFilter, setCasesStatusFilter] = useState('all');
+  const [casesTypeFilter, setCasesTypeFilter] = useState('all');
 
   // Edit
   const [formOpen, setFormOpen] = useState(false);
@@ -112,7 +130,6 @@ export default function ClientDetailPage() {
       if (!data) { setNotFound(true); setIsLoading(false); return; }
       setClient(data as unknown as ClientFull);
 
-      // Fetch contacts if company
       if (data.client_type === 'company') {
         const { data: cc } = await supabase
           .from('client_contacts')
@@ -128,6 +145,35 @@ export default function ClientDetailPage() {
     }
   }, [id]);
 
+  const fetchCases = useCallback(async () => {
+    if (!id || !profile?.organization_id) return;
+    setCasesLoading(true);
+
+    // Counts
+    const [totalRes, activeRes] = await Promise.all([
+      supabase.from('cases').select('*', { count: 'exact', head: true }).eq('client_id', id).eq('organization_id', profile.organization_id!),
+      supabase.from('cases').select('*', { count: 'exact', head: true }).eq('client_id', id).eq('organization_id', profile.organization_id!).in('status', ['active', 'pending_hearing', 'pending_judgment', 'intake']),
+    ]);
+    setTotalCasesCount(totalRes.count || 0);
+    setActiveCasesCount(activeRes.count || 0);
+
+    // List
+    let query = supabase
+      .from('cases')
+      .select('id, case_number, title, title_ar, case_type, status, priority, created_at')
+      .eq('client_id', id)
+      .eq('organization_id', profile.organization_id!)
+      .order('created_at', { ascending: false })
+      .limit(50);
+
+    if (casesStatusFilter !== 'all') query = query.eq('status', casesStatusFilter);
+    if (casesTypeFilter !== 'all') query = query.eq('case_type', casesTypeFilter);
+
+    const { data } = await query;
+    setClientCases((data || []) as unknown as CaseRow[]);
+    setCasesLoading(false);
+  }, [id, profile?.organization_id, casesStatusFilter, casesTypeFilter]);
+
   const fetchActivities = useCallback(async (page = 1, filter = 'all') => {
     if (!id) return;
     const pageSize = 20;
@@ -138,30 +184,22 @@ export default function ClientDetailPage() {
       .order('created_at', { ascending: false })
       .range((page - 1) * pageSize, page * pageSize - 1);
 
-    if (filter !== 'all') {
-      query = query.ilike('activity_type', `${filter}%`);
-    }
+    if (filter !== 'all') query = query.ilike('activity_type', `${filter}%`);
 
     const { data } = await query;
     const items = (data || []) as unknown as Activity[];
-    if (page === 1) {
-      setActivities(items);
-    } else {
-      setActivities(prev => [...prev, ...items]);
-    }
+    if (page === 1) setActivities(items);
+    else setActivities(prev => [...prev, ...items]);
     setHasMoreActivities(items.length === pageSize);
   }, [id]);
 
   useEffect(() => { fetchClient(); }, [fetchClient]);
+  useEffect(() => { fetchCases(); }, [fetchCases]);
   useEffect(() => { fetchActivities(1, activityFilter); }, [fetchActivities, activityFilter]);
 
   const getClientName = (c: ClientFull) => {
-    if (c.client_type === 'company') {
-      return language === 'ar' && c.company_name_ar ? c.company_name_ar : c.company_name || '';
-    }
-    if (language === 'ar' && c.first_name_ar && c.last_name_ar) {
-      return `${c.first_name_ar} ${c.last_name_ar}`;
-    }
+    if (c.client_type === 'company') return language === 'ar' && c.company_name_ar ? c.company_name_ar : c.company_name || '';
+    if (language === 'ar' && c.first_name_ar && c.last_name_ar) return `${c.first_name_ar} ${c.last_name_ar}`;
     return `${c.first_name || ''} ${c.last_name || ''}`.trim();
   };
 
@@ -183,7 +221,6 @@ export default function ClientDetailPage() {
       if (error) throw error;
       setClient(prev => prev ? { ...prev, notes: notesValue || null } : prev);
       setNotesDialogOpen(false);
-      // Log activity
       await supabase.from('client_activities').insert({
         organization_id: profile?.organization_id,
         client_id: client.id,
@@ -200,7 +237,6 @@ export default function ClientDetailPage() {
     }
   };
 
-  // --- NOT FOUND ---
   if (notFound) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
@@ -215,7 +251,6 @@ export default function ClientDetailPage() {
     );
   }
 
-  // --- LOADING ---
   if (isLoading || !client) {
     return (
       <div className="space-y-6">
@@ -260,7 +295,11 @@ export default function ClientDetailPage() {
       client_created: { icon: UserPlus, color: '#22C55E' },
       client_updated: { icon: Pencil, color: '#3B82F6' },
       client_archived: { icon: Archive, color: '#64748B' },
-      note_added: { icon: FileText, color: '#8B5CF6' },
+      case_created: { icon: Scale, color: '#3B82F6' },
+      case_status_changed: { icon: RefreshCw, color: '#F59E0B' },
+      status_changed: { icon: RefreshCw, color: '#F59E0B' },
+      hearing_scheduled: { icon: Calendar, color: '#EF4444' },
+      note_added: { icon: MessageSquare, color: '#8B5CF6' },
       note_updated: { icon: FileText, color: '#8B5CF6' },
       contact_added: { icon: Users, color: '#06B6D4' },
       contact_removed: { icon: Users, color: '#EF4444' },
@@ -269,6 +308,9 @@ export default function ClientDetailPage() {
     const Icon = config.icon;
     return <Icon size={14} style={{ color: config.color }} />;
   };
+
+  // Recent cases for overview
+  const recentCases = clientCases.slice(0, 5);
 
   return (
     <div>
@@ -318,11 +360,6 @@ export default function ClientDetailPage() {
               <span className="flex items-center gap-1">
                 <MapPin size={14} /> {t(`clients.governorates.${client.governorate}`)}
               </span>
-              {client.whatsapp_number && (
-                <span className="flex items-center gap-1 text-[#25D366]">
-                  <Phone size={14} /> {client.whatsapp_number}
-                </span>
-              )}
             </div>
           </div>
         </div>
@@ -350,7 +387,7 @@ export default function ClientDetailPage() {
         <TabsList className="bg-transparent border-b border-border rounded-none w-full justify-start h-auto p-0 gap-0 overflow-x-auto">
           {[
             { key: 'overview', label: t('clients.tabs.overview') },
-            { key: 'cases', label: t('clients.tabs.cases'), count: '0' },
+            { key: 'cases', label: t('clients.tabs.cases'), count: String(totalCasesCount) },
             { key: 'errands', label: t('clients.tabs.errands'), count: '0' },
             { key: 'documents', label: t('clients.tabs.documents'), count: '0' },
             { key: 'billing', label: t('clients.tabs.billing'), count: '0 IQD' },
@@ -376,13 +413,12 @@ export default function ClientDetailPage() {
         {/* OVERVIEW TAB */}
         <TabsContent value="overview" className="mt-6">
           <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-            {/* Left column */}
             <div className="lg:col-span-3 space-y-5">
               {/* Stats */}
               <div className="grid grid-cols-2 gap-3">
                 {[
-                  { icon: Scale, color: '#3B82F6', bg: '#EFF6FF', label: t('clients.overview.totalCases'), value: '0' },
-                  { icon: Briefcase, color: '#22C55E', bg: '#F0FDF4', label: t('clients.overview.activeCases'), value: '0' },
+                  { icon: Scale, color: '#3B82F6', bg: '#EFF6FF', label: t('clients.overview.totalCases'), value: String(totalCasesCount) },
+                  { icon: Briefcase, color: '#22C55E', bg: '#F0FDF4', label: t('clients.overview.activeCases'), value: String(activeCasesCount) },
                   { icon: FileCheck, color: '#8B5CF6', bg: '#F5F3FF', label: t('clients.overview.totalErrands'), value: '0' },
                   { icon: Receipt, color: '#C9A84C', bg: '#FFF8E1', label: t('clients.overview.totalBilled'), value: language === 'ar' ? '٠ د.ع' : '0 IQD' },
                 ].map((s, i) => (
@@ -400,8 +436,27 @@ export default function ClientDetailPage() {
               <div className="bg-card border border-border rounded-lg p-5">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-heading-sm font-semibold text-foreground">{t('clients.detail.recentCases')}</h3>
+                  {totalCasesCount > 0 && (
+                    <button className="text-body-sm text-accent hover:underline font-medium" onClick={() => setActiveTab('cases')}>
+                      {t('dashboard.viewAll')}
+                    </button>
+                  )}
                 </div>
-                <p className="text-body-sm text-muted-foreground italic">{t('clients.detail.noCasesYet')}</p>
+                {recentCases.length === 0 ? (
+                  <p className="text-body-sm text-muted-foreground italic">{t('clients.detail.noCasesYet')}</p>
+                ) : (
+                  <div className="space-y-0">
+                    {recentCases.map(c => (
+                      <div key={c.id} className="flex items-center justify-between py-2.5 border-b border-border/50 last:border-0 cursor-pointer hover:bg-muted/30 -mx-2 px-2 rounded" onClick={() => navigate(`/cases/${c.id}`)}>
+                        <div className="min-w-0">
+                          <p className="text-body-sm text-muted-foreground font-mono">{c.case_number}</p>
+                          <p className="text-body-md text-foreground truncate">{language === 'ar' && c.title_ar ? c.title_ar : c.title}</p>
+                        </div>
+                        <StatusBadge status={c.status} type="case" size="sm" />
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Recent Activity */}
@@ -411,7 +466,7 @@ export default function ClientDetailPage() {
                   <p className="text-body-sm text-muted-foreground italic">{t('clients.detail.noActivityYet')}</p>
                 ) : (
                   <div className="space-y-0">
-                    {activities.slice(0, 5).map((a, i) => (
+                    {activities.slice(0, 5).map((a) => (
                       <div key={a.id} className="flex items-start gap-3 py-2.5 border-b border-border/50 last:border-0">
                         <div className="mt-0.5 w-6 h-6 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
                           <ActivityIcon type={a.activity_type} />
@@ -431,7 +486,6 @@ export default function ClientDetailPage() {
 
             {/* Right column */}
             <div className="lg:col-span-2 space-y-4">
-              {/* Client Details Card */}
               <div className="bg-card border border-border rounded-lg p-5">
                 <h3 className="text-heading-sm font-semibold text-foreground mb-3">{t('clients.detail.clientDetails')}</h3>
                 <DetailRow label={t('clients.detail.clientSince')} value={formatDate(client.created_at)} />
@@ -452,7 +506,6 @@ export default function ClientDetailPage() {
                 <DetailRow label={t('clients.detail.preferredCurrency')} value={client.preferred_currency} />
               </div>
 
-              {/* Tags Card */}
               {client.tags && client.tags.length > 0 && (
                 <div className="bg-card border border-border rounded-lg p-5">
                   <h3 className="text-heading-sm font-semibold text-foreground mb-3">{t('clients.detail.tags')}</h3>
@@ -464,7 +517,6 @@ export default function ClientDetailPage() {
                 </div>
               )}
 
-              {/* Notes Card */}
               <div className="bg-card border border-border rounded-lg p-5">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-heading-sm font-semibold text-foreground">{t('clients.detail.internalNotes')}</h3>
@@ -479,7 +531,6 @@ export default function ClientDetailPage() {
                 )}
               </div>
 
-              {/* Contact Persons (company only) */}
               {client.client_type === 'company' && (
                 <div className="bg-card border border-border rounded-lg p-5">
                   <h3 className="text-heading-sm font-semibold text-foreground mb-3">{t('clients.contactPerson.title')}</h3>
@@ -517,7 +568,6 @@ export default function ClientDetailPage() {
                 </div>
               )}
 
-              {/* Outstanding Balance */}
               <div className="bg-card border border-border rounded-lg p-5">
                 <h3 className="text-heading-sm font-semibold text-foreground mb-2">{t('clients.detail.outstandingBalance')}</h3>
                 <div className="text-display-sm font-bold text-[#22C55E]">
@@ -533,12 +583,72 @@ export default function ClientDetailPage() {
 
         {/* CASES TAB */}
         <TabsContent value="cases" className="mt-6">
-          <EmptyState
-            icon={Scale}
-            title={t('clients.detail.noCasesYet')} titleAr={t('clients.detail.noCasesYet')}
-            actionLabel={t('clients.detail.createCase')} actionLabelAr={t('clients.detail.createCase')}
-            onAction={() => {}}
-          />
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <h3 className="text-heading-lg font-semibold text-foreground">
+              {language === 'ar' ? `قضايا ${clientName}` : `Cases for ${clientName}`}
+            </h3>
+            <Button onClick={() => navigate(`/cases/new?clientId=${client.id}`)} className="bg-accent text-accent-foreground hover:bg-accent/90">
+              <Plus size={16} className="me-2" /> {t('clients.detail.createCase')}
+            </Button>
+          </div>
+
+          {/* Filters */}
+          <div className="flex gap-3 mb-4">
+            <select value={casesStatusFilter} onChange={e => setCasesStatusFilter(e.target.value)}
+              className="h-9 rounded-md border border-input bg-background px-3 text-body-sm">
+              <option value="all">{t('common.all')} {t('common.status')}</option>
+              {['intake','active','pending_hearing','pending_judgment','on_hold','won','lost','settled','closed','archived'].map(s => (
+                <option key={s} value={s}>{t(`cases.statuses.${s}`)}</option>
+              ))}
+            </select>
+            <select value={casesTypeFilter} onChange={e => setCasesTypeFilter(e.target.value)}
+              className="h-9 rounded-md border border-input bg-background px-3 text-body-sm">
+              <option value="all">{t('common.all')} {t('common.type')}</option>
+              {['civil','criminal','commercial','personal_status','labor','administrative','real_estate','family','corporate','contract','intellectual_property','tax','customs','other'].map(ct => (
+                <option key={ct} value={ct}>{t(`cases.caseTypes.${ct}`)}</option>
+              ))}
+            </select>
+          </div>
+
+          {casesLoading ? (
+            <div className="space-y-3">
+              {[1,2,3].map(i => <Skeleton key={i} className="h-16 rounded-lg" />)}
+            </div>
+          ) : clientCases.length === 0 ? (
+            <EmptyState
+              icon={Scale}
+              title={t('clients.detail.noCasesYet')} titleAr={t('clients.detail.noCasesYet')}
+              actionLabel={t('clients.detail.createCase')} actionLabelAr={t('clients.detail.createCase')}
+              onAction={() => navigate(`/cases/new?clientId=${client.id}`)}
+            />
+          ) : (
+            <div className="bg-card border border-border rounded-lg overflow-hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border bg-muted/30">
+                    <th className="text-start text-body-sm font-medium text-muted-foreground px-4 py-3 w-[15%]">{t('cases.caseNumber')}</th>
+                    <th className="text-start text-body-sm font-medium text-muted-foreground px-4 py-3 w-[30%]">{t('cases.fields.title')}</th>
+                    <th className="text-start text-body-sm font-medium text-muted-foreground px-4 py-3 w-[15%]">{t('cases.fields.caseType')}</th>
+                    <th className="text-start text-body-sm font-medium text-muted-foreground px-4 py-3 w-[12%]">{t('common.status')}</th>
+                    <th className="text-start text-body-sm font-medium text-muted-foreground px-4 py-3 w-[12%]">{t('common.priority')}</th>
+                    <th className="text-start text-body-sm font-medium text-muted-foreground px-4 py-3 w-[16%]">{t('common.createdAt')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {clientCases.map(c => (
+                    <tr key={c.id} className="border-b border-border/50 hover:bg-muted/30 cursor-pointer transition-colors" onClick={() => navigate(`/cases/${c.id}`)}>
+                      <td className="px-4 py-3 text-body-sm font-mono text-muted-foreground">{c.case_number}</td>
+                      <td className="px-4 py-3 text-body-md font-medium text-foreground">{language === 'ar' && c.title_ar ? c.title_ar : c.title}</td>
+                      <td className="px-4 py-3"><span className="text-body-sm bg-muted text-muted-foreground rounded-badge px-2 py-0.5">{t(`cases.caseTypes.${c.case_type}`)}</span></td>
+                      <td className="px-4 py-3"><StatusBadge status={c.status} type="case" size="sm" /></td>
+                      <td className="px-4 py-3"><StatusBadge status={c.priority} type="priority" size="sm" /></td>
+                      <td className="px-4 py-3 text-body-sm text-muted-foreground">{formatDate(c.created_at)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </TabsContent>
 
         {/* ERRANDS TAB */}
@@ -651,7 +761,7 @@ export default function ClientDetailPage() {
       <ClientFormSlideOver
         isOpen={formOpen}
         onClose={() => setFormOpen(false)}
-        onSaved={() => { fetchClient(); fetchActivities(1, activityFilter); }}
+        onSaved={() => { fetchClient(); fetchCases(); fetchActivities(1, activityFilter); }}
         editClientId={client.id}
       />
     </div>

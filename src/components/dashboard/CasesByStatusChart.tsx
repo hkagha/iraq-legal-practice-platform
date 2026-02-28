@@ -1,11 +1,53 @@
+import { useEffect, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { PieChart, Pie, Cell, ResponsiveContainer } from 'recharts';
+
+const STATUS_COLORS: Record<string, string> = {
+  intake: '#3B82F6',
+  active: '#22C55E',
+  pending_hearing: '#F59E0B',
+  pending_judgment: '#8B5CF6',
+  on_hold: '#94A3B8',
+  won: '#C9A84C',
+  lost: '#EF4444',
+  settled: '#06B6D4',
+  closed: '#6B7280',
+};
+
+const STATUS_ORDER = ['intake', 'active', 'pending_hearing', 'pending_judgment', 'on_hold', 'won', 'lost', 'settled', 'closed'];
 
 export default function CasesByStatusChart() {
   const { t } = useLanguage();
+  const { profile } = useAuth();
+  const [data, setData] = useState<{ name: string; value: number; status: string }[]>([]);
+  const [total, setTotal] = useState(0);
 
-  // Empty state donut
-  const emptyData = [{ name: 'empty', value: 1 }];
+  useEffect(() => {
+    if (!profile?.organization_id) return;
+    const fetch = async () => {
+      const { data: cases } = await supabase
+        .from('cases')
+        .select('status')
+        .eq('organization_id', profile.organization_id!)
+        .neq('status', 'archived');
+
+      if (cases && cases.length > 0) {
+        const counts: Record<string, number> = {};
+        cases.forEach(c => { counts[c.status] = (counts[c.status] || 0) + 1; });
+        const chartData = STATUS_ORDER
+          .filter(s => counts[s])
+          .map(s => ({ name: t(`cases.statuses.${s}`), value: counts[s], status: s }));
+        setData(chartData);
+        setTotal(cases.length);
+      }
+    };
+    fetch();
+  }, [profile?.organization_id, t]);
+
+  const emptyData = [{ name: 'empty', value: 1, status: 'empty' }];
+  const chartData = data.length > 0 ? data : emptyData;
 
   return (
     <div className="bg-card border border-border rounded-card shadow-sm">
@@ -18,7 +60,7 @@ export default function CasesByStatusChart() {
           <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie
-                data={emptyData}
+                data={chartData}
                 cx="50%"
                 cy="50%"
                 innerRadius={60}
@@ -26,34 +68,37 @@ export default function CasesByStatusChart() {
                 dataKey="value"
                 stroke="none"
               >
-                <Cell fill="#E2E8F0" />
+                {chartData.map((entry, i) => (
+                  <Cell key={i} fill={STATUS_COLORS[entry.status] || '#E2E8F0'} />
+                ))}
               </Pie>
             </PieChart>
           </ResponsiveContainer>
-          {/* Center text */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <p className="text-body-sm text-muted-foreground text-center">{t('dashboard.noCasesYet')}</p>
+            {total > 0 ? (
+              <div className="text-center">
+                <p className="text-display-sm font-bold text-foreground">{total}</p>
+                <p className="text-body-sm text-muted-foreground">{t('common.all')}</p>
+              </div>
+            ) : (
+              <p className="text-body-sm text-muted-foreground text-center">{t('dashboard.noCasesYet')}</p>
+            )}
           </div>
         </div>
 
-        {/* Legend */}
         <div className="flex flex-wrap gap-x-4 gap-y-2 mt-4 justify-center">
-          {[
-            { key: 'intake', color: '#3B82F6' },
-            { key: 'active', color: '#22C55E' },
-            { key: 'pendingHearing', color: '#F59E0B' },
-            { key: 'pendingJudgment', color: '#8B5CF6' },
-            { key: 'onHold', color: '#94A3B8' },
-            { key: 'won', color: '#C9A84C' },
-            { key: 'lost', color: '#EF4444' },
-            { key: 'settled', color: '#06B6D4' },
-            { key: 'closed', color: '#6B7280' },
-          ].map(({ key, color }) => (
-            <div key={key} className="flex items-center gap-1.5">
-              <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: color }} />
-              <span className="text-body-sm text-muted-foreground">{t(`dashboard.${key}`)}</span>
-            </div>
-          ))}
+          {STATUS_ORDER.map(key => {
+            const count = data.find(d => d.status === key)?.value;
+            return (
+              <div key={key} className="flex items-center gap-1.5">
+                <div className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: STATUS_COLORS[key] }} />
+                <span className="text-body-sm text-muted-foreground">
+                  {t(`cases.statuses.${key}`)}
+                  {count !== undefined && <span className="ms-1 font-medium">({count})</span>}
+                </span>
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
