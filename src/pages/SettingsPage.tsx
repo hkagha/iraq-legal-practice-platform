@@ -6,7 +6,6 @@ import { cn } from '@/lib/utils';
 import {
   Building, Palette, Receipt, Hash, Users, Shield, Mail,
   User, Lock, Bell, Globe, CreditCard, Download, AlertTriangle,
-  ChevronDown,
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import GeneralSettings from '@/components/settings/GeneralSettings';
@@ -16,7 +15,13 @@ import NumberingSettings from '@/components/settings/NumberingSettings';
 import TeamMembersSection from '@/components/settings/TeamMembersSection';
 import RolesPermissionsSection from '@/components/settings/RolesPermissionsSection';
 import InvitationsSection from '@/components/settings/InvitationsSection';
-import PlaceholderPage from '@/components/PlaceholderPage';
+import MyProfileSection from '@/components/settings/MyProfileSection';
+import SecuritySection from '@/components/settings/SecuritySection';
+import NotificationPrefsSection from '@/components/settings/NotificationPrefsSection';
+import LanguageAppearanceSection from '@/components/settings/LanguageAppearanceSection';
+import SubscriptionSection from '@/components/settings/SubscriptionSection';
+import DataExportSection from '@/components/settings/DataExportSection';
+import DangerZoneSection from '@/components/settings/DangerZoneSection';
 
 type SectionKey = 
   | 'general' | 'branding' | 'billingConfig' | 'numbering'
@@ -86,8 +91,6 @@ export default function SettingsPage() {
     items: g.items.filter(item => !item.adminOnly || isAdmin),
   })).filter(g => g.items.length > 0);
 
-  const allItems = filteredGroups.flatMap(g => g.items);
-
   const renderContent = () => {
     switch (activeSection) {
       case 'general': return <GeneralSettings />;
@@ -97,15 +100,14 @@ export default function SettingsPage() {
       case 'teamMembers': return <TeamMembersSection />;
       case 'rolesPermissions': return <RolesPermissionsSection />;
       case 'invitations': return <InvitationsSection />;
-      default:
-        const item = allItems.find(i => i.key === activeSection);
-        return (
-          <div className="flex flex-col items-center justify-center py-16 text-center">
-            {item && <item.icon size={48} className="text-muted-foreground mb-4" />}
-            <h3 className="text-heading-lg text-foreground mb-2">{getLabel(activeSection)}</h3>
-            <p className="text-body-md text-muted-foreground">{t('placeholder.comingSoon')}</p>
-          </div>
-        );
+      case 'myProfile': return <MyProfileSection />;
+      case 'security': return <SecuritySection />;
+      case 'notificationPrefs': return <NotificationPrefsSection />;
+      case 'languageAppearance': return <LanguageAppearanceSection />;
+      case 'subscription': return <SubscriptionSection />;
+      case 'dataExport': return <DataExportSection />;
+      case 'dangerZone': return <DangerZoneSection />;
+      default: return null;
     }
   };
 

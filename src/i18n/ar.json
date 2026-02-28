@@ -1645,6 +1645,81 @@
       "preview": "معاينة",
       "resetCounter": "إعادة تعيين العداد",
       "resetConfirm": "سيؤدي هذا إلى إعادة تعيين العداد. هل أنت متأكد؟"
+    },
+    "profile": {
+      "photo": "صورة الملف الشخصي",
+      "changePhoto": "تغيير الصورة",
+      "removePhoto": "إزالة الصورة",
+      "firstName": "الاسم الأول",
+      "lastName": "الاسم الأخير",
+      "firstNameAr": "الاسم الأول (عربي)",
+      "lastNameAr": "الاسم الأخير (عربي)",
+      "phone": "الهاتف",
+      "whatsapp": "رقم الواتساب",
+      "barNumber": "رقم نقابة المحامين",
+      "jobTitle": "المسمى الوظيفي",
+      "bio": "نبذة",
+      "changeEmail": "تواصل مع المدير لتغيير بريدك الإلكتروني"
+    },
+    "security": {
+      "title": "الأمان",
+      "changePassword": "تغيير كلمة المرور",
+      "currentPassword": "كلمة المرور الحالية",
+      "newPassword": "كلمة المرور الجديدة",
+      "confirmPassword": "تأكيد كلمة المرور الجديدة",
+      "updatePassword": "تحديث كلمة المرور",
+      "passwordUpdated": "تم تحديث كلمة المرور بنجاح",
+      "passwordRequirements": "يجب أن تكون ٨ أحرف على الأقل مع حرف كبير ورقم ورمز خاص",
+      "activeSessions": "الجلسات النشطة",
+      "currentSession": "الجلسة الحالية",
+      "signOutOthers": "تسجيل الخروج من الجلسات الأخرى",
+      "twoFactor": "المصادقة الثنائية",
+      "twoFactorNotEnabled": "غير مفعلة",
+      "enable2fa": "تفعيل المصادقة الثنائية",
+      "comingSoon": "قريباً"
+    },
+    "language": {
+      "title": "اللغة",
+      "english": "English",
+      "arabic": "العربية",
+      "textDirection": "اتجاه النص يتبع اللغة المختارة تلقائياً",
+      "theme": "المظهر",
+      "light": "فاتح",
+      "dark": "داكن",
+      "system": "النظام",
+      "dateFormat": "تنسيق التاريخ",
+      "numberFormat": "تنسيق الأرقام"
+    },
+    "subscription": {
+      "title": "الاشتراك والخطة",
+      "currentPlan": "خطتك",
+      "usage": "الاستخدام",
+      "teamMembers": "أعضاء الفريق",
+      "storage": "المساحة",
+      "upgrade": "ترقية",
+      "contactSales": "تواصل معنا للترقية",
+      "billingHistory": "سجل الفوترة",
+      "billingHistoryPlaceholder": "سجل الفوترة سيكون متاحاً عند تفعيل معالجة الدفع."
+    },
+    "dataExport": {
+      "title": "تصدير بياناتك",
+      "subtitle": "حمّل نسخة كاملة من بيانات مكتبك",
+      "exportClients": "تصدير العملاء (CSV)",
+      "exportCases": "تصدير القضايا (CSV)",
+      "exportErrands": "تصدير المعاملات (CSV)",
+      "exportTimeEntries": "تصدير سجلات الوقت (CSV)",
+      "exportInvoices": "تصدير الفواتير (CSV)",
+      "exportAll": "تصدير جميع البيانات"
+    },
+    "dangerZone": {
+      "title": "منطقة الخطر",
+      "deactivate": "تعطيل المؤسسة",
+      "deactivateDesc": "تعطيل مؤسستك مؤقتاً. سيتم تسجيل خروج جميع الأعضاء.",
+      "deactivateConfirm": "اكتب '{{name}}' للتأكيد",
+      "delete": "حذف المؤسسة",
+      "deleteDesc": "حذف مؤسستك وجميع البيانات نهائياً. لا يمكن التراجع.",
+      "deleteConfirm": "اكتب 'DELETE {{name}}' للتأكيد",
+      "contactSupport": "يرجى التواصل مع الدعم لحذف مؤسستك"
     }
   },
   "team": {

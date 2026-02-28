@@ -1646,6 +1646,81 @@
       "preview": "Preview",
       "resetCounter": "Reset Counter",
       "resetConfirm": "This will reset the counter. Are you sure?"
+    },
+    "profile": {
+      "photo": "Profile Photo",
+      "changePhoto": "Change Photo",
+      "removePhoto": "Remove Photo",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "firstNameAr": "First Name (Arabic)",
+      "lastNameAr": "Last Name (Arabic)",
+      "phone": "Phone",
+      "whatsapp": "WhatsApp Number",
+      "barNumber": "Bar Number",
+      "jobTitle": "Job Title",
+      "bio": "Bio",
+      "changeEmail": "Contact your administrator to change your email"
+    },
+    "security": {
+      "title": "Security",
+      "changePassword": "Change Password",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmPassword": "Confirm New Password",
+      "updatePassword": "Update Password",
+      "passwordUpdated": "Password updated successfully",
+      "passwordRequirements": "Must be at least 8 characters with 1 uppercase, 1 number, and 1 special character",
+      "activeSessions": "Active Sessions",
+      "currentSession": "Current session",
+      "signOutOthers": "Sign out all other sessions",
+      "twoFactor": "Two-Factor Authentication",
+      "twoFactorNotEnabled": "Not enabled",
+      "enable2fa": "Enable 2FA",
+      "comingSoon": "Coming soon"
+    },
+    "language": {
+      "title": "Language",
+      "english": "English",
+      "arabic": "العربية",
+      "textDirection": "Text direction automatically follows the selected language",
+      "theme": "Theme",
+      "light": "Light",
+      "dark": "Dark",
+      "system": "System",
+      "dateFormat": "Date Format",
+      "numberFormat": "Number Format"
+    },
+    "subscription": {
+      "title": "Subscription & Plan",
+      "currentPlan": "Your Plan",
+      "usage": "Usage",
+      "teamMembers": "Team Members",
+      "storage": "Storage",
+      "upgrade": "Upgrade",
+      "contactSales": "Contact us to upgrade",
+      "billingHistory": "Billing History",
+      "billingHistoryPlaceholder": "Billing history will be available when payment processing is enabled."
+    },
+    "dataExport": {
+      "title": "Export Your Data",
+      "subtitle": "Download a complete copy of your firm's data",
+      "exportClients": "Export Clients (CSV)",
+      "exportCases": "Export Cases (CSV)",
+      "exportErrands": "Export Errands (CSV)",
+      "exportTimeEntries": "Export Time Entries (CSV)",
+      "exportInvoices": "Export Invoices (CSV)",
+      "exportAll": "Export All Data"
+    },
+    "dangerZone": {
+      "title": "Danger Zone",
+      "deactivate": "Deactivate Organization",
+      "deactivateDesc": "Temporarily deactivate your organization. All members will be logged out.",
+      "deactivateConfirm": "Type '{{name}}' to confirm",
+      "delete": "Delete Organization",
+      "deleteDesc": "Permanently delete your organization and ALL data. This cannot be undone.",
+      "deleteConfirm": "Type 'DELETE {{name}}' to confirm",
+      "contactSupport": "Please contact support to delete your organization"
     }
   },
   "team": {
