@@ -36,7 +36,7 @@ import ErrandDetailPage from '@/pages/ErrandDetailPage';
 import ClientsPage from '@/pages/ClientsPage';
 import ClientDetailPage from '@/pages/ClientDetailPage';
 const CalendarPage = () => <PlaceholderPage titleKey="sidebar.calendar" icon={Calendar} />;
-const TasksPage = () => <PlaceholderPage titleKey="sidebar.tasks" icon={CheckSquare} />;
+import TasksPage from '@/pages/TasksPage';
 import DocumentsPage from '@/pages/DocumentsPage';
 import TimeTrackingPage from '@/pages/TimeTrackingPage';
 import BillingPage from '@/pages/BillingPage';

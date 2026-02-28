@@ -1209,6 +1209,146 @@
       "atLeastOneItem": "At least one line item is required",
       "clientRequired": "Client is required"
     }
+  },
+  "tasks": {
+    "title": "Tasks",
+    "subtitle": "Manage tasks and to-do items",
+    "addTask": "New Task",
+    "editTask": "Edit Task",
+    "totalTasks": "Total Tasks",
+    "myTasks": "My Tasks",
+    "overdueTasks": "Overdue Tasks",
+    "completedToday": "Completed Today",
+    "fields": {
+      "title": "Task Title",
+      "titleAr": "Task Title (Arabic)",
+      "description": "Description",
+      "taskType": "Task Type",
+      "assignedTo": "Assigned To",
+      "status": "Status",
+      "priority": "Priority",
+      "dueDate": "Due Date",
+      "dueTime": "Due Time",
+      "startDate": "Start Date",
+      "estimatedTime": "Estimated Time",
+      "actualTime": "Actual Time",
+      "linkedCase": "Linked Case",
+      "linkedErrand": "Linked Errand",
+      "client": "Client",
+      "tags": "Tags",
+      "checklist": "Checklist",
+      "recurring": "Recurring",
+      "recurrencePattern": "Repeat"
+    },
+    "types": {
+      "general": "General",
+      "research": "Research",
+      "drafting": "Drafting",
+      "review": "Review",
+      "filing": "Filing",
+      "court_preparation": "Court Preparation",
+      "client_communication": "Client Communication",
+      "follow_up": "Follow Up",
+      "document_preparation": "Document Preparation",
+      "meeting": "Meeting",
+      "deadline": "Deadline",
+      "administrative": "Administrative",
+      "other": "Other"
+    },
+    "statuses": {
+      "todo": "To Do",
+      "in_progress": "In Progress",
+      "in_review": "In Review",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "recurrence": {
+      "daily": "Daily",
+      "weekly": "Weekly",
+      "biweekly": "Every 2 Weeks",
+      "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "yearly": "Yearly",
+      "until": "Until",
+      "noEndDate": "No end date"
+    },
+    "empty": {
+      "title": "No tasks yet",
+      "subtitle": "Create your first task to stay organized",
+      "action": "Create Your First Task"
+    },
+    "messages": {
+      "created": "Task created",
+      "updated": "Task updated",
+      "completed": "Task completed!",
+      "deleted": "Task deleted",
+      "assigned": "Task assigned",
+      "commentAdded": "Comment added"
+    },
+    "completed": "Completed",
+    "list": "List",
+    "kanban": "Kanban",
+    "allTeam": "All Team",
+    "standalone": "Standalone",
+    "linkedTo": "Linked To",
+    "sortBy": "Sort by",
+    "changeStatus": "Change Status",
+    "changePriority": "Change Priority",
+    "duplicate": "Duplicate",
+    "deleteConfirmTitle": "Delete Task",
+    "deleteConfirmMessage": "Are you sure you want to delete this task?"
+  },
+  "calendar": {
+    "title": "Calendar",
+    "subtitle": "View all events, hearings, and deadlines",
+    "addEvent": "New Event",
+    "today": "Today",
+    "month": "Month",
+    "week": "Week",
+    "day": "Day",
+    "agenda": "Agenda",
+    "eventTypes": {
+      "meeting": "Meeting",
+      "appointment": "Appointment",
+      "deadline": "Deadline",
+      "reminder": "Reminder",
+      "court_date": "Court Date",
+      "consultation": "Consultation",
+      "conference": "Conference",
+      "training": "Training",
+      "personal": "Personal",
+      "other": "Other",
+      "hearing": "Hearing",
+      "errand_due": "Errand Due",
+      "task_due": "Task Due"
+    },
+    "fields": {
+      "title": "Event Title",
+      "description": "Description",
+      "eventType": "Event Type",
+      "startDate": "Start Date",
+      "startTime": "Start Time",
+      "endDate": "End Date",
+      "endTime": "End Time",
+      "allDay": "All Day",
+      "location": "Location",
+      "virtual": "Virtual Meeting",
+      "meetingLink": "Meeting Link",
+      "participants": "Participants",
+      "linkedCase": "Linked Case",
+      "client": "Client",
+      "color": "Color",
+      "recurring": "Recurring"
+    },
+    "empty": {
+      "title": "No events on this day",
+      "subtitle": "Click to add an event"
+    },
+    "messages": {
+      "created": "Event created",
+      "updated": "Event updated",
+      "deleted": "Event deleted"
+    }
   }
 }
 }

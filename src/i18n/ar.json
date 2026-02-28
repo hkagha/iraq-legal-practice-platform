@@ -1208,6 +1208,146 @@
       "atLeastOneItem": "مطلوب بند واحد على الأقل",
       "clientRequired": "العميل مطلوب"
     }
+  },
+  "tasks": {
+    "title": "المهام",
+    "subtitle": "إدارة المهام وقوائم الأعمال",
+    "addTask": "مهمة جديدة",
+    "editTask": "تعديل المهمة",
+    "totalTasks": "إجمالي المهام",
+    "myTasks": "مهامي",
+    "overdueTasks": "المهام المتأخرة",
+    "completedToday": "المكتملة اليوم",
+    "fields": {
+      "title": "عنوان المهمة",
+      "titleAr": "عنوان المهمة (عربي)",
+      "description": "الوصف",
+      "taskType": "نوع المهمة",
+      "assignedTo": "مسندة إلى",
+      "status": "الحالة",
+      "priority": "الأولوية",
+      "dueDate": "تاريخ الاستحقاق",
+      "dueTime": "وقت الاستحقاق",
+      "startDate": "تاريخ البدء",
+      "estimatedTime": "الوقت المقدر",
+      "actualTime": "الوقت الفعلي",
+      "linkedCase": "القضية المرتبطة",
+      "linkedErrand": "المعاملة المرتبطة",
+      "client": "العميل",
+      "tags": "العلامات",
+      "checklist": "قائمة المهام الفرعية",
+      "recurring": "متكررة",
+      "recurrencePattern": "التكرار"
+    },
+    "types": {
+      "general": "عامة",
+      "research": "بحث",
+      "drafting": "صياغة",
+      "review": "مراجعة",
+      "filing": "تقديم",
+      "court_preparation": "تحضير محكمة",
+      "client_communication": "تواصل مع العميل",
+      "follow_up": "متابعة",
+      "document_preparation": "إعداد مستندات",
+      "meeting": "اجتماع",
+      "deadline": "موعد نهائي",
+      "administrative": "إدارية",
+      "other": "أخرى"
+    },
+    "statuses": {
+      "todo": "قيد الانتظار",
+      "in_progress": "قيد التنفيذ",
+      "in_review": "قيد المراجعة",
+      "completed": "مكتملة",
+      "cancelled": "ملغاة"
+    },
+    "recurrence": {
+      "daily": "يومياً",
+      "weekly": "أسبوعياً",
+      "biweekly": "كل أسبوعين",
+      "monthly": "شهرياً",
+      "quarterly": "ربع سنوي",
+      "yearly": "سنوياً",
+      "until": "حتى",
+      "noEndDate": "بدون تاريخ انتهاء"
+    },
+    "empty": {
+      "title": "لا توجد مهام بعد",
+      "subtitle": "أنشئ أول مهمة للبقاء منظماً",
+      "action": "إنشاء أول مهمة"
+    },
+    "messages": {
+      "created": "تم إنشاء المهمة",
+      "updated": "تم تحديث المهمة",
+      "completed": "تم إكمال المهمة!",
+      "deleted": "تم حذف المهمة",
+      "assigned": "تم إسناد المهمة",
+      "commentAdded": "تم إضافة تعليق"
+    },
+    "completed": "المكتملة",
+    "list": "قائمة",
+    "kanban": "كانبان",
+    "allTeam": "كل الفريق",
+    "standalone": "مستقلة",
+    "linkedTo": "مرتبطة بـ",
+    "sortBy": "ترتيب حسب",
+    "changeStatus": "تغيير الحالة",
+    "changePriority": "تغيير الأولوية",
+    "duplicate": "تكرار",
+    "deleteConfirmTitle": "حذف المهمة",
+    "deleteConfirmMessage": "هل أنت متأكد من حذف هذه المهمة؟"
+  },
+  "calendar": {
+    "title": "التقويم",
+    "subtitle": "عرض جميع الأحداث والجلسات والمواعيد",
+    "addEvent": "حدث جديد",
+    "today": "اليوم",
+    "month": "شهر",
+    "week": "أسبوع",
+    "day": "يوم",
+    "agenda": "جدول أعمال",
+    "eventTypes": {
+      "meeting": "اجتماع",
+      "appointment": "موعد",
+      "deadline": "موعد نهائي",
+      "reminder": "تذكير",
+      "court_date": "موعد محكمة",
+      "consultation": "استشارة",
+      "conference": "مؤتمر",
+      "training": "تدريب",
+      "personal": "شخصي",
+      "other": "أخرى",
+      "hearing": "جلسة",
+      "errand_due": "موعد معاملة",
+      "task_due": "موعد مهمة"
+    },
+    "fields": {
+      "title": "عنوان الحدث",
+      "description": "الوصف",
+      "eventType": "نوع الحدث",
+      "startDate": "تاريخ البدء",
+      "startTime": "وقت البدء",
+      "endDate": "تاريخ الانتهاء",
+      "endTime": "وقت الانتهاء",
+      "allDay": "طوال اليوم",
+      "location": "الموقع",
+      "virtual": "اجتماع افتراضي",
+      "meetingLink": "رابط الاجتماع",
+      "participants": "المشاركون",
+      "linkedCase": "القضية المرتبطة",
+      "client": "العميل",
+      "color": "اللون",
+      "recurring": "متكرر"
+    },
+    "empty": {
+      "title": "لا توجد أحداث في هذا اليوم",
+      "subtitle": "انقر لإضافة حدث"
+    },
+    "messages": {
+      "created": "تم إنشاء الحدث",
+      "updated": "تم تحديث الحدث",
+      "deleted": "تم حذف الحدث"
+    }
   }
 }
 }
