@@ -468,5 +468,126 @@
       "companyTypeRequired": "Company type is required",
       "remove": "Remove"
     }
+  },
+  "cases": {
+    "title": "Cases",
+    "subtitle": "Manage your law firm's legal cases and matters",
+    "addCase": "New Case",
+    "editCase": "Edit Case",
+    "caseDetails": "Case Details",
+    "caseNumber": "Case Number",
+    "totalCases": "Total Cases",
+    "activeCases": "Active Cases",
+    "urgentCases": "Urgent Cases",
+    "fields": {
+      "title": "Case Title",
+      "titleAr": "Case Title (Arabic)",
+      "description": "Description",
+      "descriptionAr": "Description (Arabic)",
+      "caseType": "Case Type",
+      "courtType": "Court Type",
+      "courtName": "Court Name",
+      "courtNameAr": "Court Name (Arabic)",
+      "courtLocation": "Court Location",
+      "courtCaseNumber": "Court Case Number",
+      "courtChamber": "Court Chamber",
+      "judgeName": "Judge Name",
+      "judgeNameAr": "Judge Name (Arabic)",
+      "client": "Client",
+      "opposingParty": "Opposing Party",
+      "opposingPartyName": "Opposing Party Name",
+      "opposingPartyNameAr": "Opposing Party Name (Arabic)",
+      "opposingPartyLawyer": "Opposing Party Lawyer",
+      "opposingPartyLawyerAr": "Opposing Party Lawyer (Arabic)",
+      "opposingPartyPhone": "Opposing Party Phone",
+      "filingDate": "Filing Date",
+      "statuteOfLimitations": "Statute of Limitations",
+      "estimatedValue": "Estimated Value",
+      "status": "Status",
+      "priority": "Priority",
+      "billingType": "Billing Type",
+      "fixedFee": "Fixed Fee",
+      "retainerAmount": "Retainer Amount",
+      "contingencyPercentage": "Contingency %",
+      "hourlyRate": "Hourly Rate",
+      "teamMembers": "Team Members",
+      "visibleToClient": "Visible to Client",
+      "nextHearing": "Next Hearing"
+    },
+    "caseTypes": {
+      "civil": "Civil",
+      "criminal": "Criminal",
+      "commercial": "Commercial",
+      "personal_status": "Personal Status",
+      "labor": "Labor",
+      "administrative": "Administrative",
+      "real_estate": "Real Estate",
+      "family": "Family",
+      "corporate": "Corporate",
+      "contract": "Contract",
+      "intellectual_property": "Intellectual Property",
+      "tax": "Tax",
+      "customs": "Customs",
+      "other": "Other"
+    },
+    "courtTypes": {
+      "court_of_first_instance": "Court of First Instance",
+      "misdemeanor_court": "Misdemeanor Court",
+      "felony_court": "Felony Court",
+      "criminal_court": "Criminal Court",
+      "personal_status_court": "Personal Status Court",
+      "labor_court": "Labor Court",
+      "commercial_court": "Commercial Court",
+      "administrative_court": "Administrative Court",
+      "court_of_appeal": "Court of Appeal",
+      "court_of_cassation": "Court of Cassation",
+      "federal_supreme_court": "Federal Supreme Court",
+      "central_criminal_court": "Central Criminal Court",
+      "investigation_court": "Investigation Court",
+      "other": "Other"
+    },
+    "billingTypes": {
+      "hourly": "Hourly",
+      "fixed_fee": "Fixed Fee",
+      "retainer": "Retainer",
+      "contingency": "Contingency",
+      "pro_bono": "Pro Bono"
+    },
+    "teamRoles": {
+      "lead": "Lead Lawyer",
+      "member": "Team Member",
+      "reviewer": "Reviewer",
+      "observer": "Observer"
+    },
+    "statuses": {
+      "intake": "Intake",
+      "active": "Active",
+      "pending_hearing": "Pending Hearing",
+      "pending_judgment": "Pending Judgment",
+      "on_hold": "On Hold",
+      "won": "Won",
+      "lost": "Lost",
+      "settled": "Settled",
+      "closed": "Closed",
+      "archived": "Archived"
+    },
+    "empty": {
+      "title": "No cases yet",
+      "subtitle": "Create your first case to start managing legal matters",
+      "action": "Create Your First Case"
+    },
+    "search": {
+      "placeholder": "Search by title, case number, or court case number..."
+    },
+    "messages": {
+      "created": "Case created successfully",
+      "updated": "Case updated successfully",
+      "archived": "Case archived successfully",
+      "failedCreate": "Failed to create case. Please try again.",
+      "failedUpdate": "Failed to update case. Please try again."
+    },
+    "kanban": {
+      "noCards": "No cases"
+    }
   }
 }

@@ -26,7 +26,7 @@ const queryClient = new QueryClient();
 
 // Main app placeholder pages
 // DashboardPage imported above
-const CasesPage = () => <PlaceholderPage titleKey="sidebar.cases" icon={Scale} />;
+import CasesPage from '@/pages/CasesPage';
 const ErrandsPage = () => <PlaceholderPage titleKey="sidebar.errands" icon={FileCheck} />;
 import ClientsPage from '@/pages/ClientsPage';
 import ClientDetailPage from '@/pages/ClientDetailPage';
