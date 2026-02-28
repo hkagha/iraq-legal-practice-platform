@@ -1389,6 +1389,25 @@
       "updated": "Event updated",
       "deleted": "Event deleted"
     }
+  },
+  "quickActions": {
+    "newTask": "New Task",
+    "newEvent": "New Event",
+    "logTime": "Log Time",
+    "newClient": "New Client",
+    "newCase": "New Case",
+    "newErrand": "New Errand"
+  },
+  "keyboard": {
+    "shortcuts": "Keyboard Shortcuts",
+    "newTask": "New Task",
+    "newEvent": "New Event",
+    "startTimer": "Start Timer",
+    "focusSearch": "Focus Search",
+    "closeModal": "Close"
+  },
+  "todaySchedule": {
+    "title": "Today",
+    "nothingScheduled": "Nothing scheduled for today"
   }
-}
 }

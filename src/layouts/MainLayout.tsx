@@ -1,18 +1,37 @@
-import { useState, useEffect } from 'react';
-import { Outlet } from 'react-router-dom';
+import { useState, useEffect, useCallback } from 'react';
+import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import AppSidebar from '@/components/AppSidebar';
 import TopHeader from '@/components/TopHeader';
 import GlobalTimerBar from '@/components/time-tracking/GlobalTimerBar';
+import KeyboardShortcuts from '@/components/KeyboardShortcuts';
+import MobileFAB from '@/components/MobileFAB';
+import TaskFormModal from '@/components/tasks/TaskFormModal';
+import EventFormModal from '@/components/calendar/EventFormModal';
+import ClientFormSlideOver from '@/components/clients/ClientFormSlideOver';
 
 export default function MainLayout() {
+  const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(() => {
     return localStorage.getItem('qanuni_sidebar_collapsed') === 'true';
   });
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [showTaskModal, setShowTaskModal] = useState(false);
+  const [showEventModal, setShowEventModal] = useState(false);
+  const [showClientForm, setShowClientForm] = useState(false);
 
   useEffect(() => {
     localStorage.setItem('qanuni_sidebar_collapsed', String(collapsed));
   }, [collapsed]);
+
+  const handleNewTask = useCallback(() => setShowTaskModal(true), []);
+  const handleNewEvent = useCallback(() => setShowEventModal(true), []);
+  const handleStartTimer = useCallback(() => navigate('/time-tracking'), [navigate]);
+  const handleFocusSearch = useCallback(() => {
+    const input = document.querySelector('header input[type="text"]') as HTMLInputElement;
+    if (input) input.focus();
+  }, []);
+  const handleLogTime = useCallback(() => navigate('/time-tracking'), [navigate]);
+  const handleNewClient = useCallback(() => setShowClientForm(true), []);
 
   return (
     <div className="min-h-screen flex w-full bg-background">
@@ -57,11 +76,36 @@ export default function MainLayout() {
 
       {/* Mobile bottom nav */}
       <MobileBottomNav />
+
+      {/* Keyboard shortcuts */}
+      <KeyboardShortcuts
+        onNewTask={handleNewTask}
+        onNewEvent={handleNewEvent}
+        onStartTimer={handleStartTimer}
+        onFocusSearch={handleFocusSearch}
+      />
+
+      {/* Mobile FAB */}
+      <MobileFAB
+        onNewTask={handleNewTask}
+        onNewEvent={handleNewEvent}
+        onLogTime={handleLogTime}
+        onNewClient={handleNewClient}
+      />
+
+      {/* Global modals */}
+      {showTaskModal && (
+        <TaskFormModal isOpen={showTaskModal} onClose={() => setShowTaskModal(false)} onSaved={() => setShowTaskModal(false)} />
+      )}
+      {showEventModal && (
+        <EventFormModal isOpen={showEventModal} onClose={() => setShowEventModal(false)} onSaved={() => setShowEventModal(false)} />
+      )}
+      <ClientFormSlideOver isOpen={showClientForm} onClose={() => setShowClientForm(false)} onSaved={() => setShowClientForm(false)} />
     </div>
   );
 }
 
-import { useLocation, useNavigate } from 'react-router-dom';
+
 import { LayoutDashboard, Scale, Calendar, CheckSquare, MoreHorizontal } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 

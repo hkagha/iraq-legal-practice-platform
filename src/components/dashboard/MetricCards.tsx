@@ -36,8 +36,10 @@ function MetricCard({ icon: Icon, iconColor, iconBg, value, label, href }: Metri
 export default function MetricCards() {
   const { t, language } = useLanguage();
   const { profile } = useAuth();
+  const { user } = useAuth();
   const [activeCasesCount, setActiveCasesCount] = useState(0);
   const [activeErrandsCount, setActiveErrandsCount] = useState(0);
+  const [pendingTasksCount, setPendingTasksCount] = useState(0);
   const [billableHours, setBillableHours] = useState(0);
   const [outstandingAmount, setOutstandingAmount] = useState(0);
 
@@ -48,7 +50,7 @@ export default function MetricCards() {
       const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().split('T')[0];
       const today = now.toISOString().split('T')[0];
 
-      const [casesRes, errandsRes, timeRes, invoiceRes] = await Promise.all([
+      const [casesRes, errandsRes, tasksRes, timeRes, invoiceRes] = await Promise.all([
         supabase
           .from('cases')
           .select('*', { count: 'exact', head: true })
@@ -59,6 +61,12 @@ export default function MetricCards() {
           .select('*', { count: 'exact', head: true })
           .eq('organization_id', profile.organization_id!)
           .in('status', ['new', 'in_progress', 'awaiting_documents', 'submitted_to_government', 'under_review_by_government', 'additional_requirements']),
+        supabase
+          .from('tasks')
+          .select('*', { count: 'exact', head: true })
+          .eq('organization_id', profile.organization_id!)
+          .eq('assigned_to', user?.id || '')
+          .not('status', 'in', '("completed","cancelled")'),
         supabase
           .from('time_entries')
           .select('duration_minutes')
@@ -75,13 +83,14 @@ export default function MetricCards() {
       ]);
       setActiveCasesCount(casesRes.count || 0);
       setActiveErrandsCount(errandsRes.count || 0);
+      setPendingTasksCount(tasksRes.count || 0);
       const totalMins = (timeRes.data || []).reduce((s, e) => s + (e.duration_minutes || 0), 0);
       setBillableHours(totalMins / 60);
       const outstanding = (invoiceRes.data || []).reduce((s, inv) => s + (parseFloat(String(inv.balance_due)) || 0), 0);
       setOutstandingAmount(outstanding);
     };
     fetchCounts();
-  }, [profile?.organization_id]);
+  }, [profile?.organization_id, user?.id]);
 
   const formatHours = (h: number) => {
     const formatted = h.toFixed(1);
@@ -116,7 +125,7 @@ export default function MetricCards() {
       icon: CheckSquare,
       iconColor: '#F59E0B',
       iconBg: '#FFFBEB',
-      value: '0',
+      value: String(pendingTasksCount),
       label: t('dashboard.pendingTasks'),
       href: '/tasks',
     },

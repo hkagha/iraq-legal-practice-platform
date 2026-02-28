@@ -1388,6 +1388,25 @@
       "updated": "تم تحديث الحدث",
       "deleted": "تم حذف الحدث"
     }
+  },
+  "quickActions": {
+    "newTask": "مهمة جديدة",
+    "newEvent": "حدث جديد",
+    "logTime": "تسجيل وقت",
+    "newClient": "عميل جديد",
+    "newCase": "قضية جديدة",
+    "newErrand": "معاملة جديدة"
+  },
+  "keyboard": {
+    "shortcuts": "اختصارات لوحة المفاتيح",
+    "newTask": "مهمة جديدة",
+    "newEvent": "حدث جديد",
+    "startTimer": "بدء المؤقت",
+    "focusSearch": "تركيز البحث",
+    "closeModal": "إغلاق"
+  },
+  "todaySchedule": {
+    "title": "اليوم",
+    "nothingScheduled": "لا يوجد جدول لهذا اليوم"
   }
-}
 }

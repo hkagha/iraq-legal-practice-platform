@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Search, Bell, Menu, User, Settings, LogOut, Scale, Users as UsersIcon, FileCheck } from 'lucide-react';
+import { Search, Bell, Menu, User, Settings, LogOut, Scale, Users as UsersIcon, FileCheck, CheckSquare, Calendar } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuLabel,
@@ -17,7 +17,7 @@ interface TopHeaderProps {
 
 interface SearchResult {
   id: string;
-  type: 'case' | 'client' | 'errand' | 'document';
+  type: 'case' | 'client' | 'errand' | 'document' | 'task' | 'calendarEvent';
   title: string;
   subtitle: string;
   status?: string;
@@ -48,7 +48,7 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
     setSearching(true);
     const pattern = `%${q}%`;
 
-    const [casesRes, clientsRes, errandsRes, docsRes] = await Promise.all([
+    const [casesRes, clientsRes, errandsRes, docsRes, tasksRes, calEventsRes] = await Promise.all([
       supabase
         .from('cases')
         .select('id, title, title_ar, case_number, status')
@@ -75,6 +75,18 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
         .eq('is_latest_version', true)
         .or(`file_name.ilike.${pattern},title.ilike.${pattern},title_ar.ilike.${pattern}`)
         .limit(5),
+      supabase
+        .from('tasks')
+        .select('id, title, title_ar, status, due_date, priority')
+        .eq('organization_id', profile.organization_id!)
+        .or(`title.ilike.${pattern},title_ar.ilike.${pattern}`)
+        .limit(5),
+      supabase
+        .from('calendar_events')
+        .select('id, title, title_ar, start_date, event_type')
+        .eq('organization_id', profile.organization_id!)
+        .or(`title.ilike.${pattern},title_ar.ilike.${pattern}`)
+        .limit(3),
     ]);
 
     const caseResults: SearchResult[] = (casesRes.data || []).map(c => ({
@@ -89,8 +101,14 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
     const docResults: SearchResult[] = (docsRes.data || []).map(d => ({
       id: d.id, type: 'document', title: language === 'ar' && d.title_ar ? d.title_ar : (d.title || d.file_name), subtitle: d.document_category,
     }));
+    const taskResults: SearchResult[] = (tasksRes.data || []).map(tk => ({
+      id: tk.id, type: 'task', title: language === 'ar' && tk.title_ar ? tk.title_ar : tk.title, subtitle: tk.due_date || '', status: tk.status,
+    }));
+    const calEventResults: SearchResult[] = (calEventsRes.data || []).map(ev => ({
+      id: ev.id, type: 'calendarEvent', title: language === 'ar' && ev.title_ar ? ev.title_ar : ev.title, subtitle: ev.start_date,
+    }));
 
-    setResults([...caseResults, ...errandResults, ...clientResults, ...docResults]);
+    setResults([...caseResults, ...errandResults, ...clientResults, ...docResults, ...taskResults, ...calEventResults]);
     setSearching(false);
   }, [profile?.organization_id, language]);
 
@@ -114,6 +132,8 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
     setShowResults(false);
     setSearchQuery('');
     if (r.type === 'document') { navigate('/documents'); return; }
+    if (r.type === 'task') { navigate('/tasks'); return; }
+    if (r.type === 'calendarEvent') { navigate('/calendar'); return; }
     navigate(r.type === 'case' ? `/cases/${r.id}` : r.type === 'errand' ? `/errands/${r.id}` : `/clients/${r.id}`);
   };
 
@@ -121,6 +141,8 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
   const errandResults = results.filter(r => r.type === 'errand');
   const clientResultsFiltered = results.filter(r => r.type === 'client');
   const docResults = results.filter(r => r.type === 'document');
+  const taskResultsFiltered = results.filter(r => r.type === 'task');
+  const calEventResultsFiltered = results.filter(r => r.type === 'calendarEvent');
 
   return (
     <header className="h-16 bg-card shadow-xs flex items-center px-4 gap-3 shrink-0 z-10">
@@ -213,6 +235,35 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
                       <div className="flex-1 min-w-0">
                         <p className="text-body-md text-foreground truncate">{r.title}</p>
                         <p className="text-body-sm text-muted-foreground capitalize">{r.subtitle}</p>
+                      </div>
+                    </button>
+                  ))}
+                </>
+              )}
+              {taskResultsFiltered.length > 0 && (
+                <>
+                  <div className="px-3 py-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider border-t border-border">{t('sidebar.tasks')}</div>
+                  {taskResultsFiltered.map(r => (
+                    <button key={r.id} onClick={() => handleResultClick(r)} className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 transition-colors text-start">
+                      <CheckSquare size={16} className="text-muted-foreground flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-body-md text-foreground truncate">{r.title}</p>
+                        <p className="text-body-sm text-muted-foreground">{r.subtitle}</p>
+                      </div>
+                      {r.status && <StatusBadge status={r.status} type="task" size="sm" />}
+                    </button>
+                  ))}
+                </>
+              )}
+              {calEventResultsFiltered.length > 0 && (
+                <>
+                  <div className="px-3 py-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider border-t border-border">{t('sidebar.calendar')}</div>
+                  {calEventResultsFiltered.map(r => (
+                    <button key={r.id} onClick={() => handleResultClick(r)} className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 transition-colors text-start">
+                      <Calendar size={16} className="text-muted-foreground flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-body-md text-foreground truncate">{r.title}</p>
+                        <p className="text-body-sm text-muted-foreground">{r.subtitle}</p>
                       </div>
                     </button>
                   ))}

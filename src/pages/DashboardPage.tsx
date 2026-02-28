@@ -4,6 +4,7 @@ import DashboardHeader from '@/components/dashboard/DashboardHeader';
 import MetricCards from '@/components/dashboard/MetricCards';
 import UpcomingEventsWidget from '@/components/dashboard/UpcomingEventsWidget';
 import TasksDueSoonWidget from '@/components/dashboard/TasksDueSoonWidget';
+import TodayScheduleWidget from '@/components/dashboard/TodayScheduleWidget';
 import RecentActivityWidget from '@/components/dashboard/RecentActivityWidget';
 import CasesByStatusChart from '@/components/dashboard/CasesByStatusChart';
 import ErrandsByStatusChart from '@/components/dashboard/ErrandsByStatusChart';
@@ -19,12 +20,13 @@ export default function DashboardPage() {
       <DashboardHeader />
       <MetricCards />
       
-      {/* Row 2 — Events + Tasks */}
+      {/* Row 2 — Today + Events + Tasks */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
         <div className="lg:col-span-3">
           <UpcomingEventsWidget />
         </div>
-        <div className="lg:col-span-2">
+        <div className="lg:col-span-2 space-y-6">
+          <TodayScheduleWidget />
           <TasksDueSoonWidget />
         </div>
       </div>
