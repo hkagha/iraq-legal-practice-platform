@@ -47,7 +47,7 @@ export default function RecentActivityWidget() {
   useEffect(() => {
     if (!profile?.organization_id) return;
     const fetch = async () => {
-      const [caseRes, clientRes, errandRes] = await Promise.all([
+    const [caseRes, clientRes, errandRes, docRes] = await Promise.all([
         supabase
           .from('case_activities')
           .select('id, activity_type, title, title_ar, created_at, case_id')
@@ -66,6 +66,12 @@ export default function RecentActivityWidget() {
           .eq('organization_id', profile.organization_id!)
           .order('created_at', { ascending: false })
           .limit(10),
+        supabase
+          .from('document_activities')
+          .select('id, activity_type, title, title_ar, created_at, document_id')
+          .eq('organization_id', profile.organization_id!)
+          .order('created_at', { ascending: false })
+          .limit(5),
       ]);
 
       const caseItems: ActivityItem[] = (caseRes.data || []).map(a => ({
@@ -83,8 +89,13 @@ export default function RecentActivityWidget() {
         title_ar: a.title_ar, created_at: a.created_at,
         entity_type: 'errand', entity_id: a.errand_id,
       }));
+      const docItems: ActivityItem[] = (docRes.data || []).map(a => ({
+        id: a.id, activity_type: a.activity_type, title: a.title,
+        title_ar: a.title_ar, created_at: a.created_at,
+        entity_type: 'case' as const, entity_id: a.document_id,
+      }));
 
-      const merged = [...caseItems, ...clientItems, ...errandItems]
+      const merged = [...caseItems, ...clientItems, ...errandItems, ...docItems]
         .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
         .slice(0, 10);
 

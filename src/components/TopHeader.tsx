@@ -17,7 +17,7 @@ interface TopHeaderProps {
 
 interface SearchResult {
   id: string;
-  type: 'case' | 'client' | 'errand';
+  type: 'case' | 'client' | 'errand' | 'document';
   title: string;
   subtitle: string;
   status?: string;
@@ -48,7 +48,7 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
     setSearching(true);
     const pattern = `%${q}%`;
 
-    const [casesRes, clientsRes, errandsRes] = await Promise.all([
+    const [casesRes, clientsRes, errandsRes, docsRes] = await Promise.all([
       supabase
         .from('cases')
         .select('id, title, title_ar, case_number, status')
@@ -67,32 +67,30 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
         .eq('organization_id', profile.organization_id!)
         .or(`title.ilike.${pattern},errand_number.ilike.${pattern},title_ar.ilike.${pattern},reference_number.ilike.${pattern}`)
         .limit(5),
+      supabase
+        .from('documents')
+        .select('id, file_name, title, title_ar, document_category, created_at')
+        .eq('organization_id', profile.organization_id!)
+        .eq('status', 'active')
+        .eq('is_latest_version', true)
+        .or(`file_name.ilike.${pattern},title.ilike.${pattern},title_ar.ilike.${pattern}`)
+        .limit(5),
     ]);
 
     const caseResults: SearchResult[] = (casesRes.data || []).map(c => ({
-      id: c.id,
-      type: 'case',
-      title: language === 'ar' && c.title_ar ? c.title_ar : c.title,
-      subtitle: c.case_number,
-      status: c.status,
+      id: c.id, type: 'case', title: language === 'ar' && c.title_ar ? c.title_ar : c.title, subtitle: c.case_number, status: c.status,
     }));
-
     const clientResults: SearchResult[] = (clientsRes.data || []).map(c => ({
-      id: c.id,
-      type: 'client',
-      title: c.client_type === 'company' ? (c.company_name || '') : `${c.first_name || ''} ${c.last_name || ''}`.trim(),
-      subtitle: c.email || c.client_type,
+      id: c.id, type: 'client', title: c.client_type === 'company' ? (c.company_name || '') : `${c.first_name || ''} ${c.last_name || ''}`.trim(), subtitle: c.email || c.client_type,
     }));
-
     const errandResults: SearchResult[] = (errandsRes.data || []).map(e => ({
-      id: e.id,
-      type: 'errand',
-      title: language === 'ar' && e.title_ar ? e.title_ar : e.title,
-      subtitle: e.errand_number,
-      status: e.status,
+      id: e.id, type: 'errand', title: language === 'ar' && e.title_ar ? e.title_ar : e.title, subtitle: e.errand_number, status: e.status,
+    }));
+    const docResults: SearchResult[] = (docsRes.data || []).map(d => ({
+      id: d.id, type: 'document', title: language === 'ar' && d.title_ar ? d.title_ar : (d.title || d.file_name), subtitle: d.document_category,
     }));
 
-    setResults([...caseResults, ...errandResults, ...clientResults]);
+    setResults([...caseResults, ...errandResults, ...clientResults, ...docResults]);
     setSearching(false);
   }, [profile?.organization_id, language]);
 
@@ -115,12 +113,14 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
   const handleResultClick = (r: SearchResult) => {
     setShowResults(false);
     setSearchQuery('');
+    if (r.type === 'document') { navigate('/documents'); return; }
     navigate(r.type === 'case' ? `/cases/${r.id}` : r.type === 'errand' ? `/errands/${r.id}` : `/clients/${r.id}`);
   };
 
   const caseResults = results.filter(r => r.type === 'case');
   const errandResults = results.filter(r => r.type === 'errand');
   const clientResultsFiltered = results.filter(r => r.type === 'client');
+  const docResults = results.filter(r => r.type === 'document');
 
   return (
     <header className="h-16 bg-card shadow-xs flex items-center px-4 gap-3 shrink-0 z-10">
@@ -199,6 +199,20 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
                       <div className="flex-1 min-w-0">
                         <p className="text-body-md text-foreground truncate">{r.title}</p>
                         <p className="text-body-sm text-muted-foreground">{r.subtitle}</p>
+                      </div>
+                    </button>
+                  ))}
+                </>
+              )}
+              {docResults.length > 0 && (
+                <>
+                  <div className="px-3 py-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider border-t border-border">{t('sidebar.documents')}</div>
+                  {docResults.map(r => (
+                    <button key={r.id} onClick={() => handleResultClick(r)} className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 transition-colors text-start">
+                      <FileCheck size={16} className="text-muted-foreground flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-body-md text-foreground truncate">{r.title}</p>
+                        <p className="text-body-sm text-muted-foreground capitalize">{r.subtitle}</p>
                       </div>
                     </button>
                   ))}
