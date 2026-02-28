@@ -28,6 +28,7 @@ const queryClient = new QueryClient();
 // DashboardPage imported above
 import CasesPage from '@/pages/CasesPage';
 import CaseFormPage from '@/pages/CaseFormPage';
+import CaseDetailPage from '@/pages/CaseDetailPage';
 const ErrandsPage = () => <PlaceholderPage titleKey="sidebar.errands" icon={FileCheck} />;
 import ClientsPage from '@/pages/ClientsPage';
 import ClientDetailPage from '@/pages/ClientDetailPage';
@@ -80,7 +81,7 @@ const App = () => (
                 <Route path="/cases" element={<CasesPage />} />
                 <Route path="/cases/new" element={<CaseFormPage />} />
                 <Route path="/cases/:id/edit" element={<CaseFormPage />} />
-                <Route path="/cases/:id" element={<CasesPage />} />
+                <Route path="/cases/:id" element={<CaseDetailPage />} />
                 <Route path="/errands" element={<ErrandsPage />} />
                 <Route path="/clients" element={<ClientsPage />} />
                 <Route path="/clients/:id" element={<ClientDetailPage />} />
