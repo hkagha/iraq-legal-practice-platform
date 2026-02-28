@@ -882,7 +882,8 @@
       "stepStarted": "تم بدء الخطوة",
       "completed": "تم إكمال المعاملة بنجاح",
       "cancelled": "تم إلغاء المعاملة",
-    "validationError": "يرجى ملء جميع الحقول المطلوبة"
+      "validationError": "يرجى ملء جميع الحقول المطلوبة"
+    }
   },
   "documents": {
     "title": "المستندات",
