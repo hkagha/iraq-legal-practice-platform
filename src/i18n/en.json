@@ -54,6 +54,7 @@
     "settings": "Settings",
     "research": "AI Research",
     "messages": "Messages",
+    "activity": "Activity Feed",
     "collapse": "Collapse sidebar",
     "expand": "Expand sidebar"
   },
@@ -1467,5 +1468,26 @@
       "from": "From",
       "to": "To"
     }
+  },
+  "collaboration": {
+    "activityFeed": "Activity Feed",
+    "activityFeedSubtitle": "Everything happening at your firm",
+    "allTeam": "All Team",
+    "showMore": "Show more",
+    "showLess": "Show less",
+    "mentions": {
+      "mentionSomeone": "Mention someone",
+      "mentionedYou": "mentioned you",
+      "inCaseNote": "in a case note",
+      "inTaskComment": "in a task comment",
+      "inErrandNote": "in an errand note"
+    },
+    "internalNotes": "Internal Notes",
+    "addNote": "Add Note",
+    "postNote": "Post Note",
+    "pinNote": "Pin Note",
+    "unpinNote": "Unpin Note",
+    "visibleToClient": "Visible to Client",
+    "hiddenFromClient": "Hidden from Client"
   }
 }

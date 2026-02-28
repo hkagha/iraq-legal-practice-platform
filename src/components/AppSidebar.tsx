@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import {
   LayoutDashboard, Scale, FileCheck, Users, Calendar, CheckSquare,
   FileText, Clock, Receipt, BarChart3, MessageSquare, Sparkles,
-  UserCog, Settings, ChevronLeft, ChevronRight
+  UserCog, Settings, ChevronLeft, ChevronRight, Activity
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -26,6 +26,7 @@ const mainNavItems = [
 ];
 
 const secondaryNavItems = [
+  { key: 'activity', path: '/activity', icon: Activity },
   { key: 'messages', path: '/messages', icon: MessageSquare },
   { key: 'research', path: '/research', icon: Sparkles },
 ];
