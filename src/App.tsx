@@ -31,6 +31,7 @@ import CaseFormPage from '@/pages/CaseFormPage';
 import CaseDetailPage from '@/pages/CaseDetailPage';
 import ErrandsPage from '@/pages/ErrandsPage';
 import ErrandFormPage from '@/pages/ErrandFormPage';
+import ErrandDetailPage from '@/pages/ErrandDetailPage';
 import ClientsPage from '@/pages/ClientsPage';
 import ClientDetailPage from '@/pages/ClientDetailPage';
 const CalendarPage = () => <PlaceholderPage titleKey="sidebar.calendar" icon={Calendar} />;
@@ -86,6 +87,7 @@ const App = () => (
                 <Route path="/errands" element={<ErrandsPage />} />
                 <Route path="/errands/new" element={<ErrandFormPage />} />
                 <Route path="/errands/:id/edit" element={<ErrandFormPage />} />
+                <Route path="/errands/:id" element={<ErrandDetailPage />} />
                 <Route path="/clients" element={<ClientsPage />} />
                 <Route path="/clients/:id" element={<ClientDetailPage />} />
                 <Route path="/calendar" element={<CalendarPage />} />

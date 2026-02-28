@@ -843,6 +843,27 @@
     "search": {
       "placeholder": "البحث بعنوان المعاملة أو رقمها أو المرجع..."
     },
+    "detail": {
+      "documents": "المستندات",
+      "details": "التفاصيل",
+      "activity": "النشاط",
+      "errandInfo": "معلومات المعاملة",
+      "errandDocuments": "مستندات المعاملة",
+      "uploadDocument": "رفع مستند",
+      "documentUploaded": "تم رفع المستند بنجاح",
+      "documentDeleted": "تم حذف المستند",
+      "linkedCase": "القضية المرتبطة",
+      "docTypes": {
+        "required_document": "مستند مطلوب",
+        "government_receipt": "إيصال حكومي",
+        "government_response": "رد حكومي",
+        "form": "نموذج",
+        "attachment": "مرفق",
+        "certificate": "شهادة",
+        "license": "رخصة",
+        "other": "أخرى"
+      }
+    },
     "messages": {
       "created": "تم إنشاء المعاملة بنجاح",
       "updated": "تم تحديث المعاملة بنجاح",
