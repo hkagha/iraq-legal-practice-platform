@@ -36,7 +36,7 @@ import ClientsPage from '@/pages/ClientsPage';
 import ClientDetailPage from '@/pages/ClientDetailPage';
 const CalendarPage = () => <PlaceholderPage titleKey="sidebar.calendar" icon={Calendar} />;
 const TasksPage = () => <PlaceholderPage titleKey="sidebar.tasks" icon={CheckSquare} />;
-const DocumentsPage = () => <PlaceholderPage titleKey="sidebar.documents" icon={FileText} />;
+import DocumentsPage from '@/pages/DocumentsPage';
 const TimeTrackingPage = () => <PlaceholderPage titleKey="sidebar.timeTracking" icon={Clock} />;
 const BillingPage = () => <PlaceholderPage titleKey="sidebar.billing" icon={Receipt} />;
 const ReportsPage = () => <PlaceholderPage titleKey="sidebar.reports" icon={BarChart3} />;

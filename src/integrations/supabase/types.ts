@@ -813,6 +813,276 @@ export type Database = {
           },
         ]
       }
+      document_activities: {
+        Row: {
+          activity_type: string
+          actor_id: string | null
+          created_at: string
+          document_id: string
+          id: string
+          metadata: Json | null
+          organization_id: string
+          title: string
+          title_ar: string | null
+        }
+        Insert: {
+          activity_type: string
+          actor_id?: string | null
+          created_at?: string
+          document_id: string
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          title: string
+          title_ar?: string | null
+        }
+        Update: {
+          activity_type?: string
+          actor_id?: string | null
+          created_at?: string
+          document_id?: string
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          title?: string
+          title_ar?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_activities_actor_id_fkey"
+            columns: ["actor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_activities_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_activities_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_templates: {
+        Row: {
+          category: string
+          content: string
+          created_at: string
+          created_by: string | null
+          description: string | null
+          description_ar: string | null
+          id: string
+          is_active: boolean | null
+          is_system: boolean | null
+          language: string
+          name: string
+          name_ar: string | null
+          organization_id: string | null
+          placeholders: Json | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          content: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          description_ar?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_system?: boolean | null
+          language?: string
+          name: string
+          name_ar?: string | null
+          organization_id?: string | null
+          placeholders?: Json | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          content?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          description_ar?: string | null
+          id?: string
+          is_active?: boolean | null
+          is_system?: boolean | null
+          language?: string
+          name?: string
+          name_ar?: string | null
+          organization_id?: string | null
+          placeholders?: Json | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_templates_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      documents: {
+        Row: {
+          case_id: string | null
+          client_id: string | null
+          created_at: string
+          description: string | null
+          description_ar: string | null
+          document_category: string
+          errand_id: string | null
+          file_name: string
+          file_name_ar: string | null
+          file_path: string
+          file_size_bytes: number
+          file_type: string
+          folder_path: string | null
+          id: string
+          is_latest_version: boolean
+          is_visible_to_client: boolean
+          last_accessed_at: string | null
+          last_accessed_by: string | null
+          mime_type: string | null
+          organization_id: string
+          parent_document_id: string | null
+          status: string
+          tags: string[] | null
+          title: string | null
+          title_ar: string | null
+          updated_at: string
+          uploaded_by: string
+          version: number
+        }
+        Insert: {
+          case_id?: string | null
+          client_id?: string | null
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          document_category?: string
+          errand_id?: string | null
+          file_name: string
+          file_name_ar?: string | null
+          file_path: string
+          file_size_bytes: number
+          file_type: string
+          folder_path?: string | null
+          id?: string
+          is_latest_version?: boolean
+          is_visible_to_client?: boolean
+          last_accessed_at?: string | null
+          last_accessed_by?: string | null
+          mime_type?: string | null
+          organization_id: string
+          parent_document_id?: string | null
+          status?: string
+          tags?: string[] | null
+          title?: string | null
+          title_ar?: string | null
+          updated_at?: string
+          uploaded_by: string
+          version?: number
+        }
+        Update: {
+          case_id?: string | null
+          client_id?: string | null
+          created_at?: string
+          description?: string | null
+          description_ar?: string | null
+          document_category?: string
+          errand_id?: string | null
+          file_name?: string
+          file_name_ar?: string | null
+          file_path?: string
+          file_size_bytes?: number
+          file_type?: string
+          folder_path?: string | null
+          id?: string
+          is_latest_version?: boolean
+          is_visible_to_client?: boolean
+          last_accessed_at?: string | null
+          last_accessed_by?: string | null
+          mime_type?: string | null
+          organization_id?: string
+          parent_document_id?: string | null
+          status?: string
+          tags?: string[] | null
+          title?: string | null
+          title_ar?: string | null
+          updated_at?: string
+          uploaded_by?: string
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "documents_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_errand_id_fkey"
+            columns: ["errand_id"]
+            isOneToOne: false
+            referencedRelation: "errands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_last_accessed_by_fkey"
+            columns: ["last_accessed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_parent_document_id_fkey"
+            columns: ["parent_document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_uploaded_by_fkey"
+            columns: ["uploaded_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       errand_activities: {
         Row: {
           activity_type: string
