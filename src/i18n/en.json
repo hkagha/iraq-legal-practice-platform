@@ -843,6 +843,27 @@
     "search": {
       "placeholder": "Search by errand title, number, or reference..."
     },
+    "detail": {
+      "documents": "Documents",
+      "details": "Details",
+      "activity": "Activity",
+      "errandInfo": "Errand Information",
+      "errandDocuments": "Errand Documents",
+      "uploadDocument": "Upload Document",
+      "documentUploaded": "Document uploaded successfully",
+      "documentDeleted": "Document deleted",
+      "linkedCase": "Linked Case",
+      "docTypes": {
+        "required_document": "Required Document",
+        "government_receipt": "Government Receipt",
+        "government_response": "Government Response",
+        "form": "Form",
+        "attachment": "Attachment",
+        "certificate": "Certificate",
+        "license": "License",
+        "other": "Other"
+      }
+    },
     "messages": {
       "created": "Errand created successfully",
       "updated": "Errand updated successfully",
