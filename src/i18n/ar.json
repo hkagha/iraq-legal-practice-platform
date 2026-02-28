@@ -258,5 +258,139 @@
     "medium": "متوسطة",
     "high": "عالية",
     "urgent": "عاجلة"
+  },
+  "clients": {
+    "title": "العملاء",
+    "subtitle": "إدارة عملاء مكتب المحاماة وجهات الاتصال",
+    "addClient": "إضافة عميل",
+    "editClient": "تعديل العميل",
+    "clientDetails": "تفاصيل العميل",
+    "individual": "فرد",
+    "company": "شركة",
+    "totalClients": "إجمالي العملاء",
+    "activeClients": "العملاء النشطون",
+    "newThisMonth": "الجدد هذا الشهر",
+    "fields": {
+      "clientType": "نوع العميل",
+      "firstName": "الاسم الأول",
+      "lastName": "اسم العائلة",
+      "firstNameAr": "الاسم الأول (عربي)",
+      "lastNameAr": "اسم العائلة (عربي)",
+      "companyName": "اسم الشركة",
+      "companyNameAr": "اسم الشركة (عربي)",
+      "companyType": "نوع الشركة",
+      "registrationNumber": "رقم التسجيل",
+      "industry": "القطاع",
+      "email": "البريد الإلكتروني",
+      "phone": "رقم الهاتف",
+      "secondaryPhone": "هاتف ثانوي",
+      "whatsapp": "رقم الواتساب",
+      "nationalId": "رقم الهوية الوطنية",
+      "dateOfBirth": "تاريخ الميلاد",
+      "gender": "الجنس",
+      "male": "ذكر",
+      "female": "أنثى",
+      "nationality": "الجنسية",
+      "address": "العنوان",
+      "addressAr": "العنوان (عربي)",
+      "city": "المدينة",
+      "governorate": "المحافظة",
+      "taxId": "الرقم الضريبي",
+      "source": "كيف وصل إليك؟",
+      "tags": "العلامات",
+      "notes": "ملاحظات",
+      "status": "الحالة",
+      "createdBy": "أضيف بواسطة",
+      "createdAt": "تاريخ الإضافة"
+    },
+    "companyTypes": {
+      "llc": "شركة ذات مسؤولية محدودة",
+      "jsc": "شركة مساهمة",
+      "sole_proprietorship": "مؤسسة فردية",
+      "partnership": "شراكة",
+      "branch_office": "مكتب فرعي",
+      "representative_office": "مكتب تمثيلي",
+      "ngo": "منظمة غير حكومية",
+      "government": "جهة حكومية",
+      "other": "أخرى"
+    },
+    "sources": {
+      "referral": "إحالة",
+      "walk_in": "زيارة مباشرة",
+      "website": "الموقع الإلكتروني",
+      "social_media": "وسائل التواصل الاجتماعي",
+      "advertisement": "إعلان",
+      "other": "أخرى"
+    },
+    "governorates": {
+      "Baghdad": "بغداد",
+      "Basra": "البصرة",
+      "Maysan": "ميسان",
+      "Dhi Qar": "ذي قار",
+      "Wasit": "واسط",
+      "Babil": "بابل",
+      "Karbala": "كربلاء",
+      "Najaf": "النجف",
+      "Al-Qadisiyyah": "القادسية",
+      "Al-Muthanna": "المثنى",
+      "Diyala": "ديالى",
+      "Salah al-Din": "صلاح الدين",
+      "Kirkuk": "كركوك",
+      "Nineveh": "نينوى",
+      "Erbil": "أربيل",
+      "Duhok": "دهوك",
+      "Sulaymaniyah": "السليمانية",
+      "Al-Anbar": "الأنبار"
+    },
+    "statuses": {
+      "active": "نشط",
+      "inactive": "غير نشط",
+      "archived": "مؤرشف",
+      "prospect": "محتمل"
+    },
+    "tabs": {
+      "overview": "نظرة عامة",
+      "cases": "القضايا",
+      "errands": "المعاملات",
+      "documents": "المستندات",
+      "billing": "الفواتير",
+      "activity": "سجل النشاط"
+    },
+    "overview": {
+      "totalCases": "إجمالي القضايا",
+      "activeCases": "القضايا النشطة",
+      "totalErrands": "إجمالي المعاملات",
+      "totalBilled": "إجمالي الفواتير",
+      "outstandingBalance": "الرصيد المستحق",
+      "clientSince": "عميل منذ",
+      "lastActivity": "آخر نشاط"
+    },
+    "empty": {
+      "title": "لا يوجد عملاء بعد",
+      "subtitle": "أضف أول عميل لبدء إدارة قضاياه ومعاملاته",
+      "action": "إضافة أول عميل"
+    },
+    "search": {
+      "placeholder": "البحث بالاسم أو البريد أو الهاتف أو الشركة..."
+    },
+    "messages": {
+      "created": "تم إنشاء العميل بنجاح",
+      "updated": "تم تحديث العميل بنجاح",
+      "archived": "تم أرشفة العميل بنجاح",
+      "restored": "تم استعادة العميل بنجاح",
+      "deleteConfirmTitle": "أرشفة العميل",
+      "deleteConfirmMessage": "هل أنت متأكد من أرشفة هذا العميل؟ سيتم الاحتفاظ بقضاياه ومستنداته.",
+      "validationError": "يرجى ملء جميع الحقول المطلوبة"
+    },
+    "contactPerson": {
+      "title": "جهات الاتصال",
+      "add": "إضافة جهة اتصال",
+      "primary": "جهة الاتصال الرئيسية",
+      "setPrimary": "تعيين كجهة رئيسية",
+      "jobTitle": "المسمى الوظيفي",
+      "department": "القسم"
+    },
+    "viewDetails": "عرض التفاصيل",
+    "archive": "أرشفة"
   }
 }

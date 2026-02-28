@@ -258,5 +258,139 @@
     "medium": "Medium",
     "high": "High",
     "urgent": "Urgent"
+  },
+  "clients": {
+    "title": "Clients",
+    "subtitle": "Manage your law firm's clients and contacts",
+    "addClient": "Add Client",
+    "editClient": "Edit Client",
+    "clientDetails": "Client Details",
+    "individual": "Individual",
+    "company": "Company",
+    "totalClients": "Total Clients",
+    "activeClients": "Active Clients",
+    "newThisMonth": "New This Month",
+    "fields": {
+      "clientType": "Client Type",
+      "firstName": "First Name",
+      "lastName": "Last Name",
+      "firstNameAr": "First Name (Arabic)",
+      "lastNameAr": "Last Name (Arabic)",
+      "companyName": "Company Name",
+      "companyNameAr": "Company Name (Arabic)",
+      "companyType": "Company Type",
+      "registrationNumber": "Registration Number",
+      "industry": "Industry",
+      "email": "Email Address",
+      "phone": "Phone Number",
+      "secondaryPhone": "Secondary Phone",
+      "whatsapp": "WhatsApp Number",
+      "nationalId": "National ID Number",
+      "dateOfBirth": "Date of Birth",
+      "gender": "Gender",
+      "male": "Male",
+      "female": "Female",
+      "nationality": "Nationality",
+      "address": "Address",
+      "addressAr": "Address (Arabic)",
+      "city": "City",
+      "governorate": "Governorate",
+      "taxId": "Tax ID",
+      "source": "How did they find you?",
+      "tags": "Tags",
+      "notes": "Notes",
+      "status": "Status",
+      "createdBy": "Added by",
+      "createdAt": "Added on"
+    },
+    "companyTypes": {
+      "llc": "Limited Liability Company (LLC)",
+      "jsc": "Joint Stock Company (JSC)",
+      "sole_proprietorship": "Sole Proprietorship",
+      "partnership": "Partnership",
+      "branch_office": "Branch Office",
+      "representative_office": "Representative Office",
+      "ngo": "Non-Governmental Organization",
+      "government": "Government Entity",
+      "other": "Other"
+    },
+    "sources": {
+      "referral": "Referral",
+      "walk_in": "Walk-in",
+      "website": "Website",
+      "social_media": "Social Media",
+      "advertisement": "Advertisement",
+      "other": "Other"
+    },
+    "governorates": {
+      "Baghdad": "Baghdad",
+      "Basra": "Basra",
+      "Maysan": "Maysan",
+      "Dhi Qar": "Dhi Qar",
+      "Wasit": "Wasit",
+      "Babil": "Babil",
+      "Karbala": "Karbala",
+      "Najaf": "Najaf",
+      "Al-Qadisiyyah": "Al-Qadisiyyah",
+      "Al-Muthanna": "Al-Muthanna",
+      "Diyala": "Diyala",
+      "Salah al-Din": "Salah al-Din",
+      "Kirkuk": "Kirkuk",
+      "Nineveh": "Nineveh",
+      "Erbil": "Erbil",
+      "Duhok": "Duhok",
+      "Sulaymaniyah": "Sulaymaniyah",
+      "Al-Anbar": "Al-Anbar"
+    },
+    "statuses": {
+      "active": "Active",
+      "inactive": "Inactive",
+      "archived": "Archived",
+      "prospect": "Prospect"
+    },
+    "tabs": {
+      "overview": "Overview",
+      "cases": "Cases",
+      "errands": "Errands",
+      "documents": "Documents",
+      "billing": "Billing",
+      "activity": "Activity Log"
+    },
+    "overview": {
+      "totalCases": "Total Cases",
+      "activeCases": "Active Cases",
+      "totalErrands": "Total Errands",
+      "totalBilled": "Total Billed",
+      "outstandingBalance": "Outstanding Balance",
+      "clientSince": "Client Since",
+      "lastActivity": "Last Activity"
+    },
+    "empty": {
+      "title": "No clients yet",
+      "subtitle": "Add your first client to start managing their cases and matters",
+      "action": "Add Your First Client"
+    },
+    "search": {
+      "placeholder": "Search by name, email, phone, or company..."
+    },
+    "messages": {
+      "created": "Client created successfully",
+      "updated": "Client updated successfully",
+      "archived": "Client archived successfully",
+      "restored": "Client restored successfully",
+      "deleteConfirmTitle": "Archive Client",
+      "deleteConfirmMessage": "Are you sure you want to archive this client? Their cases and documents will be preserved.",
+      "validationError": "Please fill in all required fields"
+    },
+    "contactPerson": {
+      "title": "Contact Persons",
+      "add": "Add Contact Person",
+      "primary": "Primary Contact",
+      "setPrimary": "Set as Primary",
+      "jobTitle": "Job Title",
+      "department": "Department"
+    },
+    "viewDetails": "View Details",
+    "archive": "Archive"
   }
 }

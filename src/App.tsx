@@ -28,7 +28,7 @@ const queryClient = new QueryClient();
 // DashboardPage imported above
 const CasesPage = () => <PlaceholderPage titleKey="sidebar.cases" icon={Scale} />;
 const ErrandsPage = () => <PlaceholderPage titleKey="sidebar.errands" icon={FileCheck} />;
-const ClientsPage = () => <PlaceholderPage titleKey="sidebar.clients" icon={Users} />;
+import ClientsPage from '@/pages/ClientsPage';
 const CalendarPage = () => <PlaceholderPage titleKey="sidebar.calendar" icon={Calendar} />;
 const TasksPage = () => <PlaceholderPage titleKey="sidebar.tasks" icon={CheckSquare} />;
 const DocumentsPage = () => <PlaceholderPage titleKey="sidebar.documents" icon={FileText} />;
