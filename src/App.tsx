@@ -29,7 +29,7 @@ const queryClient = new QueryClient();
 import CasesPage from '@/pages/CasesPage';
 import CaseFormPage from '@/pages/CaseFormPage';
 import CaseDetailPage from '@/pages/CaseDetailPage';
-const ErrandsPage = () => <PlaceholderPage titleKey="sidebar.errands" icon={FileCheck} />;
+import ErrandsPage from '@/pages/ErrandsPage';
 import ClientsPage from '@/pages/ClientsPage';
 import ClientDetailPage from '@/pages/ClientDetailPage';
 const CalendarPage = () => <PlaceholderPage titleKey="sidebar.calendar" icon={Calendar} />;
