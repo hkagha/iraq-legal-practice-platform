@@ -116,6 +116,55 @@
     "settled": "Settled",
     "closed": "Closed"
   },
+  "statuses": {
+    "case": {
+      "intake": "Intake",
+      "active": "Active",
+      "pending_hearing": "Pending Hearing",
+      "pending_judgment": "Pending Judgment",
+      "on_hold": "On Hold",
+      "won": "Won",
+      "lost": "Lost",
+      "settled": "Settled",
+      "closed": "Closed",
+      "archived": "Archived"
+    },
+    "errand": {
+      "new": "New",
+      "in_progress": "In Progress",
+      "awaiting_documents": "Awaiting Documents",
+      "submitted_to_government": "Submitted to Government",
+      "under_review_by_government": "Under Review",
+      "additional_requirements": "Additional Requirements",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "task": {
+      "todo": "To Do",
+      "in_progress": "In Progress",
+      "in_review": "In Review",
+      "completed": "Completed",
+      "cancelled": "Cancelled"
+    },
+    "invoice": {
+      "draft": "Draft",
+      "sent": "Sent",
+      "viewed": "Viewed",
+      "partially_paid": "Partially Paid",
+      "paid": "Paid",
+      "overdue": "Overdue",
+      "cancelled": "Cancelled",
+      "written_off": "Written Off"
+    },
+    "priority": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High",
+      "urgent": "Urgent"
+    }
+  },
   "common": {
     "save": "Save",
     "cancel": "Cancel",
@@ -164,7 +213,8 @@
     "of": "of",
     "showing": "Showing",
     "to": "to",
-    "entries": "entries"
+    "entries": "entries",
+    "clearAll": "Clear all"
   },
   "placeholder": {
     "underDevelopment": "This section is under development",
