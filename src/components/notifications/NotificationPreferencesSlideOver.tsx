@@ -91,6 +91,7 @@ export default function NotificationPreferencesSlideOver({ open, onClose }: Prop
   const [quietHoursEnabled, setQuietHoursEnabled] = useState(false);
   const [quietStart, setQuietStart] = useState('22:00');
   const [quietEnd, setQuietEnd] = useState('07:00');
+  const [soundEnabled, setSoundEnabled] = useState(true);
   const [loading, setLoading] = useState(true);
   const saveTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -106,6 +107,7 @@ export default function NotificationPreferencesSlideOver({ open, onClose }: Prop
           setQuietHoursEnabled(data.quiet_hours_enabled ?? false);
           setQuietStart(data.quiet_hours_start || '22:00');
           setQuietEnd(data.quiet_hours_end || '07:00');
+          setSoundEnabled((data as any).sound_enabled ?? true);
         }
         setLoading(false);
       });
@@ -117,16 +119,17 @@ export default function NotificationPreferencesSlideOver({ open, onClose }: Prop
       if (!profile?.id) return;
       await supabase.from('notification_preferences').update({
         preferences: newPrefs,
-        email_enabled: extras?.emailEnabled ?? emailEnabled,
-        whatsapp_enabled: extras?.whatsappEnabled ?? whatsappEnabled,
-        quiet_hours_enabled: extras?.quietHoursEnabled ?? quietHoursEnabled,
-        quiet_hours_start: extras?.quietStart ?? quietStart,
-        quiet_hours_end: extras?.quietEnd ?? quietEnd,
+        email_enabled: extras?.emailEnabled ?? extras?.email_enabled ?? emailEnabled,
+        whatsapp_enabled: extras?.whatsappEnabled ?? extras?.whatsapp_enabled ?? whatsappEnabled,
+        quiet_hours_enabled: extras?.quietHoursEnabled ?? extras?.quiet_hours_enabled ?? quietHoursEnabled,
+        quiet_hours_start: extras?.quietStart ?? extras?.quiet_hours_start ?? quietStart,
+        quiet_hours_end: extras?.quietEnd ?? extras?.quiet_hours_end ?? quietEnd,
+        sound_enabled: extras?.soundEnabled ?? extras?.sound_enabled ?? soundEnabled,
         ...extras,
       } as any).eq('user_id', profile.id);
       toast({ title: language === 'ar' ? 'تم الحفظ' : 'Saved', duration: 1500 });
     }, 500);
-  }, [profile?.id, emailEnabled, whatsappEnabled, quietHoursEnabled, quietStart, quietEnd, language]);
+  }, [profile?.id, emailEnabled, whatsappEnabled, quietHoursEnabled, quietStart, quietEnd, soundEnabled, language]);
 
   const togglePref = (type: string, channel: 'in_app' | 'email' | 'whatsapp') => {
     const updated = { ...prefs };
@@ -152,7 +155,8 @@ export default function NotificationPreferencesSlideOver({ open, onClose }: Prop
     setQuietHoursEnabled(false);
     setQuietStart('22:00');
     setQuietEnd('07:00');
-    save(defaultPrefs, { email_enabled: true, whatsapp_enabled: false, quiet_hours_enabled: false, quiet_hours_start: '22:00', quiet_hours_end: '07:00' });
+    setSoundEnabled(true);
+    save(defaultPrefs, { email_enabled: true, whatsapp_enabled: false, quiet_hours_enabled: false, quiet_hours_start: '22:00', quiet_hours_end: '07:00', sound_enabled: true });
   };
 
   return (
@@ -191,6 +195,27 @@ export default function NotificationPreferencesSlideOver({ open, onClose }: Prop
                   <Input type="time" value={quietEnd} onChange={e => { setQuietEnd(e.target.value); save(prefs, { quiet_hours_end: e.target.value }); }} className="w-28" />
                 </div>
               )}
+            </div>
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-body-md font-medium">{language === 'ar' ? 'صوت الإشعارات' : 'Notification sound'}</p>
+                <p className="text-body-sm text-muted-foreground">{language === 'ar' ? 'تشغيل صوت عند وصول إشعارات جديدة' : 'Play a sound when new notifications arrive'}</p>
+              </div>
+              <Switch checked={soundEnabled} onCheckedChange={v => { setSoundEnabled(v); save(prefs, { sound_enabled: v }); }} />
+            </div>
+          </div>
+
+          {/* Config banners */}
+          <div className="space-y-3">
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
+              <p className="text-body-sm text-amber-800">
+                {language === 'ar' ? 'إشعارات البريد الإلكتروني تتطلب الإعداد. تواصل مع الدعم للتفعيل.' : 'Email notifications require configuration. Contact support to enable.'}
+              </p>
+            </div>
+            <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
+              <p className="text-body-sm text-blue-800">
+                {language === 'ar' ? 'إشعارات الواتساب قريباً. سيتطلب ذلك ربط حساب واتساب للأعمال.' : 'WhatsApp notifications coming soon. This will require connecting your WhatsApp Business account.'}
+              </p>
             </div>
           </div>
 

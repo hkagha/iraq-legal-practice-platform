@@ -55,6 +55,7 @@
     "research": "AI Research",
     "messages": "Messages",
     "activity": "Activity Feed",
+    "notifications": "Notifications",
     "collapse": "Collapse sidebar",
     "expand": "Expand sidebar"
   },
@@ -1467,6 +1468,18 @@
       "quietHoursDesc": "No notifications during these hours",
       "from": "From",
       "to": "To"
+    },
+    "emailConfig": {
+      "banner": "Email notifications require configuration. Contact support to enable.",
+      "configure": "Configure Email"
+    },
+    "whatsappConfig": {
+      "banner": "WhatsApp notifications coming soon. This will require connecting your WhatsApp Business account.",
+      "comingSoon": "Coming Soon"
+    },
+    "sound": {
+      "enabled": "Notification sound",
+      "enabledDesc": "Play a sound when new notifications arrive"
     }
   },
   "collaboration": {

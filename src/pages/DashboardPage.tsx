@@ -10,7 +10,7 @@ import RecentActivityWidget from '@/components/dashboard/RecentActivityWidget';
 import CasesByStatusChart from '@/components/dashboard/CasesByStatusChart';
 import ErrandsByStatusChart from '@/components/dashboard/ErrandsByStatusChart';
 import RevenueTrendChart from '@/components/dashboard/RevenueTrendChart';
-import { checkOverdueTaskNotifications, checkUpcomingHearingNotifications } from '@/lib/notifications';
+import { runDailyNotificationChecks } from '@/lib/dailyNotificationChecks';
 
 export default function DashboardPage() {
   const { isLoading, profile } = useAuth();
@@ -19,8 +19,7 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!profile?.organization_id || !profile?.id || checkedRef.current) return;
     checkedRef.current = true;
-    checkOverdueTaskNotifications(profile.organization_id, profile.id);
-    checkUpcomingHearingNotifications(profile.organization_id, profile.id);
+    runDailyNotificationChecks(profile.organization_id, profile.id);
   }, [profile?.organization_id, profile?.id]);
 
   if (isLoading) return <DashboardSkeleton />;

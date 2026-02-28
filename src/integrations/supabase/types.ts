@@ -1260,6 +1260,78 @@ export type Database = {
           },
         ]
       }
+      email_queue: {
+        Row: {
+          attempts: number | null
+          body_html: string
+          body_text: string | null
+          created_at: string
+          error_message: string | null
+          id: string
+          max_attempts: number | null
+          notification_id: string | null
+          organization_id: string
+          scheduled_at: string | null
+          sent_at: string | null
+          status: string
+          subject: string
+          subject_ar: string | null
+          to_email: string
+          to_name: string | null
+        }
+        Insert: {
+          attempts?: number | null
+          body_html: string
+          body_text?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          max_attempts?: number | null
+          notification_id?: string | null
+          organization_id: string
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string
+          subject: string
+          subject_ar?: string | null
+          to_email: string
+          to_name?: string | null
+        }
+        Update: {
+          attempts?: number | null
+          body_html?: string
+          body_text?: string | null
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          max_attempts?: number | null
+          notification_id?: string | null
+          organization_id?: string
+          scheduled_at?: string | null
+          sent_at?: string | null
+          status?: string
+          subject?: string
+          subject_ar?: string | null
+          to_email?: string
+          to_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_queue_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_queue_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       errand_activities: {
         Row: {
           activity_type: string
@@ -2048,6 +2120,7 @@ export type Database = {
           quiet_hours_enabled: boolean | null
           quiet_hours_end: string | null
           quiet_hours_start: string | null
+          sound_enabled: boolean | null
           updated_at: string
           user_id: string
           whatsapp_enabled: boolean | null
@@ -2061,6 +2134,7 @@ export type Database = {
           quiet_hours_enabled?: boolean | null
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null
+          sound_enabled?: boolean | null
           updated_at?: string
           user_id: string
           whatsapp_enabled?: boolean | null
@@ -2074,6 +2148,7 @@ export type Database = {
           quiet_hours_enabled?: boolean | null
           quiet_hours_end?: string | null
           quiet_hours_start?: string | null
+          sound_enabled?: boolean | null
           updated_at?: string
           user_id?: string
           whatsapp_enabled?: boolean | null
@@ -2420,6 +2495,7 @@ export type Database = {
           secondary_phone: string | null
           timezone: string | null
           updated_at: string
+          whatsapp_number: string | null
         }
         Insert: {
           avatar_url?: string | null
@@ -2442,6 +2518,7 @@ export type Database = {
           secondary_phone?: string | null
           timezone?: string | null
           updated_at?: string
+          whatsapp_number?: string | null
         }
         Update: {
           avatar_url?: string | null
@@ -2464,6 +2541,7 @@ export type Database = {
           secondary_phone?: string | null
           timezone?: string | null
           updated_at?: string
+          whatsapp_number?: string | null
         }
         Relationships: [
           {
@@ -2819,6 +2897,69 @@ export type Database = {
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      whatsapp_queue: {
+        Row: {
+          created_at: string
+          delivered_at: string | null
+          error_message: string | null
+          id: string
+          message_template: string
+          notification_id: string | null
+          organization_id: string
+          phone_number: string
+          read_at: string | null
+          sent_at: string | null
+          status: string
+          template_params: Json | null
+          whatsapp_message_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          delivered_at?: string | null
+          error_message?: string | null
+          id?: string
+          message_template: string
+          notification_id?: string | null
+          organization_id: string
+          phone_number: string
+          read_at?: string | null
+          sent_at?: string | null
+          status?: string
+          template_params?: Json | null
+          whatsapp_message_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          delivered_at?: string | null
+          error_message?: string | null
+          id?: string
+          message_template?: string
+          notification_id?: string | null
+          organization_id?: string
+          phone_number?: string
+          read_at?: string | null
+          sent_at?: string | null
+          status?: string
+          template_params?: Json | null
+          whatsapp_message_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "whatsapp_queue_notification_id_fkey"
+            columns: ["notification_id"]
+            isOneToOne: false
+            referencedRelation: "notifications"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "whatsapp_queue_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
             referencedColumns: ["id"]
           },
         ]
