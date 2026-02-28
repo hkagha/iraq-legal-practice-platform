@@ -39,7 +39,9 @@ const CalendarPage = () => <PlaceholderPage titleKey="sidebar.calendar" icon={Ca
 const TasksPage = () => <PlaceholderPage titleKey="sidebar.tasks" icon={CheckSquare} />;
 import DocumentsPage from '@/pages/DocumentsPage';
 import TimeTrackingPage from '@/pages/TimeTrackingPage';
-const BillingPage = () => <PlaceholderPage titleKey="sidebar.billing" icon={Receipt} />;
+import BillingPage from '@/pages/BillingPage';
+import InvoiceFormPage from '@/pages/InvoiceFormPage';
+import InvoiceDetailPage from '@/pages/InvoiceDetailPage';
 const ReportsPage = () => <PlaceholderPage titleKey="sidebar.reports" icon={BarChart3} />;
 const MessagesPage = () => <PlaceholderPage titleKey="sidebar.messages" icon={MessageSquare} />;
 const ResearchPage = () => <PlaceholderPage titleKey="sidebar.research" icon={Sparkles} />;
@@ -97,6 +99,9 @@ const App = () => (
                 <Route path="/documents" element={<DocumentsPage />} />
                 <Route path="/time-tracking" element={<TimeTrackingPage />} />
                 <Route path="/billing" element={<BillingPage />} />
+                <Route path="/billing/new" element={<InvoiceFormPage />} />
+                <Route path="/billing/:id" element={<InvoiceDetailPage />} />
+                <Route path="/billing/:id/edit" element={<InvoiceFormPage />} />
                 <Route path="/reports" element={<ReportsPage />} />
                 <Route path="/messages" element={<MessagesPage />} />
                 <Route path="/research" element={<ResearchPage />} />
