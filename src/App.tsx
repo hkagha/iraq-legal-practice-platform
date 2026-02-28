@@ -10,6 +10,7 @@ import MainLayout from "@/layouts/MainLayout";
 import ClientLayout from "@/layouts/ClientLayout";
 import AdminLayout from "@/layouts/AdminLayout";
 import PlaceholderPage from "@/components/PlaceholderPage";
+import DashboardPage from "@/pages/DashboardPage";
 import LoginPage from "@/pages/LoginPage";
 import RegisterPage from "@/pages/RegisterPage";
 import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
@@ -24,7 +25,7 @@ import {
 const queryClient = new QueryClient();
 
 // Main app placeholder pages
-const DashboardPage = () => <PlaceholderPage titleKey="dashboard.title" icon={LayoutDashboard} />;
+// DashboardPage imported above
 const CasesPage = () => <PlaceholderPage titleKey="sidebar.cases" icon={Scale} />;
 const ErrandsPage = () => <PlaceholderPage titleKey="sidebar.errands" icon={FileCheck} />;
 const ClientsPage = () => <PlaceholderPage titleKey="sidebar.clients" icon={Users} />;
