@@ -13,6 +13,9 @@ import GeneralSettings from '@/components/settings/GeneralSettings';
 import BrandingSettings from '@/components/settings/BrandingSettings';
 import BillingConfigSettings from '@/components/settings/BillingConfigSettings';
 import NumberingSettings from '@/components/settings/NumberingSettings';
+import TeamMembersSection from '@/components/settings/TeamMembersSection';
+import RolesPermissionsSection from '@/components/settings/RolesPermissionsSection';
+import InvitationsSection from '@/components/settings/InvitationsSection';
 import PlaceholderPage from '@/components/PlaceholderPage';
 
 type SectionKey = 
@@ -91,6 +94,9 @@ export default function SettingsPage() {
       case 'branding': return <BrandingSettings />;
       case 'billingConfig': return <BillingConfigSettings />;
       case 'numbering': return <NumberingSettings />;
+      case 'teamMembers': return <TeamMembersSection />;
+      case 'rolesPermissions': return <RolesPermissionsSection />;
+      case 'invitations': return <InvitationsSection />;
       default:
         const item = allItems.find(i => i.key === activeSection);
         return (
