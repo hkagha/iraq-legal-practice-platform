@@ -120,6 +120,11 @@ export default function ErrandFormPage() {
   const { profile } = useAuth();
   const isEdit = !!id;
 
+  // Read URL params for pre-fill
+  const searchParams = new URLSearchParams(window.location.search);
+  const urlClientId = searchParams.get('clientId') || '';
+  const urlCaseId = searchParams.get('caseId') || '';
+
   const [form, setForm] = useState<ErrandFormData>({ ...emptyForm });
   const [steps, setSteps] = useState<StepData[]>([]);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -183,12 +188,17 @@ export default function ErrandFormPage() {
       });
   }, [profile?.organization_id, language]);
 
-  // Set default assigned_to
+  // Set default assigned_to and pre-fill from URL params
   useEffect(() => {
-    if (!isEdit && profile && !form.assigned_to) {
-      setForm(f => ({ ...f, assigned_to: profile.id }));
+    if (!isEdit && profile) {
+      setForm(f => ({
+        ...f,
+        assigned_to: f.assigned_to || profile.id,
+        client_id: f.client_id || urlClientId,
+        case_id: f.case_id || urlCaseId,
+      }));
     }
-  }, [profile, isEdit]);
+  }, [profile, isEdit, urlClientId, urlCaseId]);
 
   // Load cases for selected client
   useEffect(() => {

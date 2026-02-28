@@ -29,8 +29,9 @@ import {
 import {
   Scale, Pencil, MoreHorizontal, Archive, ArrowLeft, ArrowRight, User, Building2,
   Calendar, Clock, Plus, Eye, EyeOff, Pin, Trash2, Star, MessageSquare,
-  FileText, Loader2, AlertTriangle, Phone, ChevronDown,
+  FileText, Loader2, AlertTriangle, Phone, ChevronDown, FileCheck, Search,
 } from 'lucide-react';
+import { FormSearchSelect } from '@/components/ui/FormSearchSelect';
 
 const CASE_STATUS_ORDER = ['intake','active','pending_hearing','pending_judgment','on_hold','won','lost','settled','closed'] as const;
 const STATUS_PROGRESS: Record<string, number> = {
@@ -160,6 +161,12 @@ export default function CaseDetailPage() {
 
   const [savingAction, setSavingAction] = useState(false);
 
+  // Linked errands
+  const [linkedErrands, setLinkedErrands] = useState<any[]>([]);
+  const [showLinkErrandModal, setShowLinkErrandModal] = useState(false);
+  const [linkableErrands, setLinkableErrands] = useState<{ value: string; label: string; subtitle?: string }[]>([]);
+  const [selectedLinkErrand, setSelectedLinkErrand] = useState('');
+
   // Fetch all data
   const fetchCase = useCallback(async () => {
     if (!id) return;
@@ -206,6 +213,50 @@ export default function CaseDetailPage() {
   }, [id, language]);
 
   useEffect(() => { fetchCase(); }, [fetchCase]);
+
+  // Fetch linked errands
+  useEffect(() => {
+    if (!id) return;
+    supabase.from('errands').select('id,errand_number,title,title_ar,status,total_steps,completed_steps,progress_percentage')
+      .eq('case_id', id).order('created_at', { ascending: false })
+      .then(({ data }) => { if (data) setLinkedErrands(data); });
+  }, [id, caseData?.updated_at]);
+
+  // Fetch linkable errands (same client, no case_id)
+  const openLinkErrandModal = async () => {
+    if (!caseData) return;
+    const { data } = await supabase.from('errands')
+      .select('id,errand_number,title,title_ar,status')
+      .eq('client_id', caseData.client_id)
+      .is('case_id', null)
+      .order('created_at', { ascending: false });
+    if (data) {
+      setLinkableErrands(data.map((e: any) => ({
+        value: e.id,
+        label: `${e.errand_number} — ${language === 'ar' && e.title_ar ? e.title_ar : e.title}`,
+        subtitle: t(`statuses.errand.${e.status}`),
+      })));
+    }
+    setSelectedLinkErrand('');
+    setShowLinkErrandModal(true);
+  };
+
+  const linkErrand = async () => {
+    if (!selectedLinkErrand || !caseData) return;
+    setSavingAction(true);
+    try {
+      const { error } = await supabase.from('errands').update({ case_id: caseData.id } as any).eq('id', selectedLinkErrand);
+      if (error) throw error;
+      toast({ title: language === 'ar' ? 'تم ربط المعاملة' : 'Errand linked' });
+      setShowLinkErrandModal(false);
+      // Refresh
+      const { data } = await supabase.from('errands').select('id,errand_number,title,title_ar,status,total_steps,completed_steps,progress_percentage')
+        .eq('case_id', caseData.id).order('created_at', { ascending: false });
+      if (data) setLinkedErrands(data);
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally { setSavingAction(false); }
+  };
 
   const getClientName = (c: ClientInfo) => {
     if (c.client_type === 'company') return language === 'ar' && c.company_name_ar ? c.company_name_ar : c.company_name || '';
@@ -610,6 +661,36 @@ export default function CaseDetailPage() {
                 })}
               </div>
 
+              {/* Linked Errands */}
+              <div className="bg-card border border-border rounded-lg p-5">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-heading-sm font-semibold text-foreground">{t('errands.linkedErrands')}</h3>
+                  <Button variant="outline" size="sm" onClick={openLinkErrandModal}><Plus size={14} className="me-1" />{t('errands.linkErrand')}</Button>
+                </div>
+                {linkedErrands.length === 0 ? (
+                  <p className="text-body-sm text-muted-foreground italic">{t('errands.noLinkedErrands')}</p>
+                ) : linkedErrands.map((e: any) => {
+                  const pct = e.total_steps > 0 ? Math.round(((e.completed_steps || 0) / e.total_steps) * 100) : 0;
+                  return (
+                    <div key={e.id} className="flex items-center gap-3 py-2.5 border-b border-border/50 last:border-0">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-body-sm text-muted-foreground font-mono">{e.errand_number}</p>
+                        <Link to={`/errands/${e.id}`} className="text-body-md font-medium text-accent hover:underline">
+                          {language === 'ar' && e.title_ar ? e.title_ar : e.title}
+                        </Link>
+                      </div>
+                      <div className="flex items-center gap-2 flex-shrink-0">
+                        <div className="w-16">
+                          <Progress value={pct} className="h-1" />
+                        </div>
+                        <span className="text-body-sm text-muted-foreground">{e.completed_steps || 0}/{e.total_steps || 0}</span>
+                        <StatusBadge status={e.status} type="errand" size="sm" />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+
               {/* Recent Notes */}
               <div className="bg-card border border-border rounded-lg p-5">
                 <div className="flex items-center justify-between mb-3">
@@ -933,6 +1014,32 @@ export default function CaseDetailPage() {
               <Button variant="outline" className="flex-1" onClick={() => setOutcomeModal(null)}>{t('common.cancel')}</Button>
               <Button className="flex-1 bg-accent text-accent-foreground" onClick={() => handleStatusChange(outcomeModal, outcomeSummary, outcomeDate)} disabled={isChangingStatus}>{isChangingStatus && <Loader2 size={14} className="animate-spin me-1" />}{t('common.confirm')}</Button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Link Errand Modal */}
+      {showLinkErrandModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center" onClick={() => setShowLinkErrandModal(false)}>
+          <div className="absolute inset-0 bg-black/50" />
+          <div className="relative bg-card rounded-modal shadow-xl p-6 max-w-[480px] w-[90%] mx-auto space-y-4" onClick={e => e.stopPropagation()}>
+            <h3 className="text-heading-lg text-foreground">{t('errands.linkErrand')}</h3>
+            {linkableErrands.length === 0 ? (
+              <div className="text-center py-4">
+                <p className="text-body-md text-muted-foreground mb-3">{t('errands.noLinkedErrands')}</p>
+                <Button className="bg-accent text-accent-foreground" onClick={() => { setShowLinkErrandModal(false); navigate(`/errands/new?clientId=${caseData?.client_id}&caseId=${caseData?.id}`); }}>
+                  <Plus size={14} className="me-1" />{t('errands.createErrandForClient')}
+                </Button>
+              </div>
+            ) : (
+              <>
+                <FormSearchSelect value={selectedLinkErrand} onChange={setSelectedLinkErrand} options={linkableErrands} placeholder={language === 'ar' ? 'اختر معاملة...' : 'Select errand...'} />
+                <div className="flex gap-3 pt-2">
+                  <Button variant="outline" className="flex-1" onClick={() => setShowLinkErrandModal(false)}>{t('common.cancel')}</Button>
+                  <Button className="flex-1 bg-accent text-accent-foreground" onClick={linkErrand} disabled={!selectedLinkErrand || savingAction}>{savingAction && <Loader2 size={14} className="animate-spin me-1" />}{t('common.confirm')}</Button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
