@@ -44,17 +44,28 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
   const { profile } = useAuth();
   const location = useLocation();
   const [hasUrgentCases, setHasUrgentCases] = useState(false);
+  const [overdueErrandsCount, setOverdueErrandsCount] = useState(0);
 
   useEffect(() => {
     if (!profile?.organization_id) return;
     const check = async () => {
-      const { count } = await supabase
-        .from('cases')
-        .select('*', { count: 'exact', head: true })
-        .eq('organization_id', profile.organization_id!)
-        .eq('priority', 'urgent')
-        .not('status', 'in', '("closed","archived")');
-      setHasUrgentCases((count || 0) > 0);
+      const today = new Date().toISOString().split('T')[0];
+      const [urgentRes, overdueRes] = await Promise.all([
+        supabase
+          .from('cases')
+          .select('*', { count: 'exact', head: true })
+          .eq('organization_id', profile.organization_id!)
+          .eq('priority', 'urgent')
+          .not('status', 'in', '("closed","archived")'),
+        supabase
+          .from('errands')
+          .select('*', { count: 'exact', head: true })
+          .eq('organization_id', profile.organization_id!)
+          .lt('due_date', today)
+          .not('status', 'in', '("completed","cancelled","approved","rejected")'),
+      ]);
+      setHasUrgentCases((urgentRes.count || 0) > 0);
+      setOverdueErrandsCount(overdueRes.count || 0);
     };
     check();
   }, [profile?.organization_id]);
@@ -67,8 +78,8 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
     const isActive = location.pathname === item.path || location.pathname.startsWith(item.path + '/');
     const Icon = item.icon;
     const label = t(`sidebar.${item.key}`);
-    const showDot = item.key === 'cases' && hasUrgentCases;
-
+    const showDot = (item.key === 'cases' && hasUrgentCases) || (item.key === 'errands' && overdueErrandsCount > 0);
+    const showCount = item.key === 'errands' && overdueErrandsCount > 0;
     const link = (
       <NavLink
         to={item.path}
@@ -87,11 +98,18 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
         )}
         <div className="relative">
           <Icon className="h-5 w-5 shrink-0" />
-          {showDot && (
+          {showDot && !showCount && (
             <span className="absolute -top-1 -end-1 h-2 w-2 rounded-full bg-[#EF4444]" />
           )}
         </div>
-        {!collapsed && <span className="text-body-md font-medium truncate">{label}</span>}
+        {!collapsed && (
+          <span className="text-body-md font-medium truncate flex-1">{label}</span>
+        )}
+        {!collapsed && showCount && (
+          <span className="text-[11px] font-semibold rounded-full bg-destructive text-destructive-foreground min-w-[18px] h-[18px] flex items-center justify-center px-1">
+            {overdueErrandsCount}
+          </span>
+        )}
       </NavLink>
     );
 

@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Search, Bell, Menu, User, Settings, LogOut, Scale, Users as UsersIcon } from 'lucide-react';
+import { Search, Bell, Menu, User, Settings, LogOut, Scale, Users as UsersIcon, FileCheck } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuLabel,
@@ -17,7 +17,7 @@ interface TopHeaderProps {
 
 interface SearchResult {
   id: string;
-  type: 'case' | 'client';
+  type: 'case' | 'client' | 'errand';
   title: string;
   subtitle: string;
   status?: string;
@@ -48,7 +48,7 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
     setSearching(true);
     const pattern = `%${q}%`;
 
-    const [casesRes, clientsRes] = await Promise.all([
+    const [casesRes, clientsRes, errandsRes] = await Promise.all([
       supabase
         .from('cases')
         .select('id, title, title_ar, case_number, status')
@@ -60,6 +60,12 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
         .select('id, first_name, last_name, company_name, client_type, email')
         .eq('organization_id', profile.organization_id!)
         .or(`first_name.ilike.${pattern},last_name.ilike.${pattern},company_name.ilike.${pattern},email.ilike.${pattern}`)
+        .limit(5),
+      supabase
+        .from('errands')
+        .select('id, title, title_ar, errand_number, status, reference_number')
+        .eq('organization_id', profile.organization_id!)
+        .or(`title.ilike.${pattern},errand_number.ilike.${pattern},title_ar.ilike.${pattern},reference_number.ilike.${pattern}`)
         .limit(5),
     ]);
 
@@ -78,7 +84,15 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
       subtitle: c.email || c.client_type,
     }));
 
-    setResults([...caseResults, ...clientResults]);
+    const errandResults: SearchResult[] = (errandsRes.data || []).map(e => ({
+      id: e.id,
+      type: 'errand',
+      title: language === 'ar' && e.title_ar ? e.title_ar : e.title,
+      subtitle: e.errand_number,
+      status: e.status,
+    }));
+
+    setResults([...caseResults, ...errandResults, ...clientResults]);
     setSearching(false);
   }, [profile?.organization_id, language]);
 
@@ -101,10 +115,11 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
   const handleResultClick = (r: SearchResult) => {
     setShowResults(false);
     setSearchQuery('');
-    navigate(r.type === 'case' ? `/cases/${r.id}` : `/clients/${r.id}`);
+    navigate(r.type === 'case' ? `/cases/${r.id}` : r.type === 'errand' ? `/errands/${r.id}` : `/clients/${r.id}`);
   };
 
   const caseResults = results.filter(r => r.type === 'case');
+  const errandResults = results.filter(r => r.type === 'errand');
   const clientResultsFiltered = results.filter(r => r.type === 'client');
 
   return (
@@ -156,6 +171,21 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
                         <p className="text-body-sm text-muted-foreground font-mono">{r.subtitle}</p>
                       </div>
                       {r.status && <StatusBadge status={r.status} type="case" size="sm" />}
+                    </button>
+                  ))}
+                </>
+              )}
+              {errandResults.length > 0 && (
+                <>
+                  <div className="px-3 py-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider border-t border-border">{t('sidebar.errands')}</div>
+                  {errandResults.map(r => (
+                    <button key={r.id} onClick={() => handleResultClick(r)} className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 transition-colors text-start">
+                      <FileCheck size={16} className="text-muted-foreground flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <p className="text-body-md text-foreground truncate">{r.title}</p>
+                        <p className="text-body-sm text-muted-foreground font-mono">{r.subtitle}</p>
+                      </div>
+                      {r.status && <StatusBadge status={r.status} type="errand" size="sm" />}
                     </button>
                   ))}
                 </>

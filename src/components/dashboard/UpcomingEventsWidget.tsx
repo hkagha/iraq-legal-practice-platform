@@ -4,58 +4,89 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Calendar } from 'lucide-react';
-import { format } from 'date-fns';
-import { ar as arLocale } from 'date-fns/locale';
 
-interface HearingEvent {
+interface EventItem {
   id: string;
-  hearing_date: string;
-  hearing_time: string | null;
-  hearing_type: string;
-  case_id: string;
-  case_title?: string;
-  case_number?: string;
+  date: string;
+  title: string;
+  type: 'hearing' | 'errand';
+  entityId: string;
+  entityNumber?: string;
 }
 
 export default function UpcomingEventsWidget() {
   const { t, language } = useLanguage();
   const { profile } = useAuth();
   const navigate = useNavigate();
-  const [events, setEvents] = useState<HearingEvent[]>([]);
+  const [events, setEvents] = useState<EventItem[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!profile?.organization_id) return;
-    const fetch = async () => {
+    const fetchEvents = async () => {
       const today = new Date().toISOString().split('T')[0];
-      const { data } = await supabase
-        .from('case_hearings')
-        .select('id, hearing_date, hearing_time, hearing_type, case_id')
-        .eq('organization_id', profile.organization_id!)
-        .gte('hearing_date', today)
-        .eq('status', 'scheduled')
-        .order('hearing_date', { ascending: true })
-        .order('hearing_time', { ascending: true })
-        .limit(5);
+      const twoWeeks = new Date(Date.now() + 14 * 86400000).toISOString().split('T')[0];
 
-      if (data && data.length > 0) {
-        // Fetch case titles
-        const caseIds = [...new Set(data.map(d => d.case_id))];
+      const [hearingsRes, errandsRes] = await Promise.all([
+        supabase
+          .from('case_hearings')
+          .select('id, hearing_date, hearing_time, hearing_type, case_id')
+          .eq('organization_id', profile.organization_id!)
+          .gte('hearing_date', today)
+          .eq('status', 'scheduled')
+          .order('hearing_date', { ascending: true })
+          .order('hearing_time', { ascending: true })
+          .limit(5),
+        supabase
+          .from('errands')
+          .select('id, title, title_ar, due_date, errand_number, status')
+          .eq('organization_id', profile.organization_id!)
+          .gte('due_date', today)
+          .lte('due_date', twoWeeks)
+          .not('status', 'in', '("completed","cancelled","approved","rejected")')
+          .order('due_date', { ascending: true })
+          .limit(5),
+      ]);
+
+      const hearingItems: EventItem[] = [];
+      if (hearingsRes.data && hearingsRes.data.length > 0) {
+        const caseIds = [...new Set(hearingsRes.data.map(d => d.case_id))];
         const { data: cases } = await supabase
           .from('cases')
           .select('id, title, title_ar, case_number')
           .in('id', caseIds);
         const caseMap = new Map((cases || []).map(c => [c.id, c]));
 
-        setEvents(data.map(h => ({
-          ...h,
-          case_title: language === 'ar' ? (caseMap.get(h.case_id)?.title_ar || caseMap.get(h.case_id)?.title) : caseMap.get(h.case_id)?.title,
-          case_number: caseMap.get(h.case_id)?.case_number,
-        })));
+        hearingsRes.data.forEach(h => {
+          const c = caseMap.get(h.case_id);
+          hearingItems.push({
+            id: h.id,
+            date: h.hearing_date,
+            title: language === 'ar' ? (c?.title_ar || c?.title || '—') : (c?.title || '—'),
+            type: 'hearing',
+            entityId: h.case_id,
+            entityNumber: c?.case_number,
+          });
+        });
       }
+
+      const errandItems: EventItem[] = (errandsRes.data || []).map(e => ({
+        id: e.id,
+        date: e.due_date!,
+        title: language === 'ar' && e.title_ar ? e.title_ar : e.title,
+        type: 'errand',
+        entityId: e.id,
+        entityNumber: e.errand_number,
+      }));
+
+      const merged = [...hearingItems, ...errandItems]
+        .sort((a, b) => a.date.localeCompare(b.date))
+        .slice(0, 5);
+
+      setEvents(merged);
       setLoading(false);
     };
-    fetch();
+    fetchEvents();
   }, [profile?.organization_id, language]);
 
   const monthNames = language === 'ar'
@@ -99,27 +130,31 @@ export default function UpcomingEventsWidget() {
       ) : (
         <div className="divide-y divide-border">
           {events.map(ev => {
-            const d = new Date(ev.hearing_date + 'T00:00:00');
+            const d = new Date(ev.date + 'T00:00:00');
             const month = monthNames[d.getMonth()];
             const day = d.getDate();
-            const timeStr = ev.hearing_time ? ev.hearing_time.slice(0, 5) : '';
+            const isHearing = ev.type === 'hearing';
+            const link = isHearing ? `/cases/${ev.entityId}` : `/errands/${ev.entityId}`;
 
             return (
-              <div key={ev.id} className="flex items-center gap-4 px-5 py-3 hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(`/cases/${ev.case_id}`)}>
+              <div key={ev.id} className="flex items-center gap-4 px-5 py-3 hover:bg-muted/30 transition-colors cursor-pointer" onClick={() => navigate(link)}>
                 <div className="w-12 h-12 rounded-lg bg-muted flex flex-col items-center justify-center flex-shrink-0">
                   <span className="text-[11px] font-medium text-muted-foreground uppercase leading-none">{month}</span>
                   <span className="text-heading-sm font-bold text-foreground leading-tight">{day}</span>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-body-md font-medium text-foreground truncate">{ev.case_title || '—'}</p>
+                  <p className="text-body-md font-medium text-foreground truncate">{ev.title}</p>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <span className="inline-flex items-center text-[11px] font-medium rounded-badge px-1.5 py-0.5 bg-[#FEF2F2] text-[#EF4444]">
-                      {t('dashboard.hearing')}
+                    <span className={`inline-flex items-center text-[11px] font-medium rounded-badge px-1.5 py-0.5 ${
+                      isHearing
+                        ? 'bg-[#FEF2F2] text-[#EF4444]'
+                        : 'bg-[#F5F3FF] text-[#8B5CF6]'
+                    }`}>
+                      {isHearing ? t('dashboard.hearing') : t('dashboard.errandDue')}
                     </span>
-                    {timeStr && <span className="text-body-sm text-muted-foreground">{timeStr}</span>}
                   </div>
                 </div>
-                <span className="text-body-sm text-muted-foreground font-mono flex-shrink-0">{ev.case_number}</span>
+                <span className="text-body-sm text-muted-foreground font-mono flex-shrink-0">{ev.entityNumber}</span>
               </div>
             );
           })}

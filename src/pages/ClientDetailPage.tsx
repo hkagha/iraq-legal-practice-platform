@@ -11,7 +11,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import ClientFormSlideOver from '@/components/clients/ClientFormSlideOver';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
-import { format, formatDistanceToNow } from 'date-fns';
+import { format, formatDistanceToNow, differenceInDays } from 'date-fns';
 import { ar as arLocale } from 'date-fns/locale';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
@@ -24,6 +24,7 @@ import {
   FileDown, Scale, Briefcase, FileCheck, Receipt, ArrowLeft,
   Users, FileText, Plus, X, Loader2, Calendar, RefreshCw, MessageSquare,
 } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
 
 const CLIENT_STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   active: { bg: '#F0FDF4', text: '#22C55E' },
@@ -83,6 +84,21 @@ interface CaseRow {
   created_at: string;
 }
 
+interface ErrandRow {
+  id: string;
+  errand_number: string;
+  title: string;
+  title_ar: string | null;
+  category: string;
+  status: string;
+  priority: string;
+  due_date: string | null;
+  assigned_to: string | null;
+  total_steps: number;
+  completed_steps: number;
+  created_at: string;
+}
+
 export default function ClientDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -103,6 +119,13 @@ export default function ClientDetailPage() {
   const [casesLoading, setCasesLoading] = useState(true);
   const [casesStatusFilter, setCasesStatusFilter] = useState('all');
   const [casesTypeFilter, setCasesTypeFilter] = useState('all');
+
+  // Errands
+  const [clientErrands, setClientErrands] = useState<ErrandRow[]>([]);
+  const [totalErrandsCount, setTotalErrandsCount] = useState(0);
+  const [errandsLoading, setErrandsLoading] = useState(true);
+  const [errandsStatusFilter, setErrandsStatusFilter] = useState('all');
+  const [errandsCategoryFilter, setErrandsCategoryFilter] = useState('all');
 
   // Edit
   const [formOpen, setFormOpen] = useState(false);
@@ -174,6 +197,26 @@ export default function ClientDetailPage() {
     setCasesLoading(false);
   }, [id, profile?.organization_id, casesStatusFilter, casesTypeFilter]);
 
+  const fetchErrands = useCallback(async () => {
+    if (!id || !profile?.organization_id) return;
+    setErrandsLoading(true);
+    const { count } = await supabase.from('errands').select('*', { count: 'exact', head: true }).eq('client_id', id).eq('organization_id', profile.organization_id!);
+    setTotalErrandsCount(count || 0);
+
+    let query = supabase
+      .from('errands')
+      .select('id, errand_number, title, title_ar, category, status, priority, due_date, assigned_to, total_steps, completed_steps, created_at')
+      .eq('client_id', id)
+      .eq('organization_id', profile.organization_id!)
+      .order('created_at', { ascending: false })
+      .limit(50);
+    if (errandsStatusFilter !== 'all') query = query.eq('status', errandsStatusFilter);
+    if (errandsCategoryFilter !== 'all') query = query.eq('category', errandsCategoryFilter);
+    const { data } = await query;
+    setClientErrands((data || []) as unknown as ErrandRow[]);
+    setErrandsLoading(false);
+  }, [id, profile?.organization_id, errandsStatusFilter, errandsCategoryFilter]);
+
   const fetchActivities = useCallback(async (page = 1, filter = 'all') => {
     if (!id) return;
     const pageSize = 20;
@@ -195,6 +238,7 @@ export default function ClientDetailPage() {
 
   useEffect(() => { fetchClient(); }, [fetchClient]);
   useEffect(() => { fetchCases(); }, [fetchCases]);
+  useEffect(() => { fetchErrands(); }, [fetchErrands]);
   useEffect(() => { fetchActivities(1, activityFilter); }, [fetchActivities, activityFilter]);
 
   const getClientName = (c: ClientFull) => {
@@ -388,7 +432,7 @@ export default function ClientDetailPage() {
           {[
             { key: 'overview', label: t('clients.tabs.overview') },
             { key: 'cases', label: t('clients.tabs.cases'), count: String(totalCasesCount) },
-            { key: 'errands', label: t('clients.tabs.errands'), count: '0' },
+            { key: 'errands', label: t('clients.tabs.errands'), count: String(totalErrandsCount) },
             { key: 'documents', label: t('clients.tabs.documents'), count: '0' },
             { key: 'billing', label: t('clients.tabs.billing'), count: '0 IQD' },
             { key: 'activity', label: t('clients.tabs.activity') },
@@ -419,7 +463,7 @@ export default function ClientDetailPage() {
                 {[
                   { icon: Scale, color: '#3B82F6', bg: '#EFF6FF', label: t('clients.overview.totalCases'), value: String(totalCasesCount) },
                   { icon: Briefcase, color: '#22C55E', bg: '#F0FDF4', label: t('clients.overview.activeCases'), value: String(activeCasesCount) },
-                  { icon: FileCheck, color: '#8B5CF6', bg: '#F5F3FF', label: t('clients.overview.totalErrands'), value: '0' },
+                  { icon: FileCheck, color: '#8B5CF6', bg: '#F5F3FF', label: t('clients.overview.totalErrands'), value: String(totalErrandsCount) },
                   { icon: Receipt, color: '#C9A84C', bg: '#FFF8E1', label: t('clients.overview.totalBilled'), value: language === 'ar' ? '٠ د.ع' : '0 IQD' },
                 ].map((s, i) => (
                   <div key={i} className="bg-card border border-border rounded-lg p-4">
@@ -653,12 +697,71 @@ export default function ClientDetailPage() {
 
         {/* ERRANDS TAB */}
         <TabsContent value="errands" className="mt-6">
-          <EmptyState
-            icon={FileCheck}
-            title={t('clients.detail.noErrandsYet')} titleAr={t('clients.detail.noErrandsYet')}
-            actionLabel={t('clients.detail.createErrand')} actionLabelAr={t('clients.detail.createErrand')}
-            onAction={() => {}}
-          />
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
+            <h2 className="text-heading-lg font-semibold text-foreground">{t('clients.tabs.errands')}</h2>
+            <div className="flex items-center gap-2">
+              <select value={errandsStatusFilter} onChange={e => setErrandsStatusFilter(e.target.value)} className="h-9 rounded-md border border-input bg-background px-3 text-body-sm">
+                <option value="all">{t('common.all')} {t('common.status')}</option>
+                {['new','in_progress','awaiting_documents','submitted_to_government','under_review_by_government','additional_requirements','approved','rejected','completed','cancelled'].map(s => (
+                  <option key={s} value={s}>{t(`statuses.errand.${s}`)}</option>
+                ))}
+              </select>
+              <button onClick={() => navigate(`/errands/new?clientId=${client.id}`)} className="inline-flex items-center gap-2 h-9 px-4 rounded-button bg-accent text-accent-foreground text-body-sm font-semibold hover:bg-accent/90 transition-colors">
+                <Plus size={14} /> {t('clients.detail.createErrand')}
+              </button>
+            </div>
+          </div>
+
+          {errandsLoading ? (
+            <div className="space-y-3">{[1,2,3].map(i => <Skeleton key={i} className="h-16 rounded-lg" />)}</div>
+          ) : clientErrands.length === 0 ? (
+            <EmptyState
+              icon={FileCheck}
+              title={t('clients.detail.noErrandsYet')} titleAr={t('clients.detail.noErrandsYet')}
+              actionLabel={t('clients.detail.createErrand')} actionLabelAr={t('clients.detail.createErrand')}
+              onAction={() => navigate(`/errands/new?clientId=${client.id}`)}
+            />
+          ) : (
+            <div className="bg-card border border-border rounded-lg overflow-hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-border bg-muted/30">
+                    <th className="text-start text-body-sm font-medium text-muted-foreground px-4 py-3 w-[10%]">{t('errands.errandNumber')}</th>
+                    <th className="text-start text-body-sm font-medium text-muted-foreground px-4 py-3 w-[25%]">{t('errands.fields.title')}</th>
+                    <th className="text-start text-body-sm font-medium text-muted-foreground px-4 py-3 w-[12%]">{t('common.status')}</th>
+                    <th className="text-start text-body-sm font-medium text-muted-foreground px-4 py-3 w-[15%]">{t('errands.progress')}</th>
+                    <th className="text-start text-body-sm font-medium text-muted-foreground px-4 py-3 w-[12%]">{t('errands.fields.dueDate')}</th>
+                    <th className="text-start text-body-sm font-medium text-muted-foreground px-4 py-3 w-[12%]">{t('common.createdAt')}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {clientErrands.map(e => {
+                    const pct = e.total_steps > 0 ? Math.round((e.completed_steps / e.total_steps) * 100) : 0;
+                    const dueDays = e.due_date ? differenceInDays(new Date(e.due_date), new Date()) : null;
+                    const dueColor = dueDays !== null && dueDays < 0 ? 'text-destructive' : dueDays !== null && dueDays <= 3 ? 'text-warning' : 'text-muted-foreground';
+                    return (
+                      <tr key={e.id} className="border-b border-border/50 hover:bg-muted/30 cursor-pointer transition-colors" onClick={() => navigate(`/errands/${e.id}`)}>
+                        <td className="px-4 py-3 text-body-sm font-mono text-muted-foreground">{e.errand_number}</td>
+                        <td className="px-4 py-3">
+                          <p className="text-body-md font-medium text-foreground truncate">{language === 'ar' && e.title_ar ? e.title_ar : e.title}</p>
+                          <p className="text-body-sm text-muted-foreground">{t(`errands.categories.${e.category}`)}</p>
+                        </td>
+                        <td className="px-4 py-3"><StatusBadge status={e.status} type="errand" size="sm" /></td>
+                        <td className="px-4 py-3">
+                          <div className="flex items-center gap-2">
+                            <Progress value={pct} className="h-1.5 flex-1" />
+                            <span className="text-body-sm text-muted-foreground whitespace-nowrap">{e.completed_steps}/{e.total_steps}</span>
+                          </div>
+                        </td>
+                        <td className={cn('px-4 py-3 text-body-sm', dueColor)}>{e.due_date ? formatDate(e.due_date) : '—'}</td>
+                        <td className="px-4 py-3 text-body-sm text-muted-foreground">{formatDate(e.created_at)}</td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </TabsContent>
 
         {/* DOCUMENTS TAB */}

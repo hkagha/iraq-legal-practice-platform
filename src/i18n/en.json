@@ -83,6 +83,12 @@
     "noRecentActivity": "No recent activity",
     "activityWillAppear": "Activity will appear here as you use Qanuni",
     "casesByStatus": "Cases by Status",
+    "errandsByStatus": "Errands by Status",
+    "noErrandsYet": "No errands yet",
+    "errandDue": "Errand Due",
+    "linkedErrands": "Linked Errands",
+    "linkErrand": "Link Errand",
+    "noLinkedErrands": "No linked errands",
     "noCasesYet": "No cases yet",
     "revenueTrend": "Revenue Trend",
     "billableHoursUnit": "0h",
@@ -791,6 +797,7 @@
       "progress": "Progress",
       "visibleToClient": "Visible to Client"
     },
+    "progress": "Progress",
     "steps": {
       "title": "Steps",
       "addStep": "Add Step",

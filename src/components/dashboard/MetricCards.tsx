@@ -37,16 +37,25 @@ export default function MetricCards() {
   const { t, language } = useLanguage();
   const { profile } = useAuth();
   const [activeCasesCount, setActiveCasesCount] = useState(0);
+  const [activeErrandsCount, setActiveErrandsCount] = useState(0);
 
   useEffect(() => {
     if (!profile?.organization_id) return;
     const fetchCounts = async () => {
-      const { count } = await supabase
-        .from('cases')
-        .select('*', { count: 'exact', head: true })
-        .eq('organization_id', profile.organization_id!)
-        .in('status', ['active', 'pending_hearing', 'pending_judgment', 'intake']);
-      setActiveCasesCount(count || 0);
+      const [casesRes, errandsRes] = await Promise.all([
+        supabase
+          .from('cases')
+          .select('*', { count: 'exact', head: true })
+          .eq('organization_id', profile.organization_id!)
+          .in('status', ['active', 'pending_hearing', 'pending_judgment', 'intake']),
+        supabase
+          .from('errands')
+          .select('*', { count: 'exact', head: true })
+          .eq('organization_id', profile.organization_id!)
+          .in('status', ['new', 'in_progress', 'awaiting_documents', 'submitted_to_government', 'under_review_by_government', 'additional_requirements']),
+      ]);
+      setActiveCasesCount(casesRes.count || 0);
+      setActiveErrandsCount(errandsRes.count || 0);
     };
     fetchCounts();
   }, [profile?.organization_id]);
@@ -64,7 +73,7 @@ export default function MetricCards() {
       icon: FileCheck,
       iconColor: '#8B5CF6',
       iconBg: '#F5F3FF',
-      value: '0',
+      value: String(activeErrandsCount),
       label: t('dashboard.activeErrands'),
       href: '/errands',
     },
