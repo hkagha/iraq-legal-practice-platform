@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
+import { TimerProvider } from "@/contexts/TimerContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import MainLayout from "@/layouts/MainLayout";
@@ -37,7 +38,7 @@ import ClientDetailPage from '@/pages/ClientDetailPage';
 const CalendarPage = () => <PlaceholderPage titleKey="sidebar.calendar" icon={Calendar} />;
 const TasksPage = () => <PlaceholderPage titleKey="sidebar.tasks" icon={CheckSquare} />;
 import DocumentsPage from '@/pages/DocumentsPage';
-const TimeTrackingPage = () => <PlaceholderPage titleKey="sidebar.timeTracking" icon={Clock} />;
+import TimeTrackingPage from '@/pages/TimeTrackingPage';
 const BillingPage = () => <PlaceholderPage titleKey="sidebar.billing" icon={Receipt} />;
 const ReportsPage = () => <PlaceholderPage titleKey="sidebar.reports" icon={BarChart3} />;
 const MessagesPage = () => <PlaceholderPage titleKey="sidebar.messages" icon={MessageSquare} />;
@@ -66,6 +67,7 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
       <AuthProvider>
+        <TimerProvider>
         <TooltipProvider>
           <Toaster />
           <Sonner />
@@ -131,6 +133,7 @@ const App = () => (
             </Routes>
           </BrowserRouter>
         </TooltipProvider>
+        </TimerProvider>
       </AuthProvider>
     </LanguageProvider>
   </QueryClientProvider>

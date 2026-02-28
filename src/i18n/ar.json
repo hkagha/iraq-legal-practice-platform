@@ -1026,6 +1026,126 @@
       "deleteConfirmTitle": "حذف المستند",
       "deleteConfirmMessage": "هل أنت متأكد من حذف هذا المستند؟ لا يمكن التراجع عن هذا الإجراء."
     }
+  },
+  "timeTracking": {
+    "title": "تتبع الوقت",
+    "subtitle": "تتبع ساعات العمل القابلة وغير القابلة للفوترة",
+    "logTime": "تسجيل وقت",
+    "startTimer": "بدء المؤقت",
+    "stopTimer": "إيقاف المؤقت",
+    "timerRunning": "المؤقت يعمل",
+    "totalHours": "إجمالي الساعات",
+    "billableHours": "ساعات قابلة للفوترة",
+    "nonBillableHours": "ساعات غير قابلة للفوترة",
+    "totalAmount": "المبلغ الإجمالي",
+    "fields": {
+      "date": "التاريخ",
+      "description": "الوصف",
+      "case": "القضية",
+      "errand": "المعاملة",
+      "client": "العميل",
+      "duration": "المدة",
+      "hours": "ساعات",
+      "minutes": "دقائق",
+      "startTime": "وقت البدء",
+      "endTime": "وقت الانتهاء",
+      "billable": "قابل للفوترة",
+      "nonBillable": "غير قابل للفوترة",
+      "rate": "السعر",
+      "amount": "المبلغ",
+      "status": "الحالة",
+      "user": "عضو الفريق"
+    },
+    "timer": {
+      "start": "بدء",
+      "stop": "إيقاف",
+      "pause": "إيقاف مؤقت",
+      "resume": "استئناف",
+      "discard": "تجاهل",
+      "save": "حفظ السجل",
+      "whatAreYouWorkingOn": "ما الذي تعمل عليه؟",
+      "selectCaseOrErrand": "اختر قضية أو معاملة",
+      "running": "يعمل",
+      "elapsed": "المنقضي"
+    },
+    "statuses": {
+      "draft": "مسودة",
+      "submitted": "مقدم",
+      "approved": "موافق عليه",
+      "invoiced": "مفوتر",
+      "written_off": "شُطب"
+    },
+    "empty": {
+      "title": "لا توجد سجلات وقت بعد",
+      "subtitle": "ابدأ بتتبع وقتك من خلال تسجيل السجلات أو استخدام المؤقت",
+      "action": "سجّل أول سجل وقت"
+    },
+    "messages": {
+      "created": "تم تسجيل الوقت",
+      "updated": "تم تحديث سجل الوقت",
+      "deleted": "تم حذف سجل الوقت",
+      "timerStarted": "بدأ المؤقت",
+      "timerStopped": "توقف المؤقت وتم حفظ السجل",
+      "approved": "تمت الموافقة على سجل الوقت",
+      "submitted": "تم تقديم سجلات الوقت للموافقة"
+    }
+  },
+  "billing": {
+    "title": "الفواتير",
+    "subtitle": "إدارة الفواتير والمدفوعات",
+    "createInvoice": "إنشاء فاتورة",
+    "totalRevenue": "إجمالي الإيرادات",
+    "outstanding": "مستحق",
+    "overdue": "متأخر",
+    "paidThisMonth": "المدفوع هذا الشهر",
+    "invoice": {
+      "title": "فاتورة",
+      "invoiceNumber": "رقم الفاتورة",
+      "issueDate": "تاريخ الإصدار",
+      "dueDate": "تاريخ الاستحقاق",
+      "client": "العميل",
+      "case": "القضية",
+      "subtotal": "المجموع الفرعي",
+      "taxRate": "نسبة الضريبة",
+      "tax": "الضريبة",
+      "discount": "الخصم",
+      "total": "الإجمالي",
+      "amountPaid": "المبلغ المدفوع",
+      "balanceDue": "المبلغ المستحق",
+      "notes": "ملاحظات",
+      "terms": "الشروط والأحكام",
+      "lineItems": "بنود الفاتورة",
+      "addLineItem": "إضافة بند",
+      "importTimeEntries": "استيراد سجلات الوقت",
+      "description": "الوصف",
+      "quantity": "الكمية",
+      "unitPrice": "سعر الوحدة",
+      "lineTotal": "الإجمالي"
+    },
+    "payment": {
+      "title": "تسجيل دفعة",
+      "amount": "مبلغ الدفعة",
+      "date": "تاريخ الدفع",
+      "method": "طريقة الدفع",
+      "reference": "رقم المرجع",
+      "cash": "نقدي",
+      "bank_transfer": "تحويل بنكي",
+      "check": "شيك",
+      "credit_card": "بطاقة ائتمان",
+      "mobile_payment": "دفع إلكتروني",
+      "other": "أخرى"
+    },
+    "empty": {
+      "title": "لا توجد فواتير بعد",
+      "subtitle": "أنشئ أول فاتورة لبدء فوترة العملاء",
+      "action": "إنشاء أول فاتورة"
+    },
+    "messages": {
+      "invoiceCreated": "تم إنشاء الفاتورة بنجاح",
+      "invoiceSent": "تم إرسال الفاتورة للعميل",
+      "paymentRecorded": "تم تسجيل الدفعة بنجاح",
+      "invoiceCancelled": "تم إلغاء الفاتورة"
+    }
   }
 }
 }

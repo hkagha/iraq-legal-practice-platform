@@ -1027,6 +1027,126 @@
       "deleteConfirmTitle": "Delete Document",
       "deleteConfirmMessage": "Are you sure you want to delete this document? This action cannot be undone."
     }
+  },
+  "timeTracking": {
+    "title": "Time Tracking",
+    "subtitle": "Track billable and non-billable hours",
+    "logTime": "Log Time",
+    "startTimer": "Start Timer",
+    "stopTimer": "Stop Timer",
+    "timerRunning": "Timer Running",
+    "totalHours": "Total Hours",
+    "billableHours": "Billable Hours",
+    "nonBillableHours": "Non-Billable Hours",
+    "totalAmount": "Total Amount",
+    "fields": {
+      "date": "Date",
+      "description": "Description",
+      "case": "Case",
+      "errand": "Errand",
+      "client": "Client",
+      "duration": "Duration",
+      "hours": "Hours",
+      "minutes": "Minutes",
+      "startTime": "Start Time",
+      "endTime": "End Time",
+      "billable": "Billable",
+      "nonBillable": "Non-Billable",
+      "rate": "Rate",
+      "amount": "Amount",
+      "status": "Status",
+      "user": "Team Member"
+    },
+    "timer": {
+      "start": "Start",
+      "stop": "Stop",
+      "pause": "Pause",
+      "resume": "Resume",
+      "discard": "Discard",
+      "save": "Save Entry",
+      "whatAreYouWorkingOn": "What are you working on?",
+      "selectCaseOrErrand": "Select a case or errand",
+      "running": "Running",
+      "elapsed": "Elapsed"
+    },
+    "statuses": {
+      "draft": "Draft",
+      "submitted": "Submitted",
+      "approved": "Approved",
+      "invoiced": "Invoiced",
+      "written_off": "Written Off"
+    },
+    "empty": {
+      "title": "No time entries yet",
+      "subtitle": "Start tracking your time by logging entries or using the timer",
+      "action": "Log Your First Entry"
+    },
+    "messages": {
+      "created": "Time entry logged",
+      "updated": "Time entry updated",
+      "deleted": "Time entry deleted",
+      "timerStarted": "Timer started",
+      "timerStopped": "Timer stopped and entry saved",
+      "approved": "Time entry approved",
+      "submitted": "Time entries submitted for approval"
+    }
+  },
+  "billing": {
+    "title": "Billing",
+    "subtitle": "Manage invoices and payments",
+    "createInvoice": "Create Invoice",
+    "totalRevenue": "Total Revenue",
+    "outstanding": "Outstanding",
+    "overdue": "Overdue",
+    "paidThisMonth": "Paid This Month",
+    "invoice": {
+      "title": "Invoice",
+      "invoiceNumber": "Invoice Number",
+      "issueDate": "Issue Date",
+      "dueDate": "Due Date",
+      "client": "Client",
+      "case": "Case",
+      "subtotal": "Subtotal",
+      "taxRate": "Tax Rate",
+      "tax": "Tax",
+      "discount": "Discount",
+      "total": "Total",
+      "amountPaid": "Amount Paid",
+      "balanceDue": "Balance Due",
+      "notes": "Notes",
+      "terms": "Terms & Conditions",
+      "lineItems": "Line Items",
+      "addLineItem": "Add Line Item",
+      "importTimeEntries": "Import Time Entries",
+      "description": "Description",
+      "quantity": "Qty",
+      "unitPrice": "Unit Price",
+      "lineTotal": "Total"
+    },
+    "payment": {
+      "title": "Record Payment",
+      "amount": "Payment Amount",
+      "date": "Payment Date",
+      "method": "Payment Method",
+      "reference": "Reference Number",
+      "cash": "Cash",
+      "bank_transfer": "Bank Transfer",
+      "check": "Check",
+      "credit_card": "Credit Card",
+      "mobile_payment": "Mobile Payment",
+      "other": "Other"
+    },
+    "empty": {
+      "title": "No invoices yet",
+      "subtitle": "Create your first invoice to start billing clients",
+      "action": "Create Your First Invoice"
+    },
+    "messages": {
+      "invoiceCreated": "Invoice created successfully",
+      "invoiceSent": "Invoice sent to client",
+      "paymentRecorded": "Payment recorded successfully",
+      "invoiceCancelled": "Invoice cancelled"
+    }
   }
 }
 }
