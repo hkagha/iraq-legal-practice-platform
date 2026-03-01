@@ -7,12 +7,13 @@ import { Button } from '@/components/ui/button';
 import { FormInput } from '@/components/ui/FormInput';
 import { Badge } from '@/components/ui/badge';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
-import { UserPlus, Search, MoreVertical, Edit, ShieldCheck, UserMinus, UserCheck, UserX } from 'lucide-react';
+import { UserPlus, Search, MoreVertical, Edit, ShieldCheck, UserMinus, UserCheck, UserX, KeyRound } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import InviteMemberModal from './InviteMemberModal';
 import ChangeRoleModal from './ChangeRoleModal';
+import ResetPasswordModal from '@/components/admin/ResetPasswordModal';
 
 interface TeamMember {
   id: string;
@@ -46,6 +47,7 @@ export default function TeamMembersSection() {
   const [roleTarget, setRoleTarget] = useState<TeamMember | null>(null);
   const [removeTarget, setRemoveTarget] = useState<TeamMember | null>(null);
   const [removing, setRemoving] = useState(false);
+  const [resetPasswordMember, setResetPasswordMember] = useState<TeamMember | null>(null);
 
   const fetchMembers = async () => {
     if (!organization?.id) return;
@@ -181,6 +183,9 @@ export default function TeamMembersSection() {
                       <DropdownMenuItem onClick={() => setRoleTarget(member)}>
                         <ShieldCheck size={14} className="me-2" /> {t('team.changeRole')}
                       </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => setResetPasswordMember(member)}>
+                        <KeyRound size={14} className="me-2" /> {language === 'en' ? 'Reset Password' : 'إعادة تعيين كلمة المرور'}
+                      </DropdownMenuItem>
                       <DropdownMenuItem onClick={() => handleToggleActive(member)}>
                         {member.is_active ? <UserX size={14} className="me-2" /> : <UserCheck size={14} className="me-2" />}
                         {member.is_active ? t('team.deactivate') : t('team.activate')}
@@ -217,6 +222,13 @@ export default function TeamMembersSection() {
         confirmLabel="Remove"
         confirmLabelAr="إزالة"
       />
+      {resetPasswordMember && (
+        <ResetPasswordModal
+          user={resetPasswordMember}
+          onClose={() => setResetPasswordMember(null)}
+          onSuccess={() => { setResetPasswordMember(null); fetchMembers(); }}
+        />
+      )}
     </div>
   );
 }

@@ -5,12 +5,13 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useImpersonation } from '@/contexts/ImpersonationContext';
 import { supabase } from '@/integrations/supabase/client';
 import { logAdminAction } from '@/lib/adminAudit';
-import { ArrowLeft, Building, Users, Scale, FileCheck, FileText, DollarSign, HardDrive, Pencil, LogIn, MoreVertical, Power } from 'lucide-react';
+import { ArrowLeft, Building, Users, Scale, FileCheck, FileText, DollarSign, HardDrive, Pencil, LogIn, MoreVertical, Power, KeyRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import EditOrganizationModal from '@/components/admin/EditOrganizationModal';
 import CreateUserModal from '@/components/admin/CreateUserModal';
 import EditUserModal from '@/components/admin/EditUserModal';
+import ResetPasswordModal from '@/components/admin/ResetPasswordModal';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 
@@ -39,6 +40,7 @@ export default function AdminOrganizationDetailPage() {
   const [showEdit, setShowEdit] = useState(false);
   const [showCreateUser, setShowCreateUser] = useState(false);
   const [editUserId, setEditUserId] = useState<string | null>(null);
+  const [resetPasswordUser, setResetPasswordUser] = useState<any>(null);
 
   useEffect(() => { if (id) loadAll(); }, [id]);
 
@@ -177,6 +179,7 @@ export default function AdminOrganizationDetailPage() {
                         <DropdownMenuTrigger asChild><button className="h-7 w-7 rounded hover:bg-muted flex items-center justify-center"><MoreVertical className="h-4 w-4" /></button></DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
                           <DropdownMenuItem onClick={() => setEditUserId(u.id)}><Pencil className="h-4 w-4 me-2" />{isEN ? 'Edit' : 'تعديل'}</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setResetPasswordUser(u)}><KeyRound className="h-4 w-4 me-2" />{isEN ? 'Reset Password' : 'إعادة تعيين كلمة المرور'}</DropdownMenuItem>
                           <DropdownMenuItem onClick={async () => {
                             await supabase.from('profiles').update({ is_active: !u.is_active } as any).eq('id', u.id);
                             toast.success(isEN ? 'Updated' : 'تم التحديث'); loadAll();
@@ -242,6 +245,13 @@ export default function AdminOrganizationDetailPage() {
       {showEdit && <EditOrganizationModal open={showEdit} orgId={org.id} onClose={() => setShowEdit(false)} onSuccess={loadAll} />}
       <CreateUserModal open={showCreateUser} onClose={() => setShowCreateUser(false)} onSuccess={loadAll} preselectedOrgId={org.id} />
       {editUserId && <EditUserModal open={!!editUserId} userId={editUserId} onClose={() => setEditUserId(null)} onSuccess={loadAll} />}
+      {resetPasswordUser && (
+        <ResetPasswordModal
+          user={resetPasswordUser}
+          onClose={() => setResetPasswordUser(null)}
+          onSuccess={() => { setResetPasswordUser(null); loadAll(); }}
+        />
+      )}
     </div>
   );
 }

@@ -2862,6 +2862,9 @@ export type Database = {
           onboarding_completed: boolean | null
           onboarding_step: number | null
           organization_id: string | null
+          password_changed_by: string | null
+          password_last_changed_at: string | null
+          password_set_by_admin: boolean | null
           phone: string | null
           role: string
           secondary_phone: string | null
@@ -2887,6 +2890,9 @@ export type Database = {
           onboarding_completed?: boolean | null
           onboarding_step?: number | null
           organization_id?: string | null
+          password_changed_by?: string | null
+          password_last_changed_at?: string | null
+          password_set_by_admin?: boolean | null
           phone?: string | null
           role?: string
           secondary_phone?: string | null
@@ -2912,6 +2918,9 @@ export type Database = {
           onboarding_completed?: boolean | null
           onboarding_step?: number | null
           organization_id?: string | null
+          password_changed_by?: string | null
+          password_last_changed_at?: string | null
+          password_set_by_admin?: boolean | null
           phone?: string | null
           role?: string
           secondary_phone?: string | null
@@ -2925,6 +2934,13 @@ export type Database = {
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "profiles_password_changed_by_fkey"
+            columns: ["password_changed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]

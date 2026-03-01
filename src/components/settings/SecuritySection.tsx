@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
@@ -11,6 +12,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 
 export default function SecuritySection() {
   const { language, t } = useLanguage();
+  const { profile } = useAuth();
   const [currentPassword, setCurrentPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -35,6 +37,15 @@ export default function SecuritySection() {
     if (error) {
       toast({ title: error.message, variant: 'destructive' });
     } else {
+      // Clear admin-set flag
+      if (profile?.id) {
+        await supabase.from('profiles').update({
+          password_set_by_admin: false,
+          password_last_changed_at: new Date().toISOString(),
+          password_changed_by: profile.id,
+        } as any).eq('id', profile.id);
+      }
+      sessionStorage.setItem('qanuni_password_reminder_dismissed', 'true');
       toast({ title: language === 'ar' ? 'تم تحديث كلمة المرور بنجاح' : 'Password updated successfully' });
       setCurrentPassword('');
       setNewPassword('');

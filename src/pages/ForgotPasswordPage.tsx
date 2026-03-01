@@ -66,7 +66,13 @@ export default function ForgotPasswordPage() {
               </button>
             </form>
 
-            <p className="text-center mt-6">
+            <p className="text-body-sm text-muted-foreground text-center mt-4">
+              {language === 'en'
+                ? 'You can also contact your administrator to reset your password directly.'
+                : 'يمكنك أيضاً التواصل مع المسؤول لإعادة تعيين كلمة المرور مباشرة.'}
+            </p>
+
+            <p className="text-center mt-4">
               <Link to="/login" className="text-body-md text-accent hover:underline">{t('auth.signIn')}</Link>
             </p>
           </>

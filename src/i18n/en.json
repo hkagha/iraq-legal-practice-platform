@@ -2145,5 +2145,22 @@
       "tokensUsed": "{{used}} / {{limit}} tokens used",
       "resetDate": "Resets on the 1st of each month"
     }
+  },
+  "passwordManagement": {
+    "resetPassword": "Reset Password",
+    "setPassword": "Set Password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "generateSecure": "Generate Secure Password",
+    "minLength": "Minimum 8 characters",
+    "passwordUpdated": "Password updated successfully",
+    "passwordMismatch": "Passwords do not match",
+    "tooShort": "Password must be at least 8 characters",
+    "setByAdmin": "This will set a new password for this user. Share it with them securely.",
+    "reminderBanner": "Your password was set by an administrator. We recommend changing it to something personal.",
+    "changePassword": "Change Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
+    "contactAdmin": "You can also contact your administrator to reset your password directly."
   }
 }
