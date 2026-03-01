@@ -16,12 +16,20 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user && profile) {
-      if (profile.role === 'super_admin') {
-        navigate('/admin', { replace: true });
-      }
+    if (!user) return;
+    if (!profile) return; // Still loading profile
+
+    if (profile.role === 'super_admin') {
+      navigate('/admin/dashboard', { replace: true });
+    } else {
+      // Not a super admin — reject and sign out
+      setError(language === 'en'
+        ? 'Access denied. This login is for platform administrators only.'
+        : 'تم رفض الوصول. هذا التسجيل لمديري المنصة فقط.');
+      signOut();
+      setLoading(false);
     }
-  }, [user, profile, navigate]);
+  }, [user, profile, navigate, signOut, language]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,23 +45,7 @@ export default function AdminLoginPage() {
       setLoading(false);
       return;
     }
-    // After sign in, the useEffect will check the role
-    // We need to wait for profile to load, so we check after a delay
-    setTimeout(async () => {
-      // Re-fetch profile to check role
-      const { data } = await (await import('@/integrations/supabase/client')).supabase
-        .from('profiles').select('role').eq('email', email).single();
-      if (data?.role !== 'super_admin') {
-        setError(language === 'en'
-          ? 'Access denied. This login is for platform administrators only.'
-          : 'تم رفض الوصول. هذا التسجيل لمديري المنصة فقط.');
-        await signOut();
-        setLoading(false);
-      } else {
-        setLoading(false);
-        navigate('/admin', { replace: true });
-      }
-    }, 1500);
+    // The useEffect watching [user, profile] will handle redirect or rejection
   };
 
   return (
