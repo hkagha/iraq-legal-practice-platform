@@ -3,6 +3,8 @@ import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import AppSidebar from '@/components/AppSidebar';
 import TopHeader from '@/components/TopHeader';
 import GlobalTimerBar from '@/components/time-tracking/GlobalTimerBar';
+import { useImpersonation } from '@/contexts/ImpersonationContext';
+import { logAdminAction } from '@/lib/adminAudit';
 import KeyboardShortcuts from '@/components/KeyboardShortcuts';
 import MobileFAB from '@/components/MobileFAB';
 import TaskFormModal from '@/components/tasks/TaskFormModal';
@@ -34,8 +36,20 @@ export default function MainLayout() {
   const handleLogTime = useCallback(() => navigate('/time-tracking'), [navigate]);
   const handleNewClient = useCallback(() => setShowClientForm(true), []);
 
+  const { isImpersonating, impersonatedOrgName, impersonatedOrgId, originalAdminId, endImpersonation } = useImpersonation();
+
   return (
-    <div className="min-h-screen flex w-full bg-background">
+    <div className="min-h-screen flex flex-col w-full bg-background">
+      {isImpersonating && (
+        <div className="bg-warning text-warning-foreground px-4 py-2 text-body-sm font-semibold flex items-center justify-center gap-3 z-50">
+          <span>⚠️ VIEWING AS: {impersonatedOrgName}</span>
+          <button onClick={async () => {
+            if (originalAdminId && impersonatedOrgId) await logAdminAction(originalAdminId, 'impersonate_end', 'organization', impersonatedOrgId, impersonatedOrgName || '');
+            endImpersonation(); navigate('/admin/dashboard');
+          }} className="underline hover:no-underline">Exit Impersonation</button>
+        </div>
+      )}
+      <div className="flex flex-1 min-h-0">
       {/* Desktop sidebar */}
       <div className="hidden lg:flex shrink-0">
         <AppSidebar
@@ -106,6 +120,7 @@ export default function MainLayout() {
 
       {/* AI Chat Panel */}
       <AIChatPanel />
+      </div>
     </div>
   );
 }

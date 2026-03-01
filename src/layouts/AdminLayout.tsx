@@ -4,7 +4,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
-  LayoutDashboard, Building, Users, BarChart3,
+  LayoutDashboard, Building, Users, BarChart3, DollarSign,
   Settings, Megaphone, Database, Server, ChevronLeft, ChevronRight,
   ClipboardList, LogOut, Scale
 } from 'lucide-react';
@@ -16,6 +16,7 @@ const adminNavItems = [
   { key: 'users', path: '/admin/users', icon: Users, label: 'Users', labelAr: 'المستخدمون' },
   { key: 'divider2', divider: true },
   { key: 'analytics', path: '/admin/analytics', icon: BarChart3, label: 'Analytics', labelAr: 'التحليلات' },
+  { key: 'revenue', path: '/admin/revenue', icon: DollarSign, label: 'Revenue', labelAr: 'الإيرادات' },
   { key: 'divider3', divider: true },
   { key: 'backups', path: '/admin/backups', icon: Database, label: 'Backups', labelAr: 'النسخ الاحتياطي' },
   { key: 'divider4', divider: true },
