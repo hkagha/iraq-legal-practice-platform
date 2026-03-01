@@ -343,6 +343,7 @@
     "portalInvitationSent": "تم إرسال دعوة البوابة بنجاح"
   },
   "admin": {
+    "title": "إدارة المنصة",
     "dashboard": "لوحة تحكم المدير",
     "organizations": "المؤسسات",
     "allUsers": "جميع المستخدمين",
@@ -350,7 +351,117 @@
     "platformAnalytics": "تحليلات المنصة",
     "systemSettings": "إعدادات النظام",
     "announcements": "الإعلانات",
-    "backups": "النسخ الاحتياطي"
+    "backups": "النسخ الاحتياطي",
+    "login": {
+      "title": "إدارة المنصة",
+      "subtitle": "وصول آمن",
+      "signIn": "تسجيل الدخول لإدارة المنصة",
+      "accessDenied": "تم رفض الوصول. هذا التسجيل لمديري المنصة فقط.",
+      "backToMain": "العودة لتسجيل الدخول الرئيسي"
+    },
+    "nav": {
+      "dashboard": "لوحة التحكم",
+      "organizations": "المؤسسات",
+      "users": "المستخدمون",
+      "revenue": "الإيرادات",
+      "analytics": "التحليلات",
+      "backups": "النسخ الاحتياطي",
+      "emailQueue": "قائمة البريد",
+      "whatsappQueue": "قائمة الواتساب",
+      "announcements": "الإعلانات",
+      "auditLog": "سجل المراجعة",
+      "platformSettings": "إعدادات المنصة",
+      "systemHealth": "صحة النظام"
+    },
+    "impersonate": {
+      "viewing": "عرض كـ",
+      "exit": "إنهاء الانتحال",
+      "warning": "أنت على وشك عرض هذه المؤسسة كمديرها. سيتم تسجيل أفعالك.",
+      "confirm": "بدء الانتحال"
+    },
+    "org": {
+      "addOrg": "إضافة مؤسسة",
+      "viewDashboard": "عرض لوحة التحكم",
+      "editDetails": "تعديل التفاصيل",
+      "changePlan": "تغيير الخطة",
+      "loginAsAdmin": "الدخول كمدير",
+      "suspend": "تعليق",
+      "activate": "تفعيل",
+      "deleteOrg": "حذف المؤسسة",
+      "health": {
+        "active": "نشط",
+        "low": "نشاط منخفض",
+        "inactive": "غير نشط"
+      }
+    },
+    "users": {
+      "allUsers": "جميع المستخدمين",
+      "createUser": "إنشاء مستخدم",
+      "viewProfile": "عرض الملف",
+      "changeRole": "تغيير الدور",
+      "resetPassword": "إعادة تعيين كلمة المرور",
+      "changeOrg": "تغيير المؤسسة",
+      "deactivate": "تعطيل",
+      "deleteUser": "حذف المستخدم",
+      "loginAsUser": "الدخول كمستخدم",
+      "forceSignOut": "فرض تسجيل الخروج",
+      "neverLoggedIn": "لم يسجل الدخول أبداً",
+      "tempPassword": "تعيين كلمة مرور مؤقتة"
+    },
+    "audit": {
+      "title": "سجل المراجعة",
+      "subtitle": "جميع الإجراءات الإدارية عبر المنصة",
+      "actions": {
+        "login": "سجل الدخول",
+        "logout": "سجل الخروج",
+        "impersonate_start": "بدأ الانتحال",
+        "impersonate_end": "أنهى الانتحال",
+        "org_created": "أنشأ مؤسسة",
+        "org_updated": "حدّث مؤسسة",
+        "org_suspended": "علّق مؤسسة",
+        "org_activated": "فعّل مؤسسة",
+        "org_deleted": "حذف مؤسسة",
+        "user_created": "أنشأ مستخدم",
+        "user_updated": "حدّث مستخدم",
+        "user_deactivated": "عطّل مستخدم",
+        "user_role_changed": "غيّر دور المستخدم",
+        "user_password_reset": "أعاد تعيين كلمة المرور",
+        "plan_changed": "غيّر الخطة",
+        "backup_created": "أنشأ نسخة احتياطية",
+        "announcement_sent": "أرسل إعلان",
+        "settings_changed": "غيّر إعدادات المنصة"
+      }
+    },
+    "announcementsPage": {
+      "title": "الإعلانات",
+      "new": "إعلان جديد",
+      "send": "إرسال الإعلان",
+      "allOrgs": "جميع المؤسسات",
+      "specificOrgs": "مؤسسات محددة",
+      "sentTo": "أُرسل إلى {{n}} مستخدم",
+      "normal": "عادي",
+      "important": "مهم",
+      "urgent": "عاجل"
+    },
+    "systemHealth": {
+      "title": "صحة النظام",
+      "operational": "يعمل",
+      "degraded": "متدهور",
+      "down": "متوقف",
+      "database": "قاعدة البيانات",
+      "storage": "التخزين",
+      "auth": "المصادقة",
+      "realtime": "الوقت الحقيقي",
+      "recentErrors": "الأخطاء الأخيرة"
+    },
+    "platformSettings": {
+      "title": "إعدادات المنصة",
+      "planLimits": "حدود الخطط الافتراضية",
+      "branding": "هوية المنصة",
+      "maintenance": "وضع الصيانة",
+      "maintenanceMsg": "رسالة الصيانة",
+      "activateMaintenance": "تفعيل وضع الصيانة"
+    }
   },
   "months": {
     "jan": "يناير",
