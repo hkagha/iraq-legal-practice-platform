@@ -241,6 +241,78 @@
     "myProfile": "ملفي الشخصي",
     "invoices": "الفواتير"
   },
+  "portal": {
+    "title": "بوابة العملاء",
+    "welcome": "مرحباً، {{name}}",
+    "dashboard": "لوحة التحكم",
+    "myCases": "قضاياي",
+    "myErrands": "معاملاتي",
+    "myDocuments": "المستندات",
+    "myInvoices": "الفواتير",
+    "messages": "الرسائل",
+    "profile": "ملفي الشخصي",
+    "signOut": "تسجيل الخروج",
+    "poweredBy": "مدعوم من قانوني",
+    "noAccess": "ليس لديك صلاحية لعرض هذا العنصر.",
+    "lastUpdated": "آخر تحديث",
+    "dashboard": {
+      "overview": "نظرة عامة",
+      "activeCases": "القضايا النشطة",
+      "activeErrands": "المعاملات النشطة",
+      "pendingInvoices": "الفواتير المعلقة",
+      "recentActivity": "النشاط الأخير",
+      "upcomingEvents": "الأحداث القادمة",
+      "noActivity": "لا يوجد نشاط حديث",
+      "viewAll": "عرض الكل"
+    },
+    "cases": {
+      "title": "قضاياي",
+      "subtitle": "عرض حالة قضاياك القانونية",
+      "noCases": "ليس لديك قضايا نشطة",
+      "status": "الحالة",
+      "type": "النوع",
+      "court": "المحكمة",
+      "lastUpdate": "آخر تحديث",
+      "nextHearing": "الجلسة القادمة",
+      "caseTeam": "فريقك القانوني",
+      "hearings": "الجلسات",
+      "noHearings": "لا توجد جلسات قادمة"
+    },
+    "errands": {
+      "title": "معاملاتي",
+      "subtitle": "تتبع معاملاتك الحكومية والإجراءات",
+      "noErrands": "ليس لديك معاملات نشطة",
+      "progress": "التقدم",
+      "steps": "الخطوات",
+      "dueDate": "تاريخ الاستحقاق"
+    },
+    "documents": {
+      "title": "المستندات",
+      "subtitle": "عرض وتحميل مستنداتك",
+      "noDocuments": "لم تتم مشاركة مستندات معك بعد",
+      "download": "تحميل",
+      "sharedOn": "شوركت في"
+    },
+    "invoices": {
+      "title": "الفواتير",
+      "subtitle": "عرض فواتيرك وسجل المدفوعات",
+      "noInvoices": "لا توجد فواتير بعد",
+      "payNow": "ادفع الآن",
+      "downloadPdf": "تحميل PDF",
+      "paymentHistory": "سجل المدفوعات"
+    },
+    "messages": {
+      "title": "الرسائل",
+      "subtitle": "تواصل مع فريقك القانوني",
+      "newMessage": "رسالة جديدة",
+      "noMessages": "لا توجد رسائل بعد",
+      "placeholder": "اكتب رسالتك...",
+      "send": "إرسال"
+    },
+    "enablePortalAccess": "تفعيل الوصول للبوابة",
+    "sendPortalInvitation": "إرسال دعوة البوابة",
+    "portalInvitationSent": "تم إرسال دعوة البوابة بنجاح"
+  },
   "admin": {
     "dashboard": "لوحة تحكم المدير",
     "organizations": "المؤسسات",

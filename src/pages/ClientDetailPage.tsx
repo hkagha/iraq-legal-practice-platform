@@ -142,6 +142,11 @@ export default function ClientDetailPage() {
   const [hasMoreActivities, setHasMoreActivities] = useState(false);
   const [activityFilter, setActivityFilter] = useState('all');
 
+  // Portal invitation
+  const [portalInviteOpen, setPortalInviteOpen] = useState(false);
+  const [portalEmail, setPortalEmail] = useState('');
+  const [sendingInvite, setSendingInvite] = useState(false);
+
   const fetchClient = useCallback(async () => {
     if (!id) return;
     setIsLoading(true);
@@ -421,7 +426,9 @@ export default function ClientDetailPage() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align={isRTL ? 'start' : 'end'}>
               <DropdownMenuItem><Archive size={14} className="me-2" /> {t('clients.archive')}</DropdownMenuItem>
-              <DropdownMenuItem><UserPlus size={14} className="me-2" /> {t('clients.detail.inviteToPortal')}</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => { setPortalEmail(client.email || ''); setPortalInviteOpen(true); }}>
+                <UserPlus size={14} className="me-2" /> {t('portal.enablePortalAccess')}
+              </DropdownMenuItem>
               <DropdownMenuItem><FileDown size={14} className="me-2" /> {t('clients.detail.exportPdf')}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -859,6 +866,56 @@ export default function ClientDetailPage() {
         onSaved={() => { fetchClient(); fetchCases(); fetchActivities(1, activityFilter); }}
         editClientId={client.id}
       />
+
+      {/* Portal Invitation Modal */}
+      <Dialog open={portalInviteOpen} onOpenChange={setPortalInviteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t('portal.enablePortalAccess')}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-label text-foreground block mb-1.5">{t('common.email')}</label>
+              <input
+                type="email"
+                value={portalEmail}
+                onChange={(e) => setPortalEmail(e.target.value)}
+                className="w-full h-11 rounded-input border border-border bg-card px-3 text-body-md focus:outline-none focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setPortalInviteOpen(false)}>{t('common.cancel')}</Button>
+            <Button
+              disabled={!portalEmail || sendingInvite}
+              onClick={async () => {
+                if (!portalEmail || !profile?.organization_id || !client) return;
+                setSendingInvite(true);
+                try {
+                  const { error } = await supabase.from('invitations').insert({
+                    organization_id: profile.organization_id,
+                    invited_by: profile.id,
+                    email: portalEmail,
+                    role: 'client',
+                    first_name: client.first_name || client.company_name || '',
+                    last_name: client.last_name || '',
+                  } as any);
+                  if (error) throw error;
+                  toast({ title: t('portal.portalInvitationSent') });
+                  setPortalInviteOpen(false);
+                } catch (err: any) {
+                  toast({ title: 'Error', description: err.message, variant: 'destructive' });
+                } finally {
+                  setSendingInvite(false);
+                }
+              }}
+            >
+              {sendingInvite ? <Loader2 size={16} className="me-2 animate-spin" /> : <UserPlus size={16} className="me-2" />}
+              {t('portal.sendPortalInvitation')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

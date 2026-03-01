@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
@@ -6,7 +6,7 @@ import { Eye, EyeOff, Scale, FileText, BarChart3, Loader2 } from 'lucide-react';
 
 export default function LoginPage() {
   const { t, language, setLanguage } = useLanguage();
-  const { signIn } = useAuth();
+  const { signIn, profile, user } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
@@ -15,6 +15,14 @@ export default function LoginPage() {
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (user && profile) {
+      if (profile.role === 'client') navigate('/portal/dashboard', { replace: true });
+      else if (['super_admin', 'sales_admin'].includes(profile.role)) navigate('/admin/dashboard', { replace: true });
+      else navigate('/dashboard', { replace: true });
+    }
+  }, [user, profile, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,9 +37,8 @@ export default function LoginPage() {
 
     if (result.error) {
       setError(t('auth.invalidCredentials'));
-    } else {
-      navigate('/dashboard');
     }
+    // Redirect is handled by ProtectedRoute based on role
   };
 
   return (

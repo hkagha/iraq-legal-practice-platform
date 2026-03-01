@@ -241,6 +241,78 @@
     "myProfile": "My Profile",
     "invoices": "Invoices"
   },
+  "portal": {
+    "title": "Client Portal",
+    "welcome": "Welcome, {{name}}",
+    "dashboard": "Dashboard",
+    "myCases": "My Cases",
+    "myErrands": "My Errands",
+    "myDocuments": "Documents",
+    "myInvoices": "Invoices",
+    "messages": "Messages",
+    "profile": "My Profile",
+    "signOut": "Sign Out",
+    "poweredBy": "Powered by Qanuni",
+    "noAccess": "You don't have access to view this item.",
+    "lastUpdated": "Last updated",
+    "dashboard": {
+      "overview": "Overview",
+      "activeCases": "Active Cases",
+      "activeErrands": "Active Errands",
+      "pendingInvoices": "Pending Invoices",
+      "recentActivity": "Recent Activity",
+      "upcomingEvents": "Upcoming Events",
+      "noActivity": "No recent activity",
+      "viewAll": "View All"
+    },
+    "cases": {
+      "title": "My Cases",
+      "subtitle": "View the status of your legal cases",
+      "noCases": "You have no active cases",
+      "status": "Status",
+      "type": "Type",
+      "court": "Court",
+      "lastUpdate": "Last Update",
+      "nextHearing": "Next Hearing",
+      "caseTeam": "Your Legal Team",
+      "hearings": "Hearings",
+      "noHearings": "No upcoming hearings"
+    },
+    "errands": {
+      "title": "My Errands",
+      "subtitle": "Track your government errands and procedures",
+      "noErrands": "You have no active errands",
+      "progress": "Progress",
+      "steps": "Steps",
+      "dueDate": "Due Date"
+    },
+    "documents": {
+      "title": "Documents",
+      "subtitle": "View and download your documents",
+      "noDocuments": "No documents shared with you yet",
+      "download": "Download",
+      "sharedOn": "Shared on"
+    },
+    "invoices": {
+      "title": "Invoices",
+      "subtitle": "View your invoices and payment history",
+      "noInvoices": "No invoices yet",
+      "payNow": "Pay Now",
+      "downloadPdf": "Download PDF",
+      "paymentHistory": "Payment History"
+    },
+    "messages": {
+      "title": "Messages",
+      "subtitle": "Communicate with your legal team",
+      "newMessage": "New Message",
+      "noMessages": "No messages yet",
+      "placeholder": "Type your message...",
+      "send": "Send"
+    },
+    "enablePortalAccess": "Enable Portal Access",
+    "sendPortalInvitation": "Send Portal Invitation",
+    "portalInvitationSent": "Portal invitation sent successfully"
+  },
   "admin": {
     "dashboard": "Admin Dashboard",
     "organizations": "Organizations",

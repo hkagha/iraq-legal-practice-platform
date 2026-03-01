@@ -63,9 +63,11 @@ import AILegalResearchPage from '@/pages/AILegalResearchPage';
 import AITranslatePage from '@/pages/AITranslatePage';
 const ProfilePage = () => <PlaceholderPage titleKey="common.profile" icon={User} />;
 
-const PortalDashboard = () => <PlaceholderPage titleKey="clientPortal.myDashboard" icon={LayoutDashboard} />;
-const PortalCases = () => <PlaceholderPage titleKey="clientPortal.myCases" icon={Scale} />;
-const PortalErrands = () => <PlaceholderPage titleKey="clientPortal.myErrands" icon={FileCheck} />;
+import PortalDashboardPage from '@/pages/portal/PortalDashboardPage';
+import PortalCasesPage from '@/pages/portal/PortalCasesPage';
+import PortalCaseDetailPage from '@/pages/portal/PortalCaseDetailPage';
+import PortalErrandsPage from '@/pages/portal/PortalErrandsPage';
+import PortalErrandDetailPage from '@/pages/portal/PortalErrandDetailPage';
 const PortalDocuments = () => <PlaceholderPage titleKey="sidebar.documents" icon={FileText} />;
 const PortalMessages = () => <PlaceholderPage titleKey="sidebar.messages" icon={MessageSquare} />;
 const PortalInvoices = () => <PlaceholderPage titleKey="clientPortal.invoices" icon={Receipt} />;
@@ -140,9 +142,11 @@ const App = () => (
               {/* Client portal */}
               <Route path="/portal" element={<ProtectedRoute allowedRoles={['client']}><ClientLayout /></ProtectedRoute>}>
                 <Route index element={<Navigate to="/portal/dashboard" replace />} />
-                <Route path="dashboard" element={<PortalDashboard />} />
-                <Route path="cases" element={<PortalCases />} />
-                <Route path="errands" element={<PortalErrands />} />
+                <Route path="dashboard" element={<PortalDashboardPage />} />
+                <Route path="cases" element={<PortalCasesPage />} />
+                <Route path="cases/:id" element={<PortalCaseDetailPage />} />
+                <Route path="errands" element={<PortalErrandsPage />} />
+                <Route path="errands/:id" element={<PortalErrandDetailPage />} />
                 <Route path="documents" element={<PortalDocuments />} />
                 <Route path="messages" element={<PortalMessages />} />
                 <Route path="invoices" element={<PortalInvoices />} />
