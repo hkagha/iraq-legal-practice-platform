@@ -7,13 +7,14 @@ export interface AIStreamOptions {
   language?: 'en' | 'ar' | 'bilingual';
   caseData?: Record<string, any>;
   clientData?: Record<string, any>;
+  organizationId?: string;
   onDelta: (text: string) => void;
   onDone: () => void;
   onError?: (error: string) => void;
 }
 
 export async function streamAI(options: AIStreamOptions): Promise<void> {
-  const { feature, prompt, context, language, caseData, clientData, onDelta, onDone, onError } = options;
+  const { feature, prompt, context, language, caseData, clientData, organizationId, onDelta, onDone, onError } = options;
 
   const resp = await fetch(AI_URL, {
     method: 'POST',
@@ -21,7 +22,7 @@ export async function streamAI(options: AIStreamOptions): Promise<void> {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
     },
-    body: JSON.stringify({ feature, prompt, context, language, caseData, clientData }),
+    body: JSON.stringify({ feature, prompt, context, language, caseData, clientData, organization_id: organizationId }),
   });
 
   if (!resp.ok || !resp.body) {

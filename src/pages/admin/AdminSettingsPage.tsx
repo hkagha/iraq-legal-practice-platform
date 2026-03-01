@@ -1,10 +1,12 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Settings } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 export default function AdminSettingsPage() {
   const { language } = useLanguage();
+  const { profile } = useAuth();
   const isEN = language === 'en';
 
   const [planLimits, setPlanLimits] = useState({
@@ -23,13 +25,53 @@ export default function AdminSettingsPage() {
 
   const [maintenance, setMaintenance] = useState(false);
   const [maintenanceMsg, setMaintenanceMsg] = useState('');
+  const [loadingSettings, setLoadingSettings] = useState(true);
 
-  function savePlanLimits() {
+  useEffect(() => { loadSettings(); }, []);
+
+  async function loadSettings() {
+    const { data } = await supabase.from('platform_settings').select('key, value') as any;
+    if (data) {
+      data.forEach((row: any) => {
+        if (row.key === 'plan_limits') setPlanLimits(row.value);
+        if (row.key === 'branding') setBranding(row.value);
+        if (row.key === 'maintenance') {
+          setMaintenance(row.value.enabled);
+          setMaintenanceMsg(row.value.message || '');
+        }
+      });
+    }
+    setLoadingSettings(false);
+  }
+
+  async function savePlanLimits() {
+    await supabase.from('platform_settings').upsert(
+      { key: 'plan_limits', value: planLimits as any, updated_at: new Date().toISOString(), updated_by: profile?.id } as any,
+      { onConflict: 'key' }
+    );
     toast.success(isEN ? 'Plan limits saved' : 'تم حفظ حدود الخطط');
   }
 
-  function saveBranding() {
+  async function saveBranding() {
+    await supabase.from('platform_settings').upsert(
+      { key: 'branding', value: branding as any, updated_at: new Date().toISOString(), updated_by: profile?.id } as any,
+      { onConflict: 'key' }
+    );
     toast.success(isEN ? 'Branding settings saved' : 'تم حفظ إعدادات الهوية');
+  }
+
+  async function toggleMaintenance() {
+    const newVal = !maintenance;
+    setMaintenance(newVal);
+    await supabase.from('platform_settings').upsert(
+      { key: 'maintenance', value: { enabled: newVal, message: maintenanceMsg } as any, updated_at: new Date().toISOString(), updated_by: profile?.id } as any,
+      { onConflict: 'key' }
+    );
+    toast.success(isEN ? (newVal ? 'Maintenance mode activated' : 'Maintenance mode deactivated') : (newVal ? 'تم تفعيل وضع الصيانة' : 'تم إلغاء وضع الصيانة'));
+  }
+
+  if (loadingSettings) {
+    return <div className="flex items-center justify-center py-20 text-muted-foreground">{isEN ? 'Loading...' : 'جاري التحميل...'}</div>;
   }
 
   return (
@@ -88,7 +130,7 @@ export default function AdminSettingsPage() {
           </table>
         </div>
         <div className="mt-4 flex justify-end">
-          <button onClick={savePlanLimits} className="h-9 px-4 rounded-lg bg-accent text-accent-foreground text-body-md font-medium hover:bg-accent-dark">{isEN ? 'Save Limits' : 'حفظ الحدود'}</button>
+          <button onClick={savePlanLimits} className="h-9 px-4 rounded-lg bg-accent text-accent-foreground text-body-md font-medium hover:bg-accent/90">{isEN ? 'Save Limits' : 'حفظ الحدود'}</button>
         </div>
       </div>
 
@@ -110,7 +152,7 @@ export default function AdminSettingsPage() {
           ))}
         </div>
         <div className="mt-4 flex justify-end">
-          <button onClick={saveBranding} className="h-9 px-4 rounded-lg bg-accent text-accent-foreground text-body-md font-medium hover:bg-accent-dark">{isEN ? 'Save Branding' : 'حفظ الهوية'}</button>
+          <button onClick={saveBranding} className="h-9 px-4 rounded-lg bg-accent text-accent-foreground text-body-md font-medium hover:bg-accent/90">{isEN ? 'Save Branding' : 'حفظ الهوية'}</button>
         </div>
       </div>
 
@@ -118,7 +160,7 @@ export default function AdminSettingsPage() {
       <div className="bg-card border rounded-lg p-6">
         <h2 className="text-heading-lg text-foreground mb-4">{isEN ? 'Maintenance Mode' : 'وضع الصيانة'}</h2>
         <div className="flex items-center gap-3 mb-4">
-          <input type="checkbox" checked={maintenance} onChange={e => setMaintenance(e.target.checked)} className="h-5 w-5 accent-accent" />
+          <input type="checkbox" checked={maintenance} onChange={toggleMaintenance} className="h-5 w-5 accent-accent" />
           <span className="text-body-md text-foreground">{isEN ? 'Enable Maintenance Mode' : 'تفعيل وضع الصيانة'}</span>
         </div>
         {maintenance && (

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Search, ClipboardList } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface AuditEntry {
   id: string;
@@ -22,13 +23,22 @@ export default function AdminAuditLogPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [actionFilter, setActionFilter] = useState('all');
+  const [page, setPage] = useState(0);
+  const [totalCount, setTotalCount] = useState(0);
+  const PAGE_SIZE = 25;
 
-  useEffect(() => { loadEntries(); }, []);
+  useEffect(() => { loadEntries(); }, [page]);
 
   async function loadEntries() {
-    const { data } = await supabase.from('admin_audit_log').select('*').order('created_at', { ascending: false }).limit(100) as any;
+    setLoading(true);
+    const { data, count } = await supabase.from('admin_audit_log')
+      .select('*', { count: 'exact' })
+      .order('created_at', { ascending: false })
+      .range(page * PAGE_SIZE, (page + 1) * PAGE_SIZE - 1) as any;
+
     const entries = data || [];
-    // Get admin names
+    setTotalCount(count || 0);
+
     const adminIds = [...new Set(entries.map((e: any) => e.admin_id))] as string[];
     if (adminIds.length > 0) {
       const { data: profiles } = await supabase.from('profiles').select('id, first_name, last_name').in('id', adminIds);
@@ -49,12 +59,15 @@ export default function AdminAuditLogPage() {
     org_updated: isEN ? 'Updated organization' : 'حدّث مؤسسة',
     org_suspended: isEN ? 'Suspended organization' : 'علّق مؤسسة',
     org_activated: isEN ? 'Activated organization' : 'فعّل مؤسسة',
+    org_deleted: isEN ? 'Deleted organization' : 'حذف مؤسسة',
     user_created: isEN ? 'Created user' : 'أنشأ مستخدم',
     user_updated: isEN ? 'Updated user' : 'حدّث مستخدم',
     user_deactivated: isEN ? 'Deactivated user' : 'عطّل مستخدم',
     user_activated: isEN ? 'Activated user' : 'فعّل مستخدم',
+    user_deleted: isEN ? 'Deleted user' : 'حذف مستخدم',
     user_role_changed: isEN ? 'Changed user role' : 'غيّر دور المستخدم',
     user_password_reset: isEN ? 'Reset user password' : 'أعاد تعيين كلمة المرور',
+    user_org_changed: isEN ? 'Changed user org' : 'غيّر مؤسسة المستخدم',
     plan_changed: isEN ? 'Changed plan' : 'غيّر الخطة',
     backup_created: isEN ? 'Created backup' : 'أنشأ نسخة احتياطية',
     announcement_sent: isEN ? 'Sent announcement' : 'أرسل إعلان',
@@ -75,6 +88,8 @@ export default function AdminAuditLogPage() {
     }
     return true;
   });
+
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
 
   return (
     <div className="space-y-6">
@@ -102,28 +117,41 @@ export default function AdminAuditLogPage() {
           <p className="text-muted-foreground">{isEN ? 'No audit entries found' : 'لا توجد سجلات'}</p>
         </div>
       ) : (
-        <div className="overflow-x-auto border rounded-lg bg-card">
-          <table className="w-full text-body-sm">
-            <thead className="bg-muted/50">
-              <tr>
-                {[isEN ? 'Timestamp' : 'الوقت', isEN ? 'Admin' : 'المدير', isEN ? 'Action' : 'الإجراء', isEN ? 'Target' : 'الهدف', isEN ? 'Details' : 'التفاصيل'].map(h => (
-                  <th key={h} className="text-start p-3 font-medium text-muted-foreground">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {filtered.map(e => (
-                <tr key={e.id} className="border-t hover:bg-muted/20">
-                  <td className="p-3 text-muted-foreground whitespace-nowrap">{new Date(e.created_at).toLocaleString()}</td>
-                  <td className="p-3 font-medium text-foreground">{e.admin_name || 'Admin'}</td>
-                  <td className="p-3"><span className={`px-2 py-0.5 rounded-full text-body-sm ${actionColor(e.action)}`}>{actionLabels[e.action] || e.action}</span></td>
-                  <td className="p-3 text-muted-foreground">{e.target_name || '—'}</td>
-                  <td className="p-3 text-muted-foreground max-w-[200px] truncate">{e.details && Object.keys(e.details).length > 0 ? JSON.stringify(e.details) : '—'}</td>
+        <>
+          <div className="overflow-x-auto border rounded-lg bg-card">
+            <table className="w-full text-body-sm">
+              <thead className="bg-muted/50">
+                <tr>
+                  {[isEN ? 'Timestamp' : 'الوقت', isEN ? 'Admin' : 'المدير', isEN ? 'Action' : 'الإجراء', isEN ? 'Target' : 'الهدف', isEN ? 'Details' : 'التفاصيل'].map(h => (
+                    <th key={h} className="text-start p-3 font-medium text-muted-foreground">{h}</th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody>
+                {filtered.map(e => (
+                  <tr key={e.id} className="border-t hover:bg-muted/20">
+                    <td className="p-3 text-muted-foreground whitespace-nowrap">{new Date(e.created_at).toLocaleString()}</td>
+                    <td className="p-3 font-medium text-foreground">{e.admin_name || 'Admin'}</td>
+                    <td className="p-3"><span className={`px-2 py-0.5 rounded-full text-body-sm ${actionColor(e.action)}`}>{actionLabels[e.action] || e.action}</span></td>
+                    <td className="p-3 text-muted-foreground">{e.target_name || '—'}</td>
+                    <td className="p-3 text-muted-foreground max-w-[200px] truncate">{e.details && Object.keys(e.details).length > 0 ? JSON.stringify(e.details) : '—'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between">
+              <span className="text-body-sm text-muted-foreground">
+                {isEN ? `Showing ${page * PAGE_SIZE + 1}-${Math.min((page + 1) * PAGE_SIZE, totalCount)} of ${totalCount}` : `عرض ${page * PAGE_SIZE + 1}-${Math.min((page + 1) * PAGE_SIZE, totalCount)} من ${totalCount}`}
+              </span>
+              <div className="flex gap-2">
+                <Button variant="outline" size="sm" disabled={page === 0} onClick={() => setPage(p => p - 1)}>{isEN ? 'Previous' : 'السابق'}</Button>
+                <Button variant="outline" size="sm" disabled={(page + 1) * PAGE_SIZE >= totalCount} onClick={() => setPage(p => p + 1)}>{isEN ? 'Next' : 'التالي'}</Button>
+              </div>
+            </div>
+          )}
+        </>
       )}
     </div>
   );
