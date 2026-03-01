@@ -37,7 +37,6 @@ const secondaryNavItems = [
 ];
 
 const bottomNavItems = [
-  { key: 'team', path: '/team', icon: UserCog },
   { key: 'settings', path: '/settings', icon: Settings },
 ];
 

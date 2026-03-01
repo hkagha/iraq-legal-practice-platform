@@ -2552,9 +2552,12 @@ export type Database = {
         Row: {
           address: string | null
           address_ar: string | null
+          ai_api_key_encrypted: string | null
           ai_enabled: boolean | null
           ai_last_reset_date: string | null
+          ai_model: string | null
           ai_monthly_token_limit: number | null
+          ai_provider: string | null
           ai_tokens_used_this_month: number | null
           bank_account_number: string | null
           bank_iban: string | null
@@ -2609,9 +2612,12 @@ export type Database = {
         Insert: {
           address?: string | null
           address_ar?: string | null
+          ai_api_key_encrypted?: string | null
           ai_enabled?: boolean | null
           ai_last_reset_date?: string | null
+          ai_model?: string | null
           ai_monthly_token_limit?: number | null
+          ai_provider?: string | null
           ai_tokens_used_this_month?: number | null
           bank_account_number?: string | null
           bank_iban?: string | null
@@ -2666,9 +2672,12 @@ export type Database = {
         Update: {
           address?: string | null
           address_ar?: string | null
+          ai_api_key_encrypted?: string | null
           ai_enabled?: boolean | null
           ai_last_reset_date?: string | null
+          ai_model?: string | null
           ai_monthly_token_limit?: number | null
+          ai_provider?: string | null
           ai_tokens_used_this_month?: number | null
           bank_account_number?: string | null
           bank_iban?: string | null
