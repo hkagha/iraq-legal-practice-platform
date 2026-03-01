@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePortalOrg } from '@/contexts/PortalOrgContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Loader2, Eye, EyeOff } from 'lucide-react';
@@ -12,8 +13,8 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 export default function PortalProfilePage() {
   const { t, language, setLanguage } = useLanguage();
   const { profile, getFullName, getInitials } = useAuth();
+  const { activeClientId } = usePortalOrg();
 
-  const [clientId, setClientId] = useState<string | null>(null);
   const [client, setClient] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
@@ -22,7 +23,6 @@ export default function PortalProfilePage() {
   const [address, setAddress] = useState('');
   const [saving, setSaving] = useState(false);
 
-  // Password
   const [currentPw, setCurrentPw] = useState('');
   const [newPw, setNewPw] = useState('');
   const [confirmPw, setConfirmPw] = useState('');
@@ -30,26 +30,17 @@ export default function PortalProfilePage() {
   const [showPw, setShowPw] = useState(false);
 
   useEffect(() => {
-    if (!profile?.id) return;
+    if (!activeClientId) return;
     loadClient();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile?.id]);
+  }, [activeClientId]);
 
   const loadClient = async () => {
     setLoading(true);
-    const { data: link } = await supabase
-      .from('client_user_links')
-      .select('client_id')
-      .eq('user_id', profile!.id)
-      .maybeSingle();
-
-    if (!link?.client_id) { setLoading(false); return; }
-    setClientId(link.client_id);
 
     const { data: c } = await supabase
       .from('clients')
       .select('id, phone, whatsapp_number, address')
-      .eq('id', link.client_id)
+      .eq('id', activeClientId!)
       .maybeSingle();
 
     setClient(c);
@@ -61,13 +52,13 @@ export default function PortalProfilePage() {
   };
 
   const handleSave = async () => {
-    if (!clientId) return;
+    if (!activeClientId) return;
     setSaving(true);
     try {
       const { error } = await supabase
         .from('clients')
         .update({ phone: phone || null, whatsapp_number: whatsapp || null, address: address || null } as any)
-        .eq('id', clientId);
+        .eq('id', activeClientId);
       if (error) throw error;
 
       toast({ title: language === 'en' ? 'Profile updated' : 'تم تحديث الملف الشخصي' });
@@ -95,7 +86,6 @@ export default function PortalProfilePage() {
 
     setChangingPw(true);
     try {
-      // Verify current password
       const { error: reauthError } = await supabase.auth.signInWithPassword({ email: profile.email, password: currentPw });
       if (reauthError) throw reauthError;
 
@@ -119,7 +109,6 @@ export default function PortalProfilePage() {
     <div className="space-y-6 max-w-lg">
       <h1 className="text-display-lg font-bold text-foreground">{t('portal.profile')}</h1>
 
-      {/* Profile card */}
       <div className="bg-card border border-border rounded-xl p-6">
         <div className="flex items-center gap-4 mb-6">
           <Avatar className="h-16 w-16">
@@ -166,7 +155,6 @@ export default function PortalProfilePage() {
         </div>
       </div>
 
-      {/* Change password */}
       <div className="bg-card border border-border rounded-xl p-6">
         <h2 className="text-heading-sm font-semibold text-foreground mb-4">{language === 'en' ? 'Change Password' : 'تغيير كلمة المرور'}</h2>
         <div className="space-y-4">

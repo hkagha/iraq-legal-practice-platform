@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePortalOrg } from '@/contexts/PortalOrgContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Scale, FileCheck, Receipt, Calendar, Users, ArrowRight } from 'lucide-react';
 import { format } from 'date-fns';
@@ -12,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 export default function PortalDashboardPage() {
   const { t, language, isRTL } = useLanguage();
   const { profile, getFullName } = useAuth();
+  const { activeClientId, activeOrg } = usePortalOrg();
 
   const [activeCases, setActiveCases] = useState(0);
   const [activeErrands, setActiveErrands] = useState(0);
@@ -21,28 +23,15 @@ export default function PortalDashboardPage() {
   const [upcomingHearings, setUpcomingHearings] = useState<any[]>([]);
   const [teamMembers, setTeamMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [clientId, setClientId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!profile?.id) return;
-    loadData();
-  }, [profile?.id]);
+    if (!activeClientId) return;
+    loadData(activeClientId);
+  }, [activeClientId]);
 
-  const loadData = async () => {
+  const loadData = async (cid: string) => {
     setLoading(true);
     try {
-      // Get client_id from client_user_links
-      const { data: link } = await supabase
-        .from('client_user_links')
-        .select('client_id')
-        .eq('user_id', profile!.id)
-        .maybeSingle();
-
-      if (!link) { setLoading(false); return; }
-      setClientId(link.client_id);
-      const cid = link.client_id;
-
-      // Parallel queries
       const [casesRes, errandsRes, invoicesRes] = await Promise.all([
         supabase.from('cases').select('id, title, title_ar, status, case_number, case_type', { count: 'exact' })
           .eq('client_id', cid).eq('is_visible_to_client', true)
@@ -61,7 +50,6 @@ export default function PortalDashboardPage() {
         (invoicesRes.data || []).reduce((sum: number, inv: any) => sum + (inv.balance_due || 0), 0)
       );
 
-      // Upcoming hearings
       const caseIds = (casesRes.data || []).map((c: any) => c.id);
       if (caseIds.length > 0) {
         const { data: hearings } = await supabase
@@ -74,7 +62,6 @@ export default function PortalDashboardPage() {
           .limit(5);
         setUpcomingHearings(hearings || []);
 
-        // Team members
         const { data: team } = await supabase
           .from('case_team_members')
           .select('user_id, role')
@@ -86,17 +73,22 @@ export default function PortalDashboardPage() {
             .select('id, first_name, last_name, first_name_ar, last_name_ar, email, phone, role, avatar_url')
             .in('id', uniqueUserIds);
           setTeamMembers(profiles || []);
+        } else {
+          setTeamMembers([]);
         }
-      }
 
-      // Recent activity
-      const { data: caseActs } = await supabase
-        .from('case_activities')
-        .select('id, title, title_ar, activity_type, created_at')
-        .in('case_id', caseIds.length > 0 ? caseIds : ['00000000-0000-0000-0000-000000000000'])
-        .order('created_at', { ascending: false })
-        .limit(10);
-      setRecentActivity(caseActs || []);
+        const { data: caseActs } = await supabase
+          .from('case_activities')
+          .select('id, title, title_ar, activity_type, created_at')
+          .in('case_id', caseIds)
+          .order('created_at', { ascending: false })
+          .limit(10);
+        setRecentActivity(caseActs || []);
+      } else {
+        setUpcomingHearings([]);
+        setTeamMembers([]);
+        setRecentActivity([]);
+      }
     } catch (err) {
       console.error('Portal dashboard error:', err);
     } finally {
@@ -133,6 +125,9 @@ export default function PortalDashboardPage() {
           {t('portal.welcome').replace('{{name}}', getFullName())}
         </h1>
         <p className="text-body-md text-muted-foreground mt-1">
+          {activeOrg && (
+            <span>{language === 'ar' ? activeOrg.organization_name_ar : activeOrg.organization_name} — </span>
+          )}
           {language === 'en' ? "Here's an overview of your legal matters" : 'إليك نظرة عامة على شؤونك القانونية'}
         </p>
       </div>
@@ -176,9 +171,7 @@ export default function PortalDashboardPage() {
 
       {/* Two column layout */}
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        {/* Left */}
         <div className="lg:col-span-3 space-y-6">
-          {/* Recent activity */}
           <div className="bg-card rounded-xl border border-border p-5">
             <h2 className="text-lg font-semibold text-foreground mb-4">{t('portal.dashboard.recentActivity')}</h2>
             {recentActivity.length === 0 ? (
@@ -200,7 +193,6 @@ export default function PortalDashboardPage() {
             )}
           </div>
 
-          {/* Upcoming events */}
           <div className="bg-card rounded-xl border border-border p-5">
             <h2 className="text-lg font-semibold text-foreground mb-4">{t('portal.dashboard.upcomingEvents')}</h2>
             {upcomingHearings.length === 0 ? (
@@ -226,9 +218,7 @@ export default function PortalDashboardPage() {
           </div>
         </div>
 
-        {/* Right */}
         <div className="lg:col-span-2 space-y-6">
-          {/* Legal team */}
           <div className="bg-card rounded-xl border border-border p-5">
             <h2 className="text-lg font-semibold text-foreground mb-4">{t('portal.cases.caseTeam')}</h2>
             {teamMembers.length === 0 ? (
@@ -257,7 +247,6 @@ export default function PortalDashboardPage() {
             )}
           </div>
 
-          {/* Outstanding balance */}
           <div className="bg-card rounded-xl border border-border p-5">
             <h2 className="text-lg font-semibold text-foreground mb-3">
               {language === 'en' ? 'Outstanding Balance' : 'الرصيد المستحق'}

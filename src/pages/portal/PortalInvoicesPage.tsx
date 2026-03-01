@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { usePortalOrg } from '@/contexts/PortalOrgContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Receipt, Download } from 'lucide-react';
 import { format } from 'date-fns';
@@ -9,6 +9,7 @@ import { ar as arLocale } from 'date-fns/locale';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
+import { cn } from '@/lib/utils';
 
 interface Invoice {
   id: string;
@@ -24,30 +25,23 @@ interface Invoice {
 
 export default function PortalInvoicesPage() {
   const { t, language } = useLanguage();
-  const { profile } = useAuth();
+  const { activeClientId } = usePortalOrg();
 
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!profile?.id) return;
+    if (!activeClientId) return;
     loadInvoices();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile?.id]);
+  }, [activeClientId]);
 
   const loadInvoices = async () => {
     setLoading(true);
-    const { data: link } = await supabase
-      .from('client_user_links')
-      .select('client_id')
-      .eq('user_id', profile!.id)
-      .maybeSingle();
-    if (!link?.client_id) { setLoading(false); return; }
 
     const { data } = await supabase
       .from('invoices')
       .select('id, invoice_number, issue_date, due_date, total_amount, amount_paid, balance_due, status, currency')
-      .eq('client_id', link.client_id)
+      .eq('client_id', activeClientId!)
       .not('status', 'in', '("draft","cancelled","written_off")')
       .order('created_at', { ascending: false });
 
@@ -168,8 +162,4 @@ export default function PortalInvoicesPage() {
       )}
     </div>
   );
-}
-
-function cn(...classes: (string | false | null | undefined)[]) {
-  return classes.filter(Boolean).join(' ');
 }

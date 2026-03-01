@@ -2,9 +2,10 @@ import { useState } from 'react';
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePortalOrg } from '@/contexts/PortalOrgContext';
 import {
   LayoutDashboard, Scale, FileCheck, FileText, MessageSquare,
-  Receipt, User, LogOut, Globe,
+  Receipt, User, LogOut, Globe, ChevronDown, Building, Check, Loader2,
 } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
@@ -25,6 +26,7 @@ const portalNav = [
 export default function ClientLayout() {
   const { t, isRTL, language, setLanguage } = useLanguage();
   const { profile, organization, signOut, getFullName, getInitials } = useAuth();
+  const { linkedOrgs, activeOrg, hasMultipleOrgs, switchOrg, isSwitching } = usePortalOrg();
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -35,14 +37,23 @@ export default function ClientLayout() {
 
   return (
     <div className="min-h-screen flex flex-col bg-secondary/30">
+      {/* Switching overlay */}
+      {isSwitching && (
+        <div className="fixed inset-0 bg-background/60 z-50 flex items-center justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-accent" />
+        </div>
+      )}
+
       {/* Header */}
       <header className="h-16 bg-card border-b border-border flex items-center justify-between px-4 md:px-6 shrink-0">
         <div className="flex items-center gap-3">
           <span className="text-lg font-bold text-primary">
-            {organization?.logo_url ? (
+            {activeOrg?.organization_logo_url ? (
+              <img src={activeOrg.organization_logo_url} alt="" className="h-8 w-8 rounded object-contain" />
+            ) : organization?.logo_url ? (
               <img src={organization.logo_url} alt="" className="h-8 w-8 rounded object-contain" />
             ) : (
-              organization?.name || 'Qanuni'
+              activeOrg?.organization_name || organization?.name || 'Qanuni'
             )}
           </span>
           <span className="text-muted-foreground text-body-sm hidden sm:inline">|</span>
@@ -50,6 +61,53 @@ export default function ClientLayout() {
         </div>
 
         <div className="flex items-center gap-2">
+          {/* Organization switcher */}
+          {hasMultipleOrgs && activeOrg && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <button className="flex items-center gap-2 h-9 px-3 rounded-lg border border-border bg-background hover:bg-muted transition-colors">
+                  {activeOrg.organization_logo_url ? (
+                    <img src={activeOrg.organization_logo_url} alt="" className="h-5 w-5 rounded object-contain" />
+                  ) : (
+                    <Building className="h-4 w-4 text-muted-foreground" />
+                  )}
+                  <span className="text-body-sm font-medium text-foreground max-w-[120px] truncate hidden sm:inline">
+                    {language === 'ar' ? activeOrg.organization_name_ar : activeOrg.organization_name}
+                  </span>
+                  <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
+                </button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align={isRTL ? 'start' : 'end'} className="w-64">
+                <p className="px-2 py-1.5 text-body-sm font-medium text-muted-foreground">
+                  {t('portal.orgSwitcher.yourOrganizations')}
+                </p>
+                <DropdownMenuSeparator />
+                {linkedOrgs.map(org => {
+                  const isActive = activeOrg.organization_id === org.organization_id;
+                  return (
+                    <DropdownMenuItem
+                      key={org.organization_id}
+                      onClick={() => switchOrg(org.organization_id)}
+                      className="flex items-center gap-3 py-2.5"
+                    >
+                      {org.organization_logo_url ? (
+                        <img src={org.organization_logo_url} alt="" className="h-6 w-6 rounded object-contain shrink-0" />
+                      ) : (
+                        <div className="h-6 w-6 rounded bg-accent/10 flex items-center justify-center shrink-0">
+                          <Building className="h-3.5 w-3.5 text-accent" />
+                        </div>
+                      )}
+                      <span className="flex-1 text-body-sm font-medium truncate">
+                        {language === 'ar' ? org.organization_name_ar : org.organization_name}
+                      </span>
+                      {isActive && <Check className="h-4 w-4 text-accent shrink-0" />}
+                    </DropdownMenuItem>
+                  );
+                })}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
+
           {/* Language toggle */}
           <button
             onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}

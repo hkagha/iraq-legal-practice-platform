@@ -338,6 +338,11 @@
       "placeholder": "Type your message...",
       "send": "Send"
     },
+    "orgSwitcher": {
+      "yourOrganizations": "Your Organizations",
+      "switchOrg": "Switch Organization",
+      "viewing": "Viewing"
+    },
     "enablePortalAccess": "Enable Portal Access",
     "sendPortalInvitation": "Send Portal Invitation",
     "portalInvitationSent": "Portal invitation sent successfully"

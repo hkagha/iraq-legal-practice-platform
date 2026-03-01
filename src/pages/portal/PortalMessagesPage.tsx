@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePortalOrg } from '@/contexts/PortalOrgContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { SendHorizonal, MessageSquare, Scale, FileCheck, Paperclip, X } from 'lucide-react';
@@ -38,9 +39,8 @@ interface Thread {
 export default function PortalMessagesPage() {
   const { t, language } = useLanguage();
   const { profile } = useAuth();
+  const { activeClientId, activeOrg } = usePortalOrg();
 
-  const [clientId, setClientId] = useState<string | null>(null);
-  const [orgId, setOrgId] = useState<string | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [threads, setThreads] = useState<Thread[]>([]);
   const [activeThread, setActiveThread] = useState<string>('general');
@@ -55,84 +55,63 @@ export default function PortalMessagesPage() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!profile?.id) return;
-    init();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile?.id]);
+    if (!activeClientId || !activeOrg) return;
+    loadMessages(activeClientId);
+  }, [activeClientId, activeOrg?.organization_id]);
 
-  const init = async () => {
+  const loadMessages = async (cid: string) => {
     setLoading(true);
     try {
-      const { data: link } = await supabase
-        .from('client_user_links')
-        .select('client_id, organization_id')
-        .eq('user_id', profile!.id)
-        .maybeSingle();
-      if (!link) { setLoading(false); return; }
+      const { data } = await supabase
+        .from('client_messages')
+        .select('*')
+        .eq('client_id', cid)
+        .eq('organization_id', activeOrg!.organization_id)
+        .order('created_at', { ascending: true })
+        .limit(300);
 
-      setClientId(link.client_id);
-      setOrgId(link.organization_id);
-      await loadMessages(link.client_id);
+      const msgs = (data || []) as unknown as Message[];
+      setMessages(msgs);
+
+      const staffIds = [...new Set(msgs.filter(m => m.sender_type === 'staff').map(m => m.sender_id))];
+      if (staffIds.length) {
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name, first_name_ar, last_name_ar')
+          .in('id', staffIds);
+        const map: Record<string, any> = {};
+        (profiles || []).forEach(p => { map[p.id] = p; });
+        setStaffProfiles(map);
+      }
+
+      const caseIds = [...new Set(msgs.filter(m => m.case_id).map(m => m.case_id as string))];
+      const errandIds = [...new Set(msgs.filter(m => m.errand_id).map(m => m.errand_id as string))];
+
+      const [casesRes, errandsRes] = await Promise.all([
+        caseIds.length ? supabase.from('cases').select('id, case_number').in('id', caseIds) : Promise.resolve({ data: [] as any[] } as any),
+        errandIds.length ? supabase.from('errands').select('id, errand_number').in('id', errandIds) : Promise.resolve({ data: [] as any[] } as any),
+      ]);
+
+      const labels: Record<string, string> = { general: language === 'en' ? 'General' : 'عام' };
+      (casesRes.data || []).forEach((c: any) => {
+        labels[`case-${c.id}`] = `${language === 'en' ? 'Case' : 'قضية'}: ${c.case_number}`;
+      });
+      (errandsRes.data || []).forEach((e: any) => {
+        labels[`errand-${e.id}`] = `${language === 'en' ? 'Errand' : 'معاملة'}: ${e.errand_number}`;
+      });
+      setThreadLabels(labels);
+
+      buildThreads(msgs, labels);
     } finally {
       setLoading(false);
     }
   };
 
-  const loadMessages = async (cid: string) => {
-    const { data } = await supabase
-      .from('client_messages')
-      .select('*')
-      .eq('client_id', cid)
-      .order('created_at', { ascending: true })
-      .limit(300);
-
-    const msgs = (data || []) as unknown as Message[];
-    setMessages(msgs);
-
-    // Staff profiles
-    const staffIds = [...new Set(msgs.filter(m => m.sender_type === 'staff').map(m => m.sender_id))];
-    if (staffIds.length) {
-      const { data: profiles } = await supabase
-        .from('profiles')
-        .select('id, first_name, last_name, first_name_ar, last_name_ar')
-        .in('id', staffIds);
-      const map: Record<string, any> = {};
-      (profiles || []).forEach(p => { map[p.id] = p; });
-      setStaffProfiles(map);
-    }
-
-    // Thread labels
-    const caseIds = [...new Set(msgs.filter(m => m.case_id).map(m => m.case_id as string))];
-    const errandIds = [...new Set(msgs.filter(m => m.errand_id).map(m => m.errand_id as string))];
-
-    const [casesRes, errandsRes] = await Promise.all([
-      caseIds.length ? supabase.from('cases').select('id, case_number').in('id', caseIds) : Promise.resolve({ data: [] as any[] } as any),
-      errandIds.length ? supabase.from('errands').select('id, errand_number').in('id', errandIds) : Promise.resolve({ data: [] as any[] } as any),
-    ]);
-
-    const labels: Record<string, string> = { general: language === 'en' ? 'General' : 'عام' };
-    (casesRes.data || []).forEach((c: any) => {
-      labels[`case-${c.id}`] = `${language === 'en' ? 'Case' : 'قضية'}: ${c.case_number}`;
-    });
-    (errandsRes.data || []).forEach((e: any) => {
-      labels[`errand-${e.id}`] = `${language === 'en' ? 'Errand' : 'معاملة'}: ${e.errand_number}`;
-    });
-    setThreadLabels(labels);
-
-    buildThreads(msgs, labels);
-  };
-
   const buildThreads = (msgs: Message[], labels: Record<string, string>) => {
     const threadMap: Record<string, Thread> = {};
     threadMap['general'] = {
-      key: 'general',
-      label: labels.general,
-      icon: MessageSquare,
-      case_id: null,
-      errand_id: null,
-      lastMessage: '',
-      lastDate: '',
-      unread: 0,
+      key: 'general', label: labels.general, icon: MessageSquare,
+      case_id: null, errand_id: null, lastMessage: '', lastDate: '', unread: 0,
     };
 
     msgs.forEach(m => {
@@ -142,11 +121,8 @@ export default function PortalMessagesPage() {
           key,
           label: labels[key] || (m.case_id ? (language === 'en' ? 'Case' : 'قضية') : (language === 'en' ? 'Errand' : 'معاملة')),
           icon: m.case_id ? Scale : m.errand_id ? FileCheck : MessageSquare,
-          case_id: m.case_id,
-          errand_id: m.errand_id,
-          lastMessage: '',
-          lastDate: '',
-          unread: 0,
+          case_id: m.case_id, errand_id: m.errand_id,
+          lastMessage: '', lastDate: '', unread: 0,
         };
       }
       threadMap[key].lastMessage = m.content.slice(0, 60);
@@ -154,18 +130,17 @@ export default function PortalMessagesPage() {
       if (!m.is_read && m.sender_type === 'staff') threadMap[key].unread++;
     });
 
-    const list = Object.values(threadMap).sort((a, b) => (b.lastDate || '').localeCompare(a.lastDate || ''));
-    setThreads(list);
+    setThreads(Object.values(threadMap).sort((a, b) => (b.lastDate || '').localeCompare(a.lastDate || '')));
   };
 
   // Realtime
   useEffect(() => {
-    if (!clientId) return;
+    if (!activeClientId) return;
     const channel = supabase
-      .channel('client-messages')
+      .channel(`portal-messages-${activeClientId}`)
       .on(
         'postgres_changes',
-        { event: 'INSERT', schema: 'public', table: 'client_messages', filter: `client_id=eq.${clientId}` },
+        { event: 'INSERT', schema: 'public', table: 'client_messages', filter: `client_id=eq.${activeClientId}` },
         (payload) => {
           const newMsg = payload.new as any as Message;
           setMessages(prev => {
@@ -174,7 +149,6 @@ export default function PortalMessagesPage() {
             return next;
           });
 
-          // Mark as read if we are viewing that thread
           if (newMsg.sender_type === 'staff') {
             const key = newMsg.case_id ? `case-${newMsg.case_id}` : newMsg.errand_id ? `errand-${newMsg.errand_id}` : 'general';
             if (key === activeThread) {
@@ -189,8 +163,7 @@ export default function PortalMessagesPage() {
       )
       .subscribe();
     return () => { supabase.removeChannel(channel); };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [clientId, activeThread]);
+  }, [activeClientId, activeThread]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -206,9 +179,9 @@ export default function PortalMessagesPage() {
   }, [messages, activeThread]);
 
   const handleUploadAttachment = async (file: File) => {
-    if (!orgId || !clientId) return;
+    if (!activeOrg || !activeClientId) return;
     const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
-    const path = `${orgId}/portal-messages/${clientId}/${Date.now()}_${safeName}`;
+    const path = `${activeOrg.organization_id}/portal-messages/${activeClientId}/${Date.now()}_${safeName}`;
 
     const { error } = await supabase.storage.from('documents').upload(path, file, { upsert: false });
     if (error) throw error;
@@ -217,12 +190,12 @@ export default function PortalMessagesPage() {
   };
 
   const handleSend = async () => {
-    if (!input.trim() || !clientId || !orgId || !profile?.id) return;
+    if (!input.trim() || !activeClientId || !activeOrg || !profile?.id) return;
     setSending(true);
     try {
       const msgData: any = {
-        organization_id: orgId,
-        client_id: clientId,
+        organization_id: activeOrg.organization_id,
+        client_id: activeClientId,
         sender_id: profile.id,
         sender_type: 'client',
         content: input.trim(),
@@ -312,14 +285,12 @@ export default function PortalMessagesPage() {
 
         {/* Chat area */}
         <div className="flex-1 flex flex-col min-w-0">
-          {/* Mobile thread select */}
           <div className="sm:hidden p-2 border-b border-border">
             <select value={activeThread} onChange={e => { setActiveThread(e.target.value); setPendingAttachments([]); }} className="w-full h-9 rounded-md border border-input bg-background px-3 text-body-sm">
               {threads.map(th => <option key={th.key} value={th.key}>{th.label}</option>)}
             </select>
           </div>
 
-          {/* Messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
             {filteredMessages.length === 0 ? (
               <div className="flex items-center justify-center h-full">
