@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePortalOrg } from '@/contexts/PortalOrgContext';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, Check, Circle, Clock, Download, XCircle } from 'lucide-react';
 import { format } from 'date-fns';
@@ -17,6 +18,7 @@ export default function PortalErrandDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { t, language } = useLanguage();
   const { profile } = useAuth();
+  const { activeClientId } = usePortalOrg();
   const navigate = useNavigate();
 
   const [errand, setErrand] = useState<any>(null);
@@ -32,12 +34,13 @@ export default function PortalErrandDetailPage() {
 
   const loadErrand = async () => {
     setLoading(true);
-    const { data: e } = await supabase
+    const query = supabase
       .from('errands')
       .select('*')
       .eq('id', id!)
-      .eq('is_visible_to_client', true)
-      .maybeSingle();
+      .eq('is_visible_to_client', true);
+    if (activeClientId) query.eq('client_id', activeClientId);
+    const { data: e } = await query.maybeSingle();
 
     if (!e) { setLoading(false); navigate('/portal/errands'); return; }
     setErrand(e);

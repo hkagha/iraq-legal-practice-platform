@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePortalOrg } from '@/contexts/PortalOrgContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { Download, Copy, Building } from 'lucide-react';
@@ -18,6 +19,7 @@ export default function PortalInvoiceDetailPage() {
 
   const { t, language, isRTL } = useLanguage();
   const { profile } = useAuth();
+  const { activeClientId } = usePortalOrg();
 
   const [invoice, setInvoice] = useState<any>(null);
   const [lineItems, setLineItems] = useState<any[]>([]);
@@ -40,8 +42,10 @@ export default function PortalInvoiceDetailPage() {
   const loadData = async () => {
     setLoading(true);
 
+    const invQuery = supabase.from('invoices').select('*').eq('id', id!);
+    if (activeClientId) invQuery.eq('client_id', activeClientId);
     const [invRes, itemsRes, payRes] = await Promise.all([
-      supabase.from('invoices').select('*').eq('id', id!).maybeSingle(),
+      invQuery.maybeSingle(),
       supabase.from('invoice_line_items').select('*').eq('invoice_id', id!).order('sort_order'),
       supabase.from('payments').select('*').eq('invoice_id', id!).order('payment_date', { ascending: false }),
     ]);

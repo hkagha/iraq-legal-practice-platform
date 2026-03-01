@@ -338,6 +338,11 @@
       "placeholder": "اكتب رسالتك...",
       "send": "إرسال"
     },
+    "orgSwitcher": {
+      "yourOrganizations": "مؤسساتك",
+      "switchOrg": "تغيير المؤسسة",
+      "viewing": "عرض"
+    },
     "enablePortalAccess": "تفعيل الوصول للبوابة",
     "sendPortalInvitation": "إرسال دعوة البوابة",
     "portalInvitationSent": "تم إرسال دعوة البوابة بنجاح"

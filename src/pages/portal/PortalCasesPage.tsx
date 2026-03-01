@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { usePortalOrg } from '@/contexts/PortalOrgContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Scale, Calendar } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
@@ -12,31 +12,27 @@ import { EmptyState } from '@/components/ui/EmptyState';
 
 export default function PortalCasesPage() {
   const { t, language } = useLanguage();
-  const { profile } = useAuth();
-  const navigate = useNavigate();
+  const { activeClientId } = usePortalOrg();
 
   const [cases, setCases] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!profile?.id) return;
+    if (!activeClientId) return;
     loadCases();
-  }, [profile?.id]);
+  }, [activeClientId]);
 
   const loadCases = async () => {
     setLoading(true);
-    const { data: link } = await supabase.from('client_user_links').select('client_id').eq('user_id', profile!.id).maybeSingle();
-    if (!link) { setLoading(false); return; }
 
     const { data } = await supabase
       .from('cases')
       .select('id, case_number, title, title_ar, case_type, status, priority, court_name, court_name_ar, updated_at')
-      .eq('client_id', link.client_id)
+      .eq('client_id', activeClientId!)
       .eq('is_visible_to_client', true)
       .not('status', 'eq', 'archived')
       .order('updated_at', { ascending: false });
 
-    // Get next hearing for each case
     const caseIds = (data || []).map((c: any) => c.id);
     let hearingsMap: Record<string, any> = {};
     if (caseIds.length > 0) {

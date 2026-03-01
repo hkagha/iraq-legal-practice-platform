@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePortalOrg } from '@/contexts/PortalOrgContext';
 import { supabase } from '@/integrations/supabase/client';
 import { ArrowLeft, Calendar, Download, Users } from 'lucide-react';
 import { format, differenceInDays } from 'date-fns';
@@ -16,6 +17,7 @@ export default function PortalCaseDetailPage() {
   const { id } = useParams<{ id: string }>();
   const { t, language, isRTL } = useLanguage();
   const { profile } = useAuth();
+  const { activeClientId } = usePortalOrg();
   const navigate = useNavigate();
 
   const [caseData, setCaseData] = useState<any>(null);
@@ -32,12 +34,13 @@ export default function PortalCaseDetailPage() {
 
   const loadCase = async () => {
     setLoading(true);
-    const { data: c } = await supabase
+    const query = supabase
       .from('cases')
       .select('*')
       .eq('id', id!)
-      .eq('is_visible_to_client', true)
-      .maybeSingle();
+      .eq('is_visible_to_client', true);
+    if (activeClientId) query.eq('client_id', activeClientId);
+    const { data: c } = await query.maybeSingle();
 
     if (!c) { setLoading(false); navigate('/portal/cases'); return; }
     setCaseData(c);

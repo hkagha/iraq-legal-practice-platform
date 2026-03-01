@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useAuth } from '@/contexts/AuthContext';
+import { usePortalOrg } from '@/contexts/PortalOrgContext';
 import { supabase } from '@/integrations/supabase/client';
 import { FileCheck, Calendar } from 'lucide-react';
-import { format, differenceInDays, isPast } from 'date-fns';
+import { format, isPast } from 'date-fns';
 import { ar as arLocale } from 'date-fns/locale';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -13,25 +13,23 @@ import { Progress } from '@/components/ui/progress';
 
 export default function PortalErrandsPage() {
   const { t, language } = useLanguage();
-  const { profile } = useAuth();
+  const { activeClientId } = usePortalOrg();
 
   const [errands, setErrands] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!profile?.id) return;
+    if (!activeClientId) return;
     loadErrands();
-  }, [profile?.id]);
+  }, [activeClientId]);
 
   const loadErrands = async () => {
     setLoading(true);
-    const { data: link } = await supabase.from('client_user_links').select('client_id').eq('user_id', profile!.id).maybeSingle();
-    if (!link) { setLoading(false); return; }
 
     const { data } = await supabase
       .from('errands')
       .select('id, errand_number, title, title_ar, category, status, priority, due_date, total_steps, completed_steps, updated_at')
-      .eq('client_id', link.client_id)
+      .eq('client_id', activeClientId!)
       .eq('is_visible_to_client', true)
       .not('status', 'eq', 'cancelled')
       .order('updated_at', { ascending: false });

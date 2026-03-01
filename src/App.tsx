@@ -9,6 +9,7 @@ import { TimerProvider } from "@/contexts/TimerContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ImpersonationProvider } from "@/contexts/ImpersonationContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
+import { PortalOrgProvider } from '@/contexts/PortalOrgContext';
 import MainLayout from "@/layouts/MainLayout";
 import ClientLayout from "@/layouts/ClientLayout";
 import AdminLayout from "@/layouts/AdminLayout";
@@ -151,7 +152,7 @@ const App = () => (
                 </Route>
 
                 {/* Client portal */}
-                <Route path="/portal" element={<ProtectedRoute allowedRoles={['client']}><ClientLayout /></ProtectedRoute>}>
+                <Route path="/portal" element={<ProtectedRoute allowedRoles={['client']}><PortalOrgProvider><ClientLayout /></PortalOrgProvider></ProtectedRoute>}>
                   <Route index element={<Navigate to="/portal/dashboard" replace />} />
                   <Route path="dashboard" element={<PortalDashboardPage />} />
                   <Route path="cases" element={<PortalCasesPage />} />

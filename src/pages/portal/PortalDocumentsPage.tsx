@@ -1,6 +1,7 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePortalOrg } from '@/contexts/PortalOrgContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { FileText, Download, Search } from 'lucide-react';
@@ -31,6 +32,7 @@ interface DocItem {
 export default function PortalDocumentsPage() {
   const { t, language } = useLanguage();
   const { profile } = useAuth();
+  const { activeClientId } = usePortalOrg();
 
   const [documents, setDocuments] = useState<DocItem[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,32 +41,22 @@ export default function PortalDocumentsPage() {
   const [linkedTo, setLinkedTo] = useState<'all' | 'cases' | 'errands' | 'general'>('all');
 
   useEffect(() => {
-    if (!profile?.id) return;
+    if (!activeClientId) return;
     loadDocuments();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [profile?.id]);
+  }, [activeClientId]);
 
   const loadDocuments = async () => {
     setLoading(true);
     try {
-      const { data: link } = await supabase
-        .from('client_user_links')
-        .select('client_id')
-        .eq('user_id', profile!.id)
-        .maybeSingle();
-      if (!link?.client_id) { setLoading(false); return; }
-
-      const clientId = link.client_id;
-
       const [casesRes, errandsRes] = await Promise.all([
-        supabase.from('cases').select('id').eq('client_id', clientId).eq('is_visible_to_client', true),
-        supabase.from('errands').select('id').eq('client_id', clientId).eq('is_visible_to_client', true),
+        supabase.from('cases').select('id').eq('client_id', activeClientId!).eq('is_visible_to_client', true),
+        supabase.from('errands').select('id').eq('client_id', activeClientId!).eq('is_visible_to_client', true),
       ]);
 
       const caseIds = (casesRes.data || []).map((c: any) => c.id);
       const errandIds = (errandsRes.data || []).map((e: any) => e.id);
 
-      const orParts = [`client_id.eq.${clientId}`];
+      const orParts = [`client_id.eq.${activeClientId}`];
       if (caseIds.length) orParts.push(`case_id.in.(${caseIds.join(',')})`);
       if (errandIds.length) orParts.push(`errand_id.in.(${errandIds.join(',')})`);
 
@@ -91,7 +83,6 @@ export default function PortalDocumentsPage() {
       const { data, error } = await supabase.storage.from('documents').createSignedUrl(doc.file_path, 60);
       if (error || !data?.signedUrl) throw error || new Error('Failed to generate download link');
 
-      // Log activity
       await supabase.from('document_activities').insert({
         organization_id: doc.organization_id,
         document_id: doc.id,
@@ -163,7 +154,6 @@ export default function PortalDocumentsPage() {
         <p className="text-body-md text-muted-foreground mt-1">{t('portal.documents.subtitle')}</p>
       </div>
 
-      {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -182,7 +172,6 @@ export default function PortalDocumentsPage() {
         </select>
       </div>
 
-      {/* Grid */}
       {filtered.length === 0 ? (
         <EmptyState icon={FileText} title={t('portal.documents.noDocuments')} titleAr={t('portal.documents.noDocuments')} />
       ) : (
