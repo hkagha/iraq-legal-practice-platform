@@ -343,6 +343,7 @@
     "portalInvitationSent": "Portal invitation sent successfully"
   },
   "admin": {
+    "title": "Platform Administration",
     "dashboard": "Admin Dashboard",
     "organizations": "Organizations",
     "allUsers": "All Users",
@@ -350,7 +351,117 @@
     "platformAnalytics": "Platform Analytics",
     "systemSettings": "System Settings",
     "announcements": "Announcements",
-    "backups": "Backups"
+    "backups": "Backups",
+    "login": {
+      "title": "Platform Administration",
+      "subtitle": "Secure Access",
+      "signIn": "Sign In to Admin Panel",
+      "accessDenied": "Access denied. This login is for platform administrators only.",
+      "backToMain": "Back to main login"
+    },
+    "nav": {
+      "dashboard": "Dashboard",
+      "organizations": "Organizations",
+      "users": "Users",
+      "revenue": "Revenue",
+      "analytics": "Analytics",
+      "backups": "Backups",
+      "emailQueue": "Email Queue",
+      "whatsappQueue": "WhatsApp Queue",
+      "announcements": "Announcements",
+      "auditLog": "Audit Log",
+      "platformSettings": "Platform Settings",
+      "systemHealth": "System Health"
+    },
+    "impersonate": {
+      "viewing": "VIEWING AS",
+      "exit": "Exit Impersonation",
+      "warning": "You are about to view this organization as their admin. Your actions will be logged.",
+      "confirm": "Start Impersonation"
+    },
+    "org": {
+      "addOrg": "Add Organization",
+      "viewDashboard": "View Dashboard",
+      "editDetails": "Edit Details",
+      "changePlan": "Change Plan",
+      "loginAsAdmin": "Login as Admin",
+      "suspend": "Suspend",
+      "activate": "Activate",
+      "deleteOrg": "Delete Organization",
+      "health": {
+        "active": "Active",
+        "low": "Low Activity",
+        "inactive": "Inactive"
+      }
+    },
+    "users": {
+      "allUsers": "All Users",
+      "createUser": "Create User",
+      "viewProfile": "View Profile",
+      "changeRole": "Change Role",
+      "resetPassword": "Reset Password",
+      "changeOrg": "Change Organization",
+      "deactivate": "Deactivate",
+      "deleteUser": "Delete User",
+      "loginAsUser": "Login as User",
+      "forceSignOut": "Force Sign Out",
+      "neverLoggedIn": "Never logged in",
+      "tempPassword": "Set temporary password"
+    },
+    "audit": {
+      "title": "Audit Log",
+      "subtitle": "All administrative actions across the platform",
+      "actions": {
+        "login": "Logged in",
+        "logout": "Logged out",
+        "impersonate_start": "Started impersonation",
+        "impersonate_end": "Ended impersonation",
+        "org_created": "Created organization",
+        "org_updated": "Updated organization",
+        "org_suspended": "Suspended organization",
+        "org_activated": "Activated organization",
+        "org_deleted": "Deleted organization",
+        "user_created": "Created user",
+        "user_updated": "Updated user",
+        "user_deactivated": "Deactivated user",
+        "user_role_changed": "Changed user role",
+        "user_password_reset": "Reset user password",
+        "plan_changed": "Changed plan",
+        "backup_created": "Created backup",
+        "announcement_sent": "Sent announcement",
+        "settings_changed": "Changed platform settings"
+      }
+    },
+    "announcementsPage": {
+      "title": "Announcements",
+      "new": "New Announcement",
+      "send": "Send Announcement",
+      "allOrgs": "All Organizations",
+      "specificOrgs": "Specific Organizations",
+      "sentTo": "Sent to {{n}} users",
+      "normal": "Normal",
+      "important": "Important",
+      "urgent": "Urgent"
+    },
+    "systemHealth": {
+      "title": "System Health",
+      "operational": "Operational",
+      "degraded": "Degraded",
+      "down": "Down",
+      "database": "Database",
+      "storage": "Storage",
+      "auth": "Authentication",
+      "realtime": "Real-time",
+      "recentErrors": "Recent Errors"
+    },
+    "platformSettings": {
+      "title": "Platform Settings",
+      "planLimits": "Default Plan Limits",
+      "branding": "Platform Branding",
+      "maintenance": "Maintenance Mode",
+      "maintenanceMsg": "Maintenance Message",
+      "activateMaintenance": "Activate Maintenance Mode"
+    }
   },
   "months": {
     "jan": "Jan",
