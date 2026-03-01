@@ -2,6 +2,7 @@ import React, { useState, useRef, useCallback, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { streamAI } from '@/lib/aiService';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { FormInput } from '@/components/ui/FormInput';
@@ -12,7 +13,7 @@ import { Progress } from '@/components/ui/progress';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import {
-  Upload, X, Trash2, FileText, File, Image, Sheet, FileType, Loader2, Check, AlertCircle,
+  Upload, X, Trash2, FileText, File, Image, Sheet, FileType, Loader2, Check, AlertCircle, Sparkles,
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -82,6 +83,8 @@ interface FileEntry {
   progress: number;
   status: 'pending' | 'uploading' | 'done' | 'error';
   error?: string;
+  aiCategorizing?: boolean;
+  aiSuggested?: boolean;
 }
 
 interface DocumentUploadModalProps {
@@ -326,17 +329,59 @@ export default function DocumentUploadModal({
                   <>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
-                        <div className="flex items-center gap-2 mb-1">
+                         <div className="flex items-center gap-2 mb-1">
                           <label className="text-body-sm font-medium text-foreground">{t('documents.fields.category')} *</label>
-                          {getExt(entry.file.name) === 'pdf' && entry.category === 'general' && (
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <button type="button" className="text-[11px] text-accent flex items-center gap-0.5 hover:underline" onClick={e => { e.preventDefault(); toast.info(language === 'ar' ? 'التصنيف التلقائي بالذكاء الاصطناعي قريباً' : 'AI auto-categorization coming soon'); }}>
-                                  ✨ {language === 'ar' ? 'تصنيف تلقائي' : 'Auto-categorize'}
-                                </button>
-                              </TooltipTrigger>
-                              <TooltipContent>{language === 'ar' ? 'التصنيف التلقائي بالذكاء الاصطناعي قريباً' : 'AI auto-categorization coming soon'}</TooltipContent>
-                            </Tooltip>
+                          {entry.aiSuggested && (
+                            <span className="text-[10px] text-accent flex items-center gap-0.5">✨ AI</span>
+                          )}
+                          {!entry.aiCategorizing && !entry.aiSuggested && (
+                            <button type="button" className="text-[11px] text-accent flex items-center gap-0.5 hover:underline" onClick={async (e) => {
+                              e.preventDefault();
+                              updateFile(entry.id, { aiCategorizing: true });
+                              try {
+                                const text = await entry.file.text().catch(() => '');
+                                const preview = text.slice(0, 2000) || entry.file.name;
+                                let aiResult = '';
+                                await streamAI({
+                                  feature: 'auto_categorize',
+                                  prompt: `Analyze this document and categorize it. Choose exactly one category from this list: contract, pleading, motion, brief, memorandum, court_order, court_judgment, evidence, exhibit, correspondence, letter, notice, power_of_attorney, affidavit, declaration, corporate_document, registration_certificate, license, financial_document, invoice_document, receipt, identity_document, passport, national_id_copy, property_document, deed, template, draft, final, internal_memo, meeting_notes, research, government_form, government_response, government_receipt, photo, scan, other, general.\n\nAlso suggest a descriptive title.\n\nRespond in JSON only: {"category": "...", "title": "...", "title_ar": "..."}\n\nDocument filename: ${entry.file.name}\nDocument content:\n${preview}`,
+                                  language: 'en',
+                                  onDelta: (chunk) => { aiResult += chunk; },
+                                  onDone: () => {
+                                    try {
+                                      const jsonMatch = aiResult.match(/\{[\s\S]*\}/);
+                                      if (jsonMatch) {
+                                        const parsed = JSON.parse(jsonMatch[0]);
+                                        updateFile(entry.id, {
+                                          category: parsed.category || 'general',
+                                          title: parsed.title || entry.title,
+                                          aiCategorizing: false,
+                                          aiSuggested: true,
+                                        });
+                                      } else {
+                                        updateFile(entry.id, { aiCategorizing: false });
+                                      }
+                                    } catch {
+                                      updateFile(entry.id, { aiCategorizing: false });
+                                      toast.error(language === 'ar' ? 'تعذر التصنيف التلقائي' : 'Could not auto-categorize');
+                                    }
+                                  },
+                                  onError: () => {
+                                    updateFile(entry.id, { aiCategorizing: false });
+                                    toast.error(language === 'ar' ? 'تعذر التصنيف التلقائي' : 'Could not auto-categorize');
+                                  },
+                                });
+                              } catch {
+                                updateFile(entry.id, { aiCategorizing: false });
+                              }
+                            }}>
+                              <Sparkles size={11} /> {language === 'ar' ? 'تصنيف تلقائي' : 'Auto-categorize'}
+                            </button>
+                          )}
+                          {entry.aiCategorizing && (
+                            <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                              <Loader2 size={11} className="animate-spin" /> {language === 'ar' ? 'تحليل...' : 'Analyzing...'}
+                            </span>
                           )}
                         </div>
                         <FormSelect value={entry.category} onValueChange={v => updateFile(entry.id, { category: v })} options={categoryOptions} />

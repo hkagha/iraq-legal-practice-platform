@@ -57,7 +57,10 @@
     "activity": "Activity Feed",
     "notifications": "Notifications",
     "collapse": "Collapse sidebar",
-    "expand": "Expand sidebar"
+    "expand": "Expand sidebar",
+    "aiDraft": "Draft Document",
+    "aiResearch": "Legal Research",
+    "aiTranslate": "Translate"
   },
   "dashboard": {
     "title": "Dashboard",
@@ -1849,6 +1852,21 @@
       "disclaimer": "This research is AI-generated and should be verified with official legal sources.",
       "sources": "Potential Sources",
       "search": "Research"
+    },
+    "translate": {
+      "title": "AI Translation",
+      "subtitle": "Translate legal texts between Arabic and English"
+    },
+    "enhance": {
+      "button": "Enhance with AI",
+      "enhanced": "Enhanced Version",
+      "accept": "Accept",
+      "discard": "Discard"
+    },
+    "contractReview": {
+      "title": "AI Contract Review",
+      "reviewing": "Reviewing contract...",
+      "button": "AI Review"
     },
     "settings": {
       "title": "AI Configuration",
