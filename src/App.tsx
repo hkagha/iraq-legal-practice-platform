@@ -56,10 +56,11 @@ import ClientAnalyticsReport from '@/pages/ClientAnalyticsReport';
 import TimeUtilizationReport from '@/pages/TimeUtilizationReport';
 import BillingAgingReport from '@/pages/BillingAgingReport';
 const MessagesPage = () => <PlaceholderPage titleKey="sidebar.messages" icon={MessageSquare} />;
-const ResearchPage = () => <PlaceholderPage titleKey="sidebar.research" icon={Sparkles} />;
 const TeamPage = () => <PlaceholderPage titleKey="sidebar.team" icon={UserCog} />;
 import SettingsPage from '@/pages/SettingsPage';
 import AIDocumentDraftPage from '@/pages/AIDocumentDraftPage';
+import AILegalResearchPage from '@/pages/AILegalResearchPage';
+import AITranslatePage from '@/pages/AITranslatePage';
 const ProfilePage = () => <PlaceholderPage titleKey="common.profile" icon={User} />;
 
 const PortalDashboard = () => <PlaceholderPage titleKey="clientPortal.myDashboard" icon={LayoutDashboard} />;
@@ -126,10 +127,11 @@ const App = () => (
                 <Route path="/reports/time" element={<TimeUtilizationReport />} />
                 <Route path="/reports/billing-aging" element={<BillingAgingReport />} />
                 <Route path="/messages" element={<MessagesPage />} />
-                <Route path="/research" element={<ResearchPage />} />
                 <Route path="/team" element={<TeamPage />} />
                 <Route path="/settings" element={<SettingsPage />} />
                 <Route path="/ai/draft" element={<AIDocumentDraftPage />} />
+                <Route path="/ai/research" element={<AILegalResearchPage />} />
+                <Route path="/ai/translate" element={<AITranslatePage />} />
                 <Route path="/notifications" element={<NotificationsPage />} />
                 <Route path="/activity" element={<ActivityFeedPage />} />
                 <Route path="/profile" element={<ProfilePage />} />

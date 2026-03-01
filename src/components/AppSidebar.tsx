@@ -25,11 +25,15 @@ const mainNavItems = [
   { key: 'reports', path: '/reports', icon: BarChart3 },
 ];
 
+const aiNavItems = [
+  { key: 'aiDraft', path: '/ai/draft', icon: FileText },
+  { key: 'aiResearch', path: '/ai/research', icon: Sparkles },
+  { key: 'aiTranslate', path: '/ai/translate', icon: MessageSquare },
+];
+
 const secondaryNavItems = [
   { key: 'activity', path: '/activity', icon: Activity },
   { key: 'notifications', path: '/notifications', icon: Bell },
-  { key: 'messages', path: '/messages', icon: MessageSquare },
-  { key: 'research', path: '/research', icon: Sparkles },
 ];
 
 const bottomNavItems = [
@@ -219,6 +223,13 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
 
       <nav className="flex-1 overflow-y-auto py-3 space-y-0.5">
         {mainNavItems.map(renderNavItem)}
+        {divider}
+        {!collapsed && (
+          <div className="mx-4 mb-1 text-[10px] font-semibold text-white/40 uppercase tracking-wider">
+            {language === 'ar' ? 'أدوات ذكية' : 'AI Tools'}
+          </div>
+        )}
+        {aiNavItems.map(renderNavItem)}
         {divider}
         {secondaryNavItems.map(renderNavItem)}
         {divider}

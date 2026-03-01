@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import AIContractReview from '@/components/ai/AIContractReview';
 
 const FILE_TYPE_ICONS: Record<string, { icon: typeof FileText; color: string }> = {
   pdf: { icon: FileType, color: '#EF4444' },
@@ -50,6 +51,7 @@ export default function DocumentDetailSlideOver({ documentId, isOpen, onClose, o
   const [loading, setLoading] = useState(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState(false);
+  const [docTextContent, setDocTextContent] = useState<string>('');
 
   useEffect(() => {
     if (!documentId || !isOpen) return;
@@ -63,7 +65,17 @@ export default function DocumentDetailSlideOver({ documentId, isOpen, onClose, o
         setDoc(data);
         // Get signed URL for preview
         const { data: urlData } = await supabase.storage.from('documents').createSignedUrl(data.file_path, 300);
-        if (urlData) setPreviewUrl(urlData.signedUrl);
+        if (urlData) {
+          setPreviewUrl(urlData.signedUrl);
+          // Try to fetch text content for AI review
+          if (['txt', 'text'].includes(data.file_type?.toLowerCase())) {
+            try {
+              const resp = await fetch(urlData.signedUrl);
+              const text = await resp.text();
+              setDocTextContent(text);
+            } catch {}
+          }
+        }
         // Get versions
         if (data.parent_document_id || data.version > 1) {
           const rootId = data.parent_document_id || data.id;
@@ -266,6 +278,15 @@ export default function DocumentDetailSlideOver({ documentId, isOpen, onClose, o
                 ))}
               </div>
             </div>
+          )}
+
+          {/* AI Contract Review — for contracts/drafts */}
+          {doc && ['contract', 'draft'].includes(doc.document_category) && docTextContent && (
+            <AIContractReview
+              documentContent={docTextContent}
+              documentTitle={displayName}
+              caseData={doc.case ? { title: doc.case.title, case_type: 'N/A' } : undefined}
+            />
           )}
         </div>
       </SlideOver>
