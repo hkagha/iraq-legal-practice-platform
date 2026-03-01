@@ -27,6 +27,8 @@ import {
 import { Progress } from '@/components/ui/progress';
 import EntityDocumentsTab from '@/components/documents/EntityDocumentsTab';
 import ClientBillingTab from '@/components/clients/ClientBillingTab';
+import ClientMessagesTab from '@/components/clients/ClientMessagesTab';
+import ClientPortalActivityCard from '@/components/clients/ClientPortalActivityCard';
 
 const CLIENT_STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   active: { bg: '#F0FDF4', text: '#22C55E' },
@@ -438,14 +440,15 @@ export default function ClientDetailPage() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-transparent border-b border-border rounded-none w-full justify-start h-auto p-0 gap-0 overflow-x-auto">
-          {[
-            { key: 'overview', label: t('clients.tabs.overview') },
-            { key: 'cases', label: t('clients.tabs.cases'), count: String(totalCasesCount) },
-            { key: 'errands', label: t('clients.tabs.errands'), count: String(totalErrandsCount) },
-            { key: 'documents', label: t('clients.tabs.documents') },
-            { key: 'billing', label: t('clients.tabs.billing'), count: '0 IQD' },
-            { key: 'activity', label: t('clients.tabs.activity') },
-          ].map(tab => (
+            {[
+              { key: 'overview', label: t('clients.tabs.overview') },
+              { key: 'cases', label: t('clients.tabs.cases'), count: String(totalCasesCount) },
+              { key: 'errands', label: t('clients.tabs.errands'), count: String(totalErrandsCount) },
+              { key: 'documents', label: t('clients.tabs.documents') },
+              { key: 'billing', label: t('clients.tabs.billing'), count: '0 IQD' },
+              { key: 'messages', label: t('sidebar.messages') },
+              { key: 'activity', label: t('clients.tabs.activity') },
+            ].map(tab => (
             <TabsTrigger
               key={tab.key}
               value={tab.key}
@@ -630,6 +633,8 @@ export default function ClientDetailPage() {
                   {t('clients.detail.viewInvoices')}
                 </button>
               </div>
+
+              <ClientPortalActivityCard clientId={client.id} />
             </div>
           </div>
         </TabsContent>
@@ -781,6 +786,11 @@ export default function ClientDetailPage() {
         {/* BILLING TAB */}
         <TabsContent value="billing" className="mt-6">
           <ClientBillingTab clientId={id!} clientName={clientName} />
+        </TabsContent>
+
+        {/* MESSAGES TAB */}
+        <TabsContent value="messages" className="mt-6">
+          <ClientMessagesTab clientId={client.id} />
         </TabsContent>
 
         {/* ACTIVITY LOG TAB */}

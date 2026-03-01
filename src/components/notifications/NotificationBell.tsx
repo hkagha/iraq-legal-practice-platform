@@ -180,15 +180,33 @@ export default function NotificationBell() {
     if (!n.is_read) await markAsRead(n.id);
     setOpen(false);
     if (!n.entity_type || !n.entity_id) return;
+
+    const isClient = profile?.role === 'client';
+
     switch (n.entity_type) {
-      case 'case': navigate(`/cases/${n.entity_id}`); break;
-      case 'errand': navigate(`/errands/${n.entity_id}`); break;
-      case 'task': navigate('/tasks'); break;
-      case 'invoice': navigate(`/billing/${n.entity_id}`); break;
-      case 'document': navigate('/documents'); break;
-      case 'event': navigate('/calendar'); break;
-      case 'hearing': navigate(`/cases/${n.entity_id}`); break;
-      default: break;
+      case 'case':
+        navigate(isClient ? `/portal/cases/${n.entity_id}` : `/cases/${n.entity_id}`);
+        break;
+      case 'errand':
+        navigate(isClient ? `/portal/errands/${n.entity_id}` : `/errands/${n.entity_id}`);
+        break;
+      case 'task':
+        navigate(isClient ? '/portal/dashboard' : '/tasks');
+        break;
+      case 'invoice':
+        navigate(isClient ? `/portal/invoices/${n.entity_id}` : `/billing/${n.entity_id}`);
+        break;
+      case 'document':
+        navigate(isClient ? '/portal/documents' : '/documents');
+        break;
+      case 'event':
+        navigate(isClient ? '/portal/dashboard' : '/calendar');
+        break;
+      case 'hearing':
+        navigate(isClient ? `/portal/cases/${n.entity_id}` : `/cases/${n.entity_id}`);
+        break;
+      default:
+        break;
     }
   };
 
@@ -295,14 +313,17 @@ export default function NotificationBell() {
           </div>
 
           {/* Footer */}
-          <div className="border-t border-border px-4 py-3 text-center">
-            <button
-              onClick={() => { setOpen(false); navigate('/notifications'); }}
-              className="text-body-sm text-accent hover:underline"
-            >
-              {t('notifications.viewAll')}
-            </button>
-          </div>
+           <div className="border-t border-border px-4 py-3 text-center">
+             <button
+               onClick={() => {
+                 setOpen(false);
+                 navigate(profile?.role === 'client' ? '/portal/dashboard' : '/notifications');
+               }}
+               className="text-body-sm text-accent hover:underline"
+             >
+               {t('notifications.viewAll')}
+             </button>
+           </div>
         </div>
       )}
     </div>
