@@ -22,13 +22,15 @@ import {
 import {
   Mail, Phone, MapPin, Pencil, MoreHorizontal, Archive, UserPlus,
   FileDown, Scale, Briefcase, FileCheck, Receipt, ArrowLeft,
-  Users, FileText, Plus, X, Loader2, Calendar, RefreshCw, MessageSquare,
+  Users, FileText, Plus, X, Loader2, Calendar, RefreshCw, MessageSquare, KeyRound,
 } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import EntityDocumentsTab from '@/components/documents/EntityDocumentsTab';
 import ClientBillingTab from '@/components/clients/ClientBillingTab';
 import ClientMessagesTab from '@/components/clients/ClientMessagesTab';
 import ClientPortalActivityCard from '@/components/clients/ClientPortalActivityCard';
+import CreateClientAccountModal from '@/components/clients/CreateClientAccountModal';
+import ResetPasswordModal from '@/components/admin/ResetPasswordModal';
 
 const CLIENT_STATUS_COLORS: Record<string, { bg: string; text: string }> = {
   active: { bg: '#F0FDF4', text: '#22C55E' },
@@ -144,10 +146,32 @@ export default function ClientDetailPage() {
   const [hasMoreActivities, setHasMoreActivities] = useState(false);
   const [activityFilter, setActivityFilter] = useState('all');
 
-  // Portal invitation
-  const [portalInviteOpen, setPortalInviteOpen] = useState(false);
-  const [portalEmail, setPortalEmail] = useState('');
-  const [sendingInvite, setSendingInvite] = useState(false);
+  // Portal account creation
+  const [portalCreateOpen, setPortalCreateOpen] = useState(false);
+  const [portalUser, setPortalUser] = useState<{ id: string; first_name: string; last_name: string; email: string } | null>(null);
+  const [resetPasswordUser, setResetPasswordUser] = useState<{ id: string; first_name: string; last_name: string; email: string } | null>(null);
+
+  // Fetch portal user link
+  const fetchPortalUser = useCallback(async () => {
+    if (!id) return;
+    const { data: link } = await supabase
+      .from('client_user_links')
+      .select('user_id')
+      .eq('client_id', id)
+      .maybeSingle();
+    if (link?.user_id) {
+      const { data: prof } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, email')
+        .eq('id', link.user_id)
+        .maybeSingle();
+      if (prof) setPortalUser(prof as any);
+    } else {
+      setPortalUser(null);
+    }
+  }, [id]);
+
+  useEffect(() => { fetchPortalUser(); }, [fetchPortalUser]);
 
   const fetchClient = useCallback(async () => {
     if (!id) return;
@@ -428,9 +452,15 @@ export default function ClientDetailPage() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align={isRTL ? 'start' : 'end'}>
               <DropdownMenuItem><Archive size={14} className="me-2" /> {t('clients.archive')}</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => { setPortalEmail(client.email || ''); setPortalInviteOpen(true); }}>
-                <UserPlus size={14} className="me-2" /> {t('portal.enablePortalAccess')}
-              </DropdownMenuItem>
+              {!portalUser ? (
+                <DropdownMenuItem onClick={() => setPortalCreateOpen(true)}>
+                  <UserPlus size={14} className="me-2" /> {language === 'en' ? 'Create Portal Account' : 'إنشاء حساب البوابة'}
+                </DropdownMenuItem>
+              ) : (
+                <DropdownMenuItem onClick={() => setResetPasswordUser(portalUser)}>
+                  <KeyRound size={14} className="me-2" /> {language === 'en' ? 'Reset Portal Password' : 'إعادة تعيين كلمة مرور البوابة'}
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem><FileDown size={14} className="me-2" /> {t('clients.detail.exportPdf')}</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -877,55 +907,24 @@ export default function ClientDetailPage() {
         editClientId={client.id}
       />
 
-      {/* Portal Invitation Modal */}
-      <Dialog open={portalInviteOpen} onOpenChange={setPortalInviteOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t('portal.enablePortalAccess')}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div>
-              <label className="text-label text-foreground block mb-1.5">{t('common.email')}</label>
-              <input
-                type="email"
-                value={portalEmail}
-                onChange={(e) => setPortalEmail(e.target.value)}
-                className="w-full h-11 rounded-input border border-border bg-card px-3 text-body-md focus:outline-none focus:ring-2 focus:ring-primary/20"
-              />
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setPortalInviteOpen(false)}>{t('common.cancel')}</Button>
-            <Button
-              disabled={!portalEmail || sendingInvite}
-              onClick={async () => {
-                if (!portalEmail || !profile?.organization_id || !client) return;
-                setSendingInvite(true);
-                try {
-                  const { error } = await supabase.from('invitations').insert({
-                    organization_id: profile.organization_id,
-                    invited_by: profile.id,
-                    email: portalEmail,
-                    role: 'client',
-                    first_name: client.first_name || client.company_name || '',
-                    last_name: client.last_name || '',
-                  } as any);
-                  if (error) throw error;
-                  toast({ title: t('portal.portalInvitationSent') });
-                  setPortalInviteOpen(false);
-                } catch (err: any) {
-                  toast({ title: 'Error', description: err.message, variant: 'destructive' });
-                } finally {
-                  setSendingInvite(false);
-                }
-              }}
-            >
-              {sendingInvite ? <Loader2 size={16} className="me-2 animate-spin" /> : <UserPlus size={16} className="me-2" />}
-              {t('portal.sendPortalInvitation')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {/* Create Client Portal Account Modal */}
+      <CreateClientAccountModal
+        open={portalCreateOpen}
+        onClose={() => setPortalCreateOpen(false)}
+        onSuccess={() => { fetchPortalUser(); }}
+        clientId={client.id}
+        defaultEmail={client.email || ''}
+        clientName={clientName}
+      />
+
+      {/* Reset Portal Password Modal */}
+      {resetPasswordUser && (
+        <ResetPasswordModal
+          user={resetPasswordUser}
+          onClose={() => setResetPasswordUser(null)}
+          onSuccess={() => setResetPasswordUser(null)}
+        />
+      )}
     </div>
   );
 }
