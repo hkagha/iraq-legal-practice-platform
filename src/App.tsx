@@ -17,7 +17,6 @@ import RegisterPage from "@/pages/RegisterPage";
 import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import NotFound from "./pages/NotFound";
 import InviteAcceptPage from "@/pages/InviteAcceptPage";
-import SuperAdminPage from "@/pages/SuperAdminPage";
 
 import {
   LayoutDashboard, Scale, FileCheck, Users, Calendar, CheckSquare,
@@ -27,8 +26,7 @@ import {
 
 const queryClient = new QueryClient();
 
-// Main app placeholder pages
-// DashboardPage imported above
+// Main app pages
 import CasesPage from '@/pages/CasesPage';
 import CaseFormPage from '@/pages/CaseFormPage';
 import CaseDetailPage from '@/pages/CaseDetailPage';
@@ -63,6 +61,7 @@ import AILegalResearchPage from '@/pages/AILegalResearchPage';
 import AITranslatePage from '@/pages/AITranslatePage';
 const ProfilePage = () => <PlaceholderPage titleKey="common.profile" icon={User} />;
 
+// Portal pages
 import PortalDashboardPage from '@/pages/portal/PortalDashboardPage';
 import PortalCasesPage from '@/pages/portal/PortalCasesPage';
 import PortalCaseDetailPage from '@/pages/portal/PortalCaseDetailPage';
@@ -74,14 +73,17 @@ import PortalInvoicesPage from '@/pages/portal/PortalInvoicesPage';
 import PortalInvoiceDetailPage from '@/pages/portal/PortalInvoiceDetailPage';
 import PortalProfilePage from '@/pages/portal/PortalProfilePage';
 
-const AdminDashboard = () => <PlaceholderPage titleKey="admin.dashboard" icon={LayoutDashboard} />;
-const AdminOrgs = () => <PlaceholderPage titleKey="admin.organizations" icon={Building} />;
-const AdminUsers = () => <PlaceholderPage titleKey="admin.allUsers" icon={Users} />;
-const AdminSubs = () => <PlaceholderPage titleKey="admin.subscriptions" icon={CreditCard} />;
-const AdminAnalytics = () => <PlaceholderPage titleKey="admin.platformAnalytics" icon={BarChart3} />;
-const AdminSettings = () => <PlaceholderPage titleKey="admin.systemSettings" icon={Settings} />;
-const AdminAnnouncements = () => <PlaceholderPage titleKey="admin.announcements" icon={Megaphone} />;
+// Admin pages
+import AdminLoginPage from '@/pages/admin/AdminLoginPage';
+import AdminDashboardPage from '@/pages/admin/AdminDashboardPage';
+import AdminOrganizationsPage from '@/pages/admin/AdminOrganizationsPage';
+import AdminUsersPage from '@/pages/admin/AdminUsersPage';
 import AdminBackupsPage from '@/pages/admin/AdminBackupsPage';
+import AdminAnalyticsPage from '@/pages/admin/AdminAnalyticsPage';
+import AdminAuditLogPage from '@/pages/admin/AdminAuditLogPage';
+import AdminAnnouncementsPage from '@/pages/admin/AdminAnnouncementsPage';
+import AdminSettingsPage from '@/pages/admin/AdminSettingsPage';
+import AdminSystemHealthPage from '@/pages/admin/AdminSystemHealthPage';
 
 import ErrorBoundary from '@/components/ErrorBoundary';
 
@@ -102,6 +104,7 @@ const App = () => (
               <Route path="/register" element={<RegisterPage />} />
               <Route path="/forgot-password" element={<ForgotPasswordPage />} />
               <Route path="/invite/:token" element={<InviteAcceptPage />} />
+              <Route path="/admin/login" element={<AdminLoginPage />} />
 
               {/* Protected main routes */}
               <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
@@ -160,16 +163,17 @@ const App = () => (
               </Route>
 
               {/* Admin */}
-              <Route path="/admin" element={<ProtectedRoute allowedRoles={['super_admin', 'sales_admin']}><AdminLayout /></ProtectedRoute>}>
+              <Route path="/admin" element={<ProtectedRoute allowedRoles={['super_admin']}><AdminLayout /></ProtectedRoute>}>
                 <Route index element={<Navigate to="/admin/dashboard" replace />} />
-                <Route path="dashboard" element={<SuperAdminPage />} />
-                <Route path="organizations" element={<AdminOrgs />} />
-                <Route path="users" element={<AdminUsers />} />
+                <Route path="dashboard" element={<AdminDashboardPage />} />
+                <Route path="organizations" element={<AdminOrganizationsPage />} />
+                <Route path="users" element={<AdminUsersPage />} />
                 <Route path="backups" element={<AdminBackupsPage />} />
-                <Route path="subscriptions" element={<AdminSubs />} />
-                <Route path="analytics" element={<AdminAnalytics />} />
-                <Route path="settings" element={<AdminSettings />} />
-                <Route path="announcements" element={<AdminAnnouncements />} />
+                <Route path="analytics" element={<AdminAnalyticsPage />} />
+                <Route path="audit-log" element={<AdminAuditLogPage />} />
+                <Route path="announcements" element={<AdminAnnouncementsPage />} />
+                <Route path="settings" element={<AdminSettingsPage />} />
+                <Route path="system-health" element={<AdminSystemHealthPage />} />
               </Route>
 
               <Route path="*" element={<NotFound />} />
