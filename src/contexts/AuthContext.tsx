@@ -16,6 +16,9 @@ interface Profile {
   job_title: string | null;
   language_preference: string;
   is_active: boolean;
+  password_set_by_admin: boolean;
+  password_last_changed_at: string | null;
+  password_changed_by: string | null;
 }
 
 interface Organization {

@@ -57,7 +57,16 @@ export default function CreateOrganizationModal({ open, onClose, onSuccess }: Pr
         organization_id: (org as any).id, role: 'firm_admin', first_name: firstName, last_name: lastName, phone: phone || null,
       } as any).eq('email', adminEmail);
 
-      // 4. Audit
+      // 4. Mark password as admin-set
+      if (authData.user?.id) {
+        await supabase.from('profiles').update({
+          password_set_by_admin: true,
+          password_last_changed_at: new Date().toISOString(),
+          password_changed_by: user?.id || null,
+        } as any).eq('id', authData.user.id);
+      }
+
+      // 5. Audit
       if (user) await logAdminAction(user.id, 'org_created', 'organization', (org as any).id, orgName);
 
       toast.success(isEN ? `Organization "${orgName}" created` : `تم إنشاء المؤسسة "${orgName}"`);

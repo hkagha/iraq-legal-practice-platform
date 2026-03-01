@@ -92,6 +92,15 @@ export default function PortalProfilePage() {
       const { error } = await supabase.auth.updateUser({ password: newPw });
       if (error) throw error;
 
+      // Clear admin-set flag
+      if (profile?.id) {
+        await supabase.from('profiles').update({
+          password_set_by_admin: false,
+          password_last_changed_at: new Date().toISOString(),
+          password_changed_by: profile.id,
+        } as any).eq('id', profile.id);
+      }
+      sessionStorage.setItem('qanuni_password_reminder_dismissed', 'true');
       toast({ title: language === 'en' ? 'Password changed successfully' : 'تم تغيير كلمة المرور بنجاح' });
       setCurrentPw(''); setNewPw(''); setConfirmPw('');
     } catch (err: any) {

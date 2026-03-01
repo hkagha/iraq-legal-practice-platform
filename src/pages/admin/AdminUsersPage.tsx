@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import ChangeRoleModal from '@/components/settings/ChangeRoleModal';
 import CreateUserModal from '@/components/admin/CreateUserModal';
 import EditUserModal from '@/components/admin/EditUserModal';
+import ResetPasswordModal from '@/components/admin/ResetPasswordModal';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { SlideOver } from '@/components/ui/SlideOver';
 import { toast } from 'sonner';
@@ -38,6 +39,7 @@ export default function AdminUsersPage() {
   const [editUserId, setEditUserId] = useState<string | null>(null);
   const [deleteUser, setDeleteUser] = useState<UserRow | null>(null);
   const [viewUser, setViewUser] = useState<UserRow | null>(null);
+  const [resetPasswordUser, setResetPasswordUser] = useState<UserRow | null>(null);
   const [page, setPage] = useState(0);
   const PAGE_SIZE = 50;
 
@@ -63,12 +65,6 @@ export default function AdminUsersPage() {
     loadData();
   }
 
-  async function resetPassword(u: UserRow) {
-    const { error } = await supabase.auth.resetPasswordForEmail(u.email, { redirectTo: `${window.location.origin}/reset-password` });
-    if (error) { toast.error(error.message); return; }
-    toast.success(isEN ? 'Password reset email sent' : 'تم إرسال رابط إعادة تعيين كلمة المرور');
-    if (user) await logAdminAction(user.id, 'user_password_reset', 'user', u.id, `${u.first_name} ${u.last_name}`);
-  }
 
   async function handleDeleteUser() {
     if (!deleteUser || !user) return;
@@ -189,7 +185,7 @@ export default function AdminUsersPage() {
                           <DropdownMenuItem onClick={() => setViewUser(u)}><Eye className="h-4 w-4 me-2" />{isEN ? 'View Profile' : 'عرض الملف'}</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => setEditUserId(u.id)}><Pencil className="h-4 w-4 me-2" />{isEN ? 'Edit' : 'تعديل'}</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => setChangeRoleUser(u)}>{isEN ? 'Change Role' : 'تغيير الدور'}</DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => resetPassword(u)}><KeyRound className="h-4 w-4 me-2" />{isEN ? 'Reset Password' : 'إعادة تعيين كلمة المرور'}</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setResetPasswordUser(u)}><KeyRound className="h-4 w-4 me-2" />{isEN ? 'Reset Password' : 'إعادة تعيين كلمة المرور'}</DropdownMenuItem>
                           <DropdownMenuItem onClick={() => toggleActive(u)}><Power className="h-4 w-4 me-2" />{u.is_active ? (isEN ? 'Deactivate' : 'تعطيل') : (isEN ? 'Activate' : 'تفعيل')}</DropdownMenuItem>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem onClick={() => setDeleteUser(u)} className="text-destructive"><Trash2 className="h-4 w-4 me-2" />{isEN ? 'Delete' : 'حذف'}</DropdownMenuItem>
@@ -232,6 +228,13 @@ export default function AdminUsersPage() {
             </div>
           </div>
         </SlideOver>
+      )}
+      {resetPasswordUser && (
+        <ResetPasswordModal
+          user={resetPasswordUser}
+          onClose={() => setResetPasswordUser(null)}
+          onSuccess={() => { setResetPasswordUser(null); loadData(); }}
+        />
       )}
     </div>
   );

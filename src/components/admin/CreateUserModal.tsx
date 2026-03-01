@@ -54,6 +54,15 @@ export default function CreateUserModal({ open, onClose, onSuccess, preselectedO
         organization_id: orgId, role, first_name: firstName, last_name: lastName, phone: phone || null,
       } as any).eq('email', email);
 
+      // Mark password as admin-set
+      if (authData.user?.id) {
+        await supabase.from('profiles').update({
+          password_set_by_admin: true,
+          password_last_changed_at: new Date().toISOString(),
+          password_changed_by: user?.id || null,
+        } as any).eq('id', authData.user.id);
+      }
+
       if (user) await logAdminAction(user.id, 'user_created', 'user', authData.user?.id || null, email);
       toast.success(isEN ? `User "${email}" created` : `تم إنشاء المستخدم "${email}"`);
       reset(); onClose(); onSuccess();
