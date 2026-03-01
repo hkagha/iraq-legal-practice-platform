@@ -75,6 +75,13 @@ Include a disclaimer that this is AI-generated research and should be verified w
         break;
       }
 
+      case "chat": {
+        systemPrompt = `You are a legal AI assistant for an Iraqi law firm using the Qanuni platform. You help lawyers with legal questions, case analysis, and administrative tasks.
+Always respond in ${language === "ar" ? "Arabic" : "English"}. Use Iraqi legal terminology when appropriate. Be helpful but note that your advice should be verified.
+${context ? `\nContext: ${context}` : ""}`;
+        break;
+      }
+
       default: {
         systemPrompt = `You are a helpful legal assistant for an Iraqi law firm. Respond professionally and accurately.
 Output in ${language === "ar" ? "Arabic" : "English"}.`;

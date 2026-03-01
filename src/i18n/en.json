@@ -1855,18 +1855,65 @@
     },
     "translate": {
       "title": "AI Translation",
-      "subtitle": "Translate legal texts between Arabic and English"
+      "subtitle": "Translate legal texts between Arabic and English",
+      "translate": "Translate",
+      "translating": "Translating...",
+      "translated": "AI translated",
+      "translateAll": "Translate All Empty Fields",
+      "swapLanguages": "Swap Languages",
+      "sourceLang": "Source Language",
+      "targetLang": "Target Language"
     },
     "enhance": {
       "button": "Enhance with AI",
       "enhanced": "Enhanced Version",
       "accept": "Accept",
-      "discard": "Discard"
+      "discard": "Discard",
+      "enhance": "Enhance",
+      "enhancing": "Enhancing...",
+      "original": "Original"
     },
     "contractReview": {
       "title": "AI Contract Review",
       "reviewing": "Reviewing contract...",
-      "button": "AI Review"
+      "button": "AI Review",
+      "review": "AI Review",
+      "overallAssessment": "Overall Assessment",
+      "issuesFound": "Issues Found",
+      "missingClauses": "Missing Standard Clauses",
+      "recommendations": "Recommendations",
+      "generateRevised": "Generate Revised Draft",
+      "saveAsNote": "Save as Note",
+      "highRisk": "High Risk",
+      "mediumRisk": "Medium",
+      "lowRisk": "Low",
+      "suggestion": "Suggestion"
+    },
+    "chat": {
+      "title": "AI Assistant",
+      "placeholder": "Ask me anything...",
+      "welcome": "Hi! I'm your AI legal assistant. I can help you with legal questions, case analysis, and administrative tasks.",
+      "clearChat": "Clear Chat",
+      "context": "On: {{page}}",
+      "minimize": "Minimize",
+      "quickActions": "Suggested Actions"
+    },
+    "usage": {
+      "title": "AI Usage",
+      "tokensThisMonth": "Tokens This Month",
+      "totalRequests": "Total Requests",
+      "mostUsedFeature": "Most Used Feature",
+      "avgResponseTime": "Avg. Response Time",
+      "byFeature": "Usage by Feature",
+      "trend": "Usage Trend",
+      "byMember": "Usage by Team Member",
+      "detailedLog": "View Detailed Log"
+    },
+    "insights": {
+      "title": "AI Insights",
+      "refresh": "Refresh Insights",
+      "dismiss": "Dismiss",
+      "noInsights": "No insights available. Check back later."
     },
     "settings": {
       "title": "AI Configuration",

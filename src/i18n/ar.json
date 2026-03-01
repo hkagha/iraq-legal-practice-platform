@@ -1854,18 +1854,65 @@
     },
     "translate": {
       "title": "ترجمة بالذكاء الاصطناعي",
-      "subtitle": "ترجمة النصوص القانونية بين العربية والإنجليزية"
+      "subtitle": "ترجمة النصوص القانونية بين العربية والإنجليزية",
+      "translate": "ترجم",
+      "translating": "جاري الترجمة...",
+      "translated": "ترجمة ذكية",
+      "translateAll": "ترجمة جميع الحقول الفارغة",
+      "swapLanguages": "تبديل اللغات",
+      "sourceLang": "اللغة المصدر",
+      "targetLang": "اللغة الهدف"
     },
     "enhance": {
       "button": "تحسين بالذكاء الاصطناعي",
       "enhanced": "النص المحسّن",
       "accept": "قبول",
-      "discard": "تجاهل"
+      "discard": "تجاهل",
+      "enhance": "تحسين",
+      "enhancing": "جاري التحسين...",
+      "original": "الأصلي"
     },
     "contractReview": {
       "title": "مراجعة العقد بالذكاء الاصطناعي",
       "reviewing": "مراجعة العقد...",
-      "button": "مراجعة ذكية"
+      "button": "مراجعة ذكية",
+      "review": "مراجعة ذكية",
+      "overallAssessment": "التقييم العام",
+      "issuesFound": "المشاكل المكتشفة",
+      "missingClauses": "البنود القياسية المفقودة",
+      "recommendations": "التوصيات",
+      "generateRevised": "إنشاء مسودة معدلة",
+      "saveAsNote": "حفظ كملاحظة",
+      "highRisk": "خطر عالي",
+      "mediumRisk": "متوسط",
+      "lowRisk": "منخفض",
+      "suggestion": "اقتراح"
+    },
+    "chat": {
+      "title": "المساعد الذكي",
+      "placeholder": "اسألني أي شيء...",
+      "welcome": "مرحباً! أنا مساعدك القانوني الذكي. يمكنني مساعدتك في الأسئلة القانونية وتحليل القضايا والمهام الإدارية.",
+      "clearChat": "مسح المحادثة",
+      "context": "في: {{page}}",
+      "minimize": "تصغير",
+      "quickActions": "إجراءات مقترحة"
+    },
+    "usage": {
+      "title": "استخدام الذكاء الاصطناعي",
+      "tokensThisMonth": "الرموز هذا الشهر",
+      "totalRequests": "إجمالي الطلبات",
+      "mostUsedFeature": "الميزة الأكثر استخداماً",
+      "avgResponseTime": "متوسط وقت الاستجابة",
+      "byFeature": "الاستخدام حسب الميزة",
+      "trend": "اتجاه الاستخدام",
+      "byMember": "الاستخدام حسب العضو",
+      "detailedLog": "عرض السجل المفصل"
+    },
+    "insights": {
+      "title": "رؤى ذكية",
+      "refresh": "تحديث الرؤى",
+      "dismiss": "تجاهل",
+      "noInsights": "لا توجد رؤى متاحة. تحقق لاحقاً."
     },
     "settings": {
       "title": "إعدادات الذكاء الاصطناعي",
