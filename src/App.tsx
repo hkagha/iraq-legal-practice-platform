@@ -68,10 +68,11 @@ import PortalCasesPage from '@/pages/portal/PortalCasesPage';
 import PortalCaseDetailPage from '@/pages/portal/PortalCaseDetailPage';
 import PortalErrandsPage from '@/pages/portal/PortalErrandsPage';
 import PortalErrandDetailPage from '@/pages/portal/PortalErrandDetailPage';
-const PortalDocuments = () => <PlaceholderPage titleKey="sidebar.documents" icon={FileText} />;
-const PortalMessages = () => <PlaceholderPage titleKey="sidebar.messages" icon={MessageSquare} />;
-const PortalInvoices = () => <PlaceholderPage titleKey="clientPortal.invoices" icon={Receipt} />;
-const PortalProfile = () => <PlaceholderPage titleKey="clientPortal.myProfile" icon={User} />;
+import PortalDocumentsPage from '@/pages/portal/PortalDocumentsPage';
+import PortalMessagesPage from '@/pages/portal/PortalMessagesPage';
+import PortalInvoicesPage from '@/pages/portal/PortalInvoicesPage';
+import PortalInvoiceDetailPage from '@/pages/portal/PortalInvoiceDetailPage';
+import PortalProfilePage from '@/pages/portal/PortalProfilePage';
 
 const AdminDashboard = () => <PlaceholderPage titleKey="admin.dashboard" icon={LayoutDashboard} />;
 const AdminOrgs = () => <PlaceholderPage titleKey="admin.organizations" icon={Building} />;
@@ -147,10 +148,11 @@ const App = () => (
                 <Route path="cases/:id" element={<PortalCaseDetailPage />} />
                 <Route path="errands" element={<PortalErrandsPage />} />
                 <Route path="errands/:id" element={<PortalErrandDetailPage />} />
-                <Route path="documents" element={<PortalDocuments />} />
-                <Route path="messages" element={<PortalMessages />} />
-                <Route path="invoices" element={<PortalInvoices />} />
-                <Route path="profile" element={<PortalProfile />} />
+                <Route path="documents" element={<PortalDocumentsPage />} />
+                <Route path="messages" element={<PortalMessagesPage />} />
+                <Route path="invoices" element={<PortalInvoicesPage />} />
+                <Route path="invoices/:id" element={<PortalInvoiceDetailPage />} />
+                <Route path="profile" element={<PortalProfilePage />} />
               </Route>
 
               {/* Admin */}

@@ -863,6 +863,87 @@ export type Database = {
           },
         ]
       }
+      client_messages: {
+        Row: {
+          attachments: Json | null
+          case_id: string | null
+          client_id: string
+          content: string
+          created_at: string
+          errand_id: string | null
+          id: string
+          is_read: boolean
+          organization_id: string
+          read_at: string | null
+          sender_id: string
+          sender_type: string
+        }
+        Insert: {
+          attachments?: Json | null
+          case_id?: string | null
+          client_id: string
+          content: string
+          created_at?: string
+          errand_id?: string | null
+          id?: string
+          is_read?: boolean
+          organization_id: string
+          read_at?: string | null
+          sender_id: string
+          sender_type?: string
+        }
+        Update: {
+          attachments?: Json | null
+          case_id?: string | null
+          client_id?: string
+          content?: string
+          created_at?: string
+          errand_id?: string | null
+          id?: string
+          is_read?: boolean
+          organization_id?: string
+          read_at?: string | null
+          sender_id?: string
+          sender_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "client_messages_case_id_fkey"
+            columns: ["case_id"]
+            isOneToOne: false
+            referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_messages_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_messages_errand_id_fkey"
+            columns: ["errand_id"]
+            isOneToOne: false
+            referencedRelation: "errands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_messages_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "client_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       client_user_links: {
         Row: {
           client_id: string
