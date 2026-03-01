@@ -10,6 +10,7 @@ import RecentActivityWidget from '@/components/dashboard/RecentActivityWidget';
 import CasesByStatusChart from '@/components/dashboard/CasesByStatusChart';
 import ErrandsByStatusChart from '@/components/dashboard/ErrandsByStatusChart';
 import RevenueTrendChart from '@/components/dashboard/RevenueTrendChart';
+import AIInsightsWidget from '@/components/dashboard/AIInsightsWidget';
 import { runDailyNotificationChecks } from '@/lib/dailyNotificationChecks';
 
 export default function DashboardPage() {
@@ -39,6 +40,9 @@ export default function DashboardPage() {
           <TasksDueSoonWidget />
         </div>
       </div>
+
+      {/* AI Insights */}
+      <AIInsightsWidget />
 
       {/* Row 3 — Activity */}
       <RecentActivityWidget />

@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Progress } from '@/components/ui/progress';
 import { Sparkles, Save, Loader2 } from 'lucide-react';
+import AIUsageDashboard from '@/components/settings/AIUsageDashboard';
 
 export default function AIConfigSettings() {
   const { t, language } = useLanguage();
@@ -119,6 +120,9 @@ export default function AIConfigSettings() {
         {saving ? <Loader2 size={16} className="me-2 animate-spin" /> : <Save size={16} className="me-2" />}
         {t('common.save')}
       </Button>
+
+      {/* AI Usage Dashboard */}
+      {aiEnabled && <AIUsageDashboard />}
     </div>
   );
 }

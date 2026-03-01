@@ -8,6 +8,7 @@ import MobileFAB from '@/components/MobileFAB';
 import TaskFormModal from '@/components/tasks/TaskFormModal';
 import EventFormModal from '@/components/calendar/EventFormModal';
 import ClientFormSlideOver from '@/components/clients/ClientFormSlideOver';
+import AIChatPanel from '@/components/ai/AIChatPanel';
 
 export default function MainLayout() {
   const navigate = useNavigate();
@@ -101,6 +102,9 @@ export default function MainLayout() {
         <EventFormModal isOpen={showEventModal} onClose={() => setShowEventModal(false)} onSaved={() => setShowEventModal(false)} />
       )}
       <ClientFormSlideOver isOpen={showClientForm} onClose={() => setShowClientForm(false)} onSaved={() => setShowClientForm(false)} />
+
+      {/* AI Chat Panel */}
+      <AIChatPanel />
     </div>
   );
 }
