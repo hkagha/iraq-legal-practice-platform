@@ -81,6 +81,7 @@ const AdminSubs = () => <PlaceholderPage titleKey="admin.subscriptions" icon={Cr
 const AdminAnalytics = () => <PlaceholderPage titleKey="admin.platformAnalytics" icon={BarChart3} />;
 const AdminSettings = () => <PlaceholderPage titleKey="admin.systemSettings" icon={Settings} />;
 const AdminAnnouncements = () => <PlaceholderPage titleKey="admin.announcements" icon={Megaphone} />;
+import AdminBackupsPage from '@/pages/admin/AdminBackupsPage';
 
 import ErrorBoundary from '@/components/ErrorBoundary';
 
@@ -164,6 +165,7 @@ const App = () => (
                 <Route path="dashboard" element={<SuperAdminPage />} />
                 <Route path="organizations" element={<AdminOrgs />} />
                 <Route path="users" element={<AdminUsers />} />
+                <Route path="backups" element={<AdminBackupsPage />} />
                 <Route path="subscriptions" element={<AdminSubs />} />
                 <Route path="analytics" element={<AdminAnalytics />} />
                 <Route path="settings" element={<AdminSettings />} />

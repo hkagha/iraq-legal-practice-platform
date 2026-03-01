@@ -349,7 +349,8 @@
     "subscriptions": "Subscriptions",
     "platformAnalytics": "Platform Analytics",
     "systemSettings": "System Settings",
-    "announcements": "Announcements"
+    "announcements": "Announcements",
+    "backups": "Backups"
   },
   "months": {
     "jan": "Jan",
