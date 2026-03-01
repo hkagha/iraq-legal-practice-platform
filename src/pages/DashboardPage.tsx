@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { DashboardSkeleton } from '@/components/SkeletonLoader';
 import DashboardHeader from '@/components/dashboard/DashboardHeader';
@@ -11,23 +11,39 @@ import CasesByStatusChart from '@/components/dashboard/CasesByStatusChart';
 import ErrandsByStatusChart from '@/components/dashboard/ErrandsByStatusChart';
 import RevenueTrendChart from '@/components/dashboard/RevenueTrendChart';
 import AIInsightsWidget from '@/components/dashboard/AIInsightsWidget';
+import GettingStartedWidget from '@/components/dashboard/GettingStartedWidget';
+import OnboardingWizard from '@/components/onboarding/OnboardingWizard';
 import { runDailyNotificationChecks } from '@/lib/dailyNotificationChecks';
+import { supabase } from '@/integrations/supabase/client';
 
 export default function DashboardPage() {
   const { isLoading, profile } = useAuth();
   const checkedRef = useRef(false);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   useEffect(() => {
     if (!profile?.organization_id || !profile?.id || checkedRef.current) return;
     checkedRef.current = true;
     runDailyNotificationChecks(profile.organization_id, profile.id);
-  }, [profile?.organization_id, profile?.id]);
+
+    // Check onboarding status
+    supabase.from('profiles').select('onboarding_completed').eq('id', profile.id).single().then(({ data }) => {
+      if (data && !(data as any).onboarding_completed && profile.role === 'firm_admin') {
+        setShowOnboarding(true);
+      }
+    });
+  }, [profile?.organization_id, profile?.id, profile?.role]);
 
   if (isLoading) return <DashboardSkeleton />;
 
   return (
     <div className="space-y-6">
+      {showOnboarding && <OnboardingWizard onComplete={() => setShowOnboarding(false)} />}
       <DashboardHeader />
+
+      {/* Getting Started Checklist */}
+      <GettingStartedWidget />
+
       <MetricCards />
       
       {/* Row 2 — Today + Events + Tasks */}

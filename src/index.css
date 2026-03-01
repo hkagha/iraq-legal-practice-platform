@@ -125,3 +125,41 @@
     font-weight: 500;
   }
 }
+
+/* Mobile optimization */
+@layer utilities {
+  /* Minimum touch target */
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Mobile: full-screen dialogs */
+@media (max-width: 639px) {
+  [role="dialog"] > div {
+    border-radius: 0 !important;
+    max-height: 100vh !important;
+  }
+}
+
+/* Accessible focus ring */
+:focus-visible {
+  outline: 2px solid hsl(var(--accent));
+  outline-offset: 2px;
+}
+
+/* Skip to content link */
+.skip-to-content {
+  position: absolute;
+  left: -9999px;
+  top: 0;
+  z-index: 999;
+  padding: 0.5rem 1rem;
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
+  font-weight: 600;
+}
+.skip-to-content:focus {
+  left: 0;
+}

@@ -82,9 +82,12 @@ const AdminAnalytics = () => <PlaceholderPage titleKey="admin.platformAnalytics"
 const AdminSettings = () => <PlaceholderPage titleKey="admin.systemSettings" icon={Settings} />;
 const AdminAnnouncements = () => <PlaceholderPage titleKey="admin.announcements" icon={Megaphone} />;
 
+import ErrorBoundary from '@/components/ErrorBoundary';
+
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <LanguageProvider>
+      <ErrorBoundary>
       <AuthProvider>
         <TimerProvider>
         <TooltipProvider>
@@ -173,6 +176,7 @@ const App = () => (
         </TooltipProvider>
         </TimerProvider>
       </AuthProvider>
+      </ErrorBoundary>
     </LanguageProvider>
   </QueryClientProvider>
 );

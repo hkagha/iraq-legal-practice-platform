@@ -68,7 +68,8 @@ export default function MainLayout() {
           onMenuClick={() => setMobileOpen(true)}
         />
         <GlobalTimerBar />
-        <main className="flex-1 overflow-y-auto p-6 2xl:p-8">
+        <a href="#main-content" className="skip-to-content">{/* Skip to content */}Skip to content</a>
+        <main id="main-content" className="flex-1 overflow-y-auto p-4 sm:p-6 2xl:p-8">
           <div className="max-w-[1400px] mx-auto">
             <Outlet />
           </div>
