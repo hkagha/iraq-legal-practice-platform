@@ -349,7 +349,8 @@
     "subscriptions": "الاشتراكات",
     "platformAnalytics": "تحليلات المنصة",
     "systemSettings": "إعدادات النظام",
-    "announcements": "الإعلانات"
+    "announcements": "الإعلانات",
+    "backups": "النسخ الاحتياطي"
   },
   "months": {
     "jan": "يناير",

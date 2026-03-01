@@ -80,6 +80,93 @@ export type Database = {
           },
         ]
       }
+      backup_schedules: {
+        Row: {
+          created_at: string
+          created_by: string
+          day_of_month: number | null
+          day_of_week: number | null
+          frequency: string
+          id: string
+          includes_database: boolean
+          includes_storage: boolean
+          is_active: boolean
+          last_run_at: string | null
+          last_run_status: string | null
+          max_backups: number
+          name: string
+          next_run_at: string | null
+          organization_id: string | null
+          preferred_time: string
+          retention_days: number
+          scope: string
+          tables_included: string[] | null
+          timezone: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          day_of_month?: number | null
+          day_of_week?: number | null
+          frequency: string
+          id?: string
+          includes_database?: boolean
+          includes_storage?: boolean
+          is_active?: boolean
+          last_run_at?: string | null
+          last_run_status?: string | null
+          max_backups?: number
+          name: string
+          next_run_at?: string | null
+          organization_id?: string | null
+          preferred_time?: string
+          retention_days?: number
+          scope: string
+          tables_included?: string[] | null
+          timezone?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          day_of_month?: number | null
+          day_of_week?: number | null
+          frequency?: string
+          id?: string
+          includes_database?: boolean
+          includes_storage?: boolean
+          is_active?: boolean
+          last_run_at?: string | null
+          last_run_status?: string | null
+          max_backups?: number
+          name?: string
+          next_run_at?: string | null
+          organization_id?: string | null
+          preferred_time?: string
+          retention_days?: number
+          scope?: string
+          tables_included?: string[] | null
+          timezone?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "backup_schedules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "backup_schedules_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       billing_rates: {
         Row: {
           case_id: string | null
@@ -2822,6 +2909,84 @@ export type Database = {
           },
           {
             foreignKeyName: "saved_reports_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      system_backups: {
+        Row: {
+          backup_name: string
+          backup_type: string
+          completed_at: string | null
+          created_at: string
+          created_by: string
+          data_file_path: string | null
+          data_size_bytes: number | null
+          error_message: string | null
+          expires_at: string | null
+          id: string
+          includes_database: boolean
+          includes_storage: boolean
+          organization_id: string | null
+          record_counts: Json | null
+          scope: string
+          started_at: string
+          status: string
+          tables_included: string[] | null
+        }
+        Insert: {
+          backup_name: string
+          backup_type: string
+          completed_at?: string | null
+          created_at?: string
+          created_by: string
+          data_file_path?: string | null
+          data_size_bytes?: number | null
+          error_message?: string | null
+          expires_at?: string | null
+          id?: string
+          includes_database?: boolean
+          includes_storage?: boolean
+          organization_id?: string | null
+          record_counts?: Json | null
+          scope: string
+          started_at?: string
+          status?: string
+          tables_included?: string[] | null
+        }
+        Update: {
+          backup_name?: string
+          backup_type?: string
+          completed_at?: string | null
+          created_at?: string
+          created_by?: string
+          data_file_path?: string | null
+          data_size_bytes?: number | null
+          error_message?: string | null
+          expires_at?: string | null
+          id?: string
+          includes_database?: boolean
+          includes_storage?: boolean
+          organization_id?: string | null
+          record_counts?: Json | null
+          scope?: string
+          started_at?: string
+          status?: string
+          tables_included?: string[] | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "system_backups_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "system_backups_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"

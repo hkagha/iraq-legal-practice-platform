@@ -5,13 +5,14 @@ import TopHeader from '@/components/TopHeader';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   LayoutDashboard, Building, Users, CreditCard, BarChart3,
-  Settings, Megaphone, ChevronLeft, ChevronRight
+  Settings, Megaphone, Database, Server, ChevronLeft, ChevronRight
 } from 'lucide-react';
 
 const adminNavItems = [
   { key: 'dashboard', path: '/admin/dashboard', icon: LayoutDashboard, tKey: 'admin.dashboard' },
   { key: 'organizations', path: '/admin/organizations', icon: Building, tKey: 'admin.organizations' },
   { key: 'users', path: '/admin/users', icon: Users, tKey: 'admin.allUsers' },
+  { key: 'backups', path: '/admin/backups', icon: Database, tKey: 'admin.backups' },
   { key: 'subscriptions', path: '/admin/subscriptions', icon: CreditCard, tKey: 'admin.subscriptions' },
   { key: 'analytics', path: '/admin/analytics', icon: BarChart3, tKey: 'admin.platformAnalytics' },
   { key: 'settings', path: '/admin/settings', icon: Settings, tKey: 'admin.systemSettings' },
