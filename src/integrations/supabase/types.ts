@@ -2687,6 +2687,8 @@ export type Database = {
           last_name: string
           last_name_ar: string | null
           notification_preferences: Json | null
+          onboarding_completed: boolean | null
+          onboarding_step: number | null
           organization_id: string | null
           phone: string | null
           role: string
@@ -2710,6 +2712,8 @@ export type Database = {
           last_name?: string
           last_name_ar?: string | null
           notification_preferences?: Json | null
+          onboarding_completed?: boolean | null
+          onboarding_step?: number | null
           organization_id?: string | null
           phone?: string | null
           role?: string
@@ -2733,6 +2737,8 @@ export type Database = {
           last_name?: string
           last_name_ar?: string | null
           notification_preferences?: Json | null
+          onboarding_completed?: boolean | null
+          onboarding_step?: number | null
           organization_id?: string | null
           phone?: string | null
           role?: string
