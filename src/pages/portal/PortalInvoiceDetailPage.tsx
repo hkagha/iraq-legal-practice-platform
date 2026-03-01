@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useEffect, useMemo, useState } from 'react';
+import { useParams, Link, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { ArrowLeft, Download, Copy, Building } from 'lucide-react';
+import { Download, Copy, Building } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -13,8 +13,12 @@ import { ar as arLocale } from 'date-fns/locale';
 
 export default function PortalInvoiceDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const [searchParams] = useSearchParams();
+  const isPrint = searchParams.get('print') === '1';
+
   const { t, language, isRTL } = useLanguage();
   const { profile } = useAuth();
+
   const [invoice, setInvoice] = useState<any>(null);
   const [lineItems, setLineItems] = useState<any[]>([]);
   const [payments, setPayments] = useState<any[]>([]);
@@ -24,46 +28,68 @@ export default function PortalInvoiceDetailPage() {
   useEffect(() => {
     if (!id || !profile?.id) return;
     loadData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, profile?.id]);
+
+  useEffect(() => {
+    if (!isPrint) return;
+    const tm = setTimeout(() => window.print(), 400);
+    return () => clearTimeout(tm);
+  }, [isPrint]);
 
   const loadData = async () => {
     setLoading(true);
+
     const [invRes, itemsRes, payRes] = await Promise.all([
       supabase.from('invoices').select('*').eq('id', id!).maybeSingle(),
-      supabase.from('invoice_line_items').select('*').eq('invoice_id', id!).order('created_at'),
+      supabase.from('invoice_line_items').select('*').eq('invoice_id', id!).order('sort_order'),
       supabase.from('payments').select('*').eq('invoice_id', id!).order('payment_date', { ascending: false }),
     ]);
+
     const inv = invRes.data;
     if (inv) {
       setInvoice(inv);
       setLineItems(itemsRes.data || []);
       setPayments(payRes.data || []);
 
-      // Mark as viewed
+      // Mark as viewed via secure RPC
       if (!inv.viewed_at) {
-        await supabase.from('invoices').update({ viewed_at: new Date().toISOString(), status: inv.status === 'sent' ? 'viewed' : inv.status } as any).eq('id', inv.id);
+        await supabase.rpc('client_mark_invoice_viewed', { p_invoice_id: inv.id });
       }
 
-      // Get org info
-      const { data: orgData } = await supabase.from('organizations').select('name, name_ar, phone, email, address, address_ar, bank_name, bank_account_number, bank_iban, logo_url').eq('id', inv.organization_id).maybeSingle();
+      // Org info
+      const { data: orgData } = await supabase
+        .from('organizations')
+        .select('name, name_ar, phone, email, address, address_ar, bank_name, bank_account_number, bank_iban, logo_url')
+        .eq('id', inv.organization_id)
+        .maybeSingle();
       setOrg(orgData);
     }
+
     setLoading(false);
   };
 
   const formatDate = (d: string) => {
-    try { return language === 'ar' ? format(new Date(d), 'dd MMM yyyy', { locale: arLocale }) : format(new Date(d), 'MMM dd, yyyy'); }
-    catch { return d; }
+    try {
+      return language === 'ar'
+        ? format(new Date(d), 'dd MMM yyyy', { locale: arLocale })
+        : format(new Date(d), 'MMM dd, yyyy');
+    } catch {
+      return d;
+    }
   };
 
-  const formatAmount = (amount: number) => `${(amount || 0).toLocaleString()} ${invoice?.currency || 'IQD'}`;
+  const currency = invoice?.currency || 'IQD';
+  const formatAmount = (amount: number) => `${(amount || 0).toLocaleString()} ${currency}`;
 
   const copyBankDetails = () => {
     if (!org) return;
-    const text = `${org.bank_name || ''}\n${org.bank_account_number || ''}\n${org.bank_iban ? 'IBAN: ' + org.bank_iban : ''}\nRef: ${invoice?.invoice_number}`;
+    const text = `${org.bank_name || ''}\n${org.bank_account_number || ''}\n${org.bank_iban ? 'IBAN: ' + org.bank_iban : ''}\n${language === 'en' ? 'Reference:' : 'المرجع:'} ${invoice?.invoice_number}`;
     navigator.clipboard.writeText(text);
     toast({ title: language === 'en' ? 'Bank details copied' : 'تم نسخ تفاصيل البنك' });
   };
+
+  const paid = useMemo(() => (invoice ? Number(invoice.balance_due || 0) <= 0 : false), [invoice]);
 
   if (loading) {
     return <div className="space-y-4"><Skeleton className="h-8 w-48" /><Skeleton className="h-96 rounded-lg" /></div>;
@@ -79,37 +105,46 @@ export default function PortalInvoiceDetailPage() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-1 text-body-sm text-muted-foreground">
-        <Link to="/portal/invoices" className="text-accent hover:underline">{t('portal.invoices.title')}</Link>
-        <span>{isRTL ? ' \\ ' : ' / '}</span>
-        <span className="text-foreground">{invoice.invoice_number}</span>
-      </nav>
+    <div className={isPrint ? 'print:p-0' : 'space-y-6'}>
+      {!isPrint && (
+        <>
+          <nav className="flex items-center gap-1 text-body-sm text-muted-foreground">
+            <Link to="/portal/invoices" className="text-accent hover:underline">{t('portal.invoices.title')}</Link>
+            <span>{isRTL ? ' \\ ' : ' / '}</span>
+            <span className="text-foreground">{invoice.invoice_number}</span>
+          </nav>
 
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h1 className="text-display-lg font-bold font-mono text-foreground">{invoice.invoice_number}</h1>
-          <div className="flex items-center gap-2 mt-1">
-            <StatusBadge status={invoice.status} type="invoice" />
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div>
+              <h1 className="text-display-lg font-bold font-mono text-foreground">{invoice.invoice_number}</h1>
+              <div className="flex items-center gap-2 mt-1">
+                <StatusBadge status={invoice.status} type="invoice" />
+              </div>
+            </div>
+            <Button variant="outline" asChild>
+              <a href={`/portal/invoices/${invoice.id}?print=1`} target="_blank" rel="noreferrer">
+                <Download className="h-4 w-4 me-2" /> {t('portal.invoices.downloadPdf')}
+              </a>
+            </Button>
           </div>
-        </div>
-      </div>
+        </>
+      )}
 
       {/* Invoice preview */}
-      <div className="bg-card border border-border rounded-xl p-6 sm:p-8 relative">
-        {invoice.balance_due <= 0 && (
-          <div className="absolute top-6 end-6 rotate-[-15deg] border-4 border-emerald-500 text-emerald-500 font-bold text-2xl px-4 py-1 rounded opacity-30">PAID</div>
+      <div className="bg-card border border-border rounded-xl p-6 sm:p-8 relative print:border-none print:shadow-none">
+        {paid && (
+          <div className="absolute top-6 end-6 rotate-[-15deg] border-4 border-success text-success font-bold text-2xl px-4 py-1 rounded opacity-30 print:hidden">
+            PAID
+          </div>
         )}
 
-        {/* Org header */}
         <div className="flex justify-between items-start mb-8">
           <div>
             {org?.logo_url && <img src={org.logo_url} alt="" className="h-12 w-12 rounded object-contain mb-2" />}
             <h2 className="text-lg font-bold text-foreground">{language === 'ar' && org?.name_ar ? org.name_ar : org?.name}</h2>
             {org?.phone && <p className="text-body-sm text-muted-foreground">{org.phone}</p>}
             {org?.email && <p className="text-body-sm text-muted-foreground">{org.email}</p>}
+            {org?.address && <p className="text-body-sm text-muted-foreground">{language === 'ar' && org.address_ar ? org.address_ar : org.address}</p>}
           </div>
           <div className="text-end">
             <p className="text-body-sm text-muted-foreground">{language === 'en' ? 'Issue Date' : 'تاريخ الإصدار'}</p>
@@ -119,7 +154,6 @@ export default function PortalInvoiceDetailPage() {
           </div>
         </div>
 
-        {/* Line items */}
         <table className="w-full mb-6">
           <thead>
             <tr className="border-b border-border">
@@ -132,9 +166,7 @@ export default function PortalInvoiceDetailPage() {
           <tbody>
             {lineItems.map((item: any) => (
               <tr key={item.id} className="border-b border-border/50">
-                <td className="py-3 text-body-md text-foreground">
-                  {language === 'ar' && item.description_ar ? item.description_ar : item.description}
-                </td>
+                <td className="py-3 text-body-md text-foreground">{language === 'ar' && item.description_ar ? item.description_ar : item.description}</td>
                 <td className="py-3 text-body-md text-foreground text-end">{item.quantity}</td>
                 <td className="py-3 text-body-md text-foreground text-end">{(item.unit_price || 0).toLocaleString()}</td>
                 <td className="py-3 text-body-md text-foreground text-end font-medium">{((item.quantity || 1) * (item.unit_price || 0)).toLocaleString()}</td>
@@ -143,7 +175,6 @@ export default function PortalInvoiceDetailPage() {
           </tbody>
         </table>
 
-        {/* Totals */}
         <div className="flex justify-end">
           <div className="w-64 space-y-2">
             <div className="flex justify-between text-body-md">
@@ -157,7 +188,7 @@ export default function PortalInvoiceDetailPage() {
               </div>
             )}
             {(invoice.discount_amount || 0) > 0 && (
-              <div className="flex justify-between text-body-md text-emerald-600">
+              <div className="flex justify-between text-body-md text-success">
                 <span>{language === 'en' ? 'Discount' : 'الخصم'}</span>
                 <span>-{formatAmount(invoice.discount_amount)}</span>
               </div>
@@ -167,7 +198,7 @@ export default function PortalInvoiceDetailPage() {
               <span>{formatAmount(invoice.total_amount)}</span>
             </div>
             {(invoice.amount_paid || 0) > 0 && (
-              <div className="flex justify-between text-body-md text-emerald-600">
+              <div className="flex justify-between text-body-md text-success">
                 <span>{language === 'en' ? 'Paid' : 'المدفوع'}</span>
                 <span>-{formatAmount(invoice.amount_paid)}</span>
               </div>
@@ -181,7 +212,6 @@ export default function PortalInvoiceDetailPage() {
           </div>
         </div>
 
-        {/* Notes */}
         {(invoice.notes || invoice.terms) && (
           <div className="mt-6 pt-4 border-t border-border space-y-3">
             {invoice.notes && (
@@ -201,7 +231,7 @@ export default function PortalInvoiceDetailPage() {
       </div>
 
       {/* Payment History */}
-      {payments.length > 0 && (
+      {!isPrint && payments.length > 0 && (
         <div className="bg-card border border-border rounded-xl p-5">
           <h2 className="text-lg font-semibold text-foreground mb-4">{t('portal.invoices.paymentHistory')}</h2>
           <table className="w-full">
@@ -217,7 +247,7 @@ export default function PortalInvoiceDetailPage() {
               {payments.map((p: any) => (
                 <tr key={p.id} className="border-b border-border/50">
                   <td className="py-2 text-body-md">{formatDate(p.payment_date)}</td>
-                  <td className="py-2 text-body-md text-end font-medium text-emerald-600">{formatAmount(p.amount)}</td>
+                  <td className="py-2 text-body-md text-end font-medium text-success">{formatAmount(p.amount)}</td>
                   <td className="py-2 text-body-md text-muted-foreground">{p.payment_method || '—'}</td>
                   <td className="py-2 text-body-md text-muted-foreground">{p.reference_number || '—'}</td>
                 </tr>
@@ -227,8 +257,8 @@ export default function PortalInvoiceDetailPage() {
         </div>
       )}
 
-      {/* Bank transfer details */}
-      {(invoice.balance_due || 0) > 0 && org && (org.bank_name || org.bank_account_number) && (
+      {/* Bank transfer */}
+      {!isPrint && (invoice.balance_due || 0) > 0 && org && (org.bank_name || org.bank_account_number) && (
         <div className="bg-card border border-accent/30 rounded-xl p-5">
           <div className="flex items-center gap-2 mb-3">
             <Building className="h-5 w-5 text-accent" />

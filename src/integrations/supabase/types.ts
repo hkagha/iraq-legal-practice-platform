@@ -3239,6 +3239,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      client_can_access_document_object: {
+        Args: { object_name: string }
+        Returns: boolean
+      }
+      client_mark_invoice_viewed: {
+        Args: { p_invoice_id: string }
+        Returns: undefined
+      }
       create_notification: {
         Args: {
           p_actor_id?: string

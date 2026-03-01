@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { User, Loader2, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -11,9 +11,15 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 export default function PortalProfilePage() {
   const { t, language, setLanguage } = useLanguage();
-  const { profile, getFullName, getInitials, updateProfile } = useAuth();
+  const { profile, getFullName, getInitials } = useAuth();
+
+  const [clientId, setClientId] = useState<string | null>(null);
+  const [client, setClient] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
   const [phone, setPhone] = useState('');
+  const [whatsapp, setWhatsapp] = useState('');
+  const [address, setAddress] = useState('');
   const [saving, setSaving] = useState(false);
 
   // Password
@@ -24,15 +30,46 @@ export default function PortalProfilePage() {
   const [showPw, setShowPw] = useState(false);
 
   useEffect(() => {
-    if (profile) {
-      setPhone(profile.phone || '');
-    }
-  }, [profile]);
+    if (!profile?.id) return;
+    loadClient();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [profile?.id]);
+
+  const loadClient = async () => {
+    setLoading(true);
+    const { data: link } = await supabase
+      .from('client_user_links')
+      .select('client_id')
+      .eq('user_id', profile!.id)
+      .maybeSingle();
+
+    if (!link?.client_id) { setLoading(false); return; }
+    setClientId(link.client_id);
+
+    const { data: c } = await supabase
+      .from('clients')
+      .select('id, phone, whatsapp_number, address')
+      .eq('id', link.client_id)
+      .maybeSingle();
+
+    setClient(c);
+    setPhone(c?.phone || profile?.phone || '');
+    setWhatsapp(c?.whatsapp_number || '');
+    setAddress(c?.address || '');
+
+    setLoading(false);
+  };
 
   const handleSave = async () => {
+    if (!clientId) return;
     setSaving(true);
     try {
-      await updateProfile({ phone } as any);
+      const { error } = await supabase
+        .from('clients')
+        .update({ phone: phone || null, whatsapp_number: whatsapp || null, address: address || null } as any)
+        .eq('id', clientId);
+      if (error) throw error;
+
       toast({ title: language === 'en' ? 'Profile updated' : 'تم تحديث الملف الشخصي' });
     } catch (err: any) {
       toast({ title: 'Error', description: err.message, variant: 'destructive' });
@@ -42,6 +79,11 @@ export default function PortalProfilePage() {
   };
 
   const handleChangePassword = async () => {
+    if (!profile?.email) return;
+    if (!currentPw) {
+      toast({ title: language === 'en' ? 'Enter current password' : 'أدخل كلمة المرور الحالية', variant: 'destructive' });
+      return;
+    }
     if (newPw.length < 8) {
       toast({ title: t('auth.passwordMinLength'), variant: 'destructive' });
       return;
@@ -50,18 +92,26 @@ export default function PortalProfilePage() {
       toast({ title: t('auth.passwordsDoNotMatch'), variant: 'destructive' });
       return;
     }
+
     setChangingPw(true);
-    const { error } = await supabase.auth.updateUser({ password: newPw });
-    if (error) {
-      toast({ title: 'Error', description: error.message, variant: 'destructive' });
-    } else {
+    try {
+      // Verify current password
+      const { error: reauthError } = await supabase.auth.signInWithPassword({ email: profile.email, password: currentPw });
+      if (reauthError) throw reauthError;
+
+      const { error } = await supabase.auth.updateUser({ password: newPw });
+      if (error) throw error;
+
       toast({ title: language === 'en' ? 'Password changed successfully' : 'تم تغيير كلمة المرور بنجاح' });
       setCurrentPw(''); setNewPw(''); setConfirmPw('');
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message, variant: 'destructive' });
+    } finally {
+      setChangingPw(false);
     }
-    setChangingPw(false);
   };
 
-  if (!profile) {
+  if (loading || !profile) {
     return <div className="space-y-4"><Skeleton className="h-8 w-48" /><Skeleton className="h-64 rounded-lg" /></div>;
   }
 
@@ -88,6 +138,20 @@ export default function PortalProfilePage() {
           </div>
 
           <div>
+            <label className="text-label text-foreground block mb-1.5">{language === 'en' ? 'WhatsApp' : 'واتساب'}</label>
+            <Input value={whatsapp} onChange={e => setWhatsapp(e.target.value)} placeholder="+964 7XX XXX XXXX" />
+          </div>
+
+          <div>
+            <label className="text-label text-foreground block mb-1.5">{t('common.address')}</label>
+            <textarea
+              value={address}
+              onChange={e => setAddress(e.target.value)}
+              className="w-full min-h-[100px] rounded-md border border-input bg-background px-3 py-2 text-body-md resize-y"
+            />
+          </div>
+
+          <div>
             <label className="text-label text-foreground block mb-1.5">{language === 'en' ? 'Preferred Language' : 'اللغة المفضلة'}</label>
             <div className="flex gap-2">
               <button onClick={() => setLanguage('en')} className={`px-4 py-2 rounded-md text-body-sm font-medium border ${language === 'en' ? 'bg-accent text-accent-foreground border-accent' : 'bg-card border-border text-foreground'}`}>English</button>
@@ -107,6 +171,11 @@ export default function PortalProfilePage() {
         <h2 className="text-heading-sm font-semibold text-foreground mb-4">{language === 'en' ? 'Change Password' : 'تغيير كلمة المرور'}</h2>
         <div className="space-y-4">
           <div>
+            <label className="text-label text-foreground block mb-1.5">{language === 'en' ? 'Current Password' : 'كلمة المرور الحالية'}</label>
+            <Input type="password" value={currentPw} onChange={e => setCurrentPw(e.target.value)} />
+          </div>
+
+          <div>
             <label className="text-label text-foreground block mb-1.5">{language === 'en' ? 'New Password' : 'كلمة المرور الجديدة'}</label>
             <div className="relative">
               <Input type={showPw ? 'text' : 'password'} value={newPw} onChange={e => setNewPw(e.target.value)} />
@@ -115,10 +184,12 @@ export default function PortalProfilePage() {
               </button>
             </div>
           </div>
+
           <div>
             <label className="text-label text-foreground block mb-1.5">{t('auth.confirmPassword')}</label>
             <Input type="password" value={confirmPw} onChange={e => setConfirmPw(e.target.value)} />
           </div>
+
           <Button variant="outline" onClick={handleChangePassword} disabled={changingPw || !newPw}>
             {changingPw && <Loader2 className="h-4 w-4 animate-spin me-2" />}
             {language === 'en' ? 'Update Password' : 'تحديث كلمة المرور'}

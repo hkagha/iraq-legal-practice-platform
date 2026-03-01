@@ -1,9 +1,9 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Receipt, Download, FileText } from 'lucide-react';
+import { Receipt, Download } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar as arLocale } from 'date-fns/locale';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -25,12 +25,14 @@ interface Invoice {
 export default function PortalInvoicesPage() {
   const { t, language } = useLanguage();
   const { profile } = useAuth();
+
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!profile?.id) return;
     loadInvoices();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [profile?.id]);
 
   const loadInvoices = async () => {
@@ -40,7 +42,7 @@ export default function PortalInvoicesPage() {
       .select('client_id')
       .eq('user_id', profile!.id)
       .maybeSingle();
-    if (!link) { setLoading(false); return; }
+    if (!link?.client_id) { setLoading(false); return; }
 
     const { data } = await supabase
       .from('invoices')
@@ -48,17 +50,22 @@ export default function PortalInvoicesPage() {
       .eq('client_id', link.client_id)
       .not('status', 'in', '("draft","cancelled","written_off")')
       .order('created_at', { ascending: false });
+
     setInvoices((data || []) as Invoice[]);
     setLoading(false);
   };
 
   const formatDate = (d: string) => {
-    try { return language === 'ar' ? format(new Date(d), 'dd MMM yyyy', { locale: arLocale }) : format(new Date(d), 'MMM dd, yyyy'); }
-    catch { return d; }
+    try {
+      return language === 'ar'
+        ? format(new Date(d), 'dd MMM yyyy', { locale: arLocale })
+        : format(new Date(d), 'MMM dd, yyyy');
+    } catch {
+      return d;
+    }
   };
 
-  const formatAmount = (amount: number, currency: string) =>
-    `${amount?.toLocaleString() || 0} ${currency}`;
+  const formatAmount = (amount: number, currency: string) => `${(amount || 0).toLocaleString()} ${currency}`;
 
   const totalOutstanding = invoices
     .filter(i => ['sent', 'viewed', 'partially_paid', 'overdue'].includes(i.status))
@@ -91,11 +98,11 @@ export default function PortalInvoicesPage() {
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="bg-card rounded-xl border border-border p-5">
           <p className="text-body-sm text-muted-foreground">{language === 'en' ? 'Total Outstanding' : 'إجمالي المستحق'}</p>
-          <p className="text-display-sm font-bold text-amber-500">{formatAmount(totalOutstanding, 'IQD')}</p>
+          <p className="text-display-sm font-bold text-warning">{formatAmount(totalOutstanding, 'IQD')}</p>
         </div>
         <div className="bg-card rounded-xl border border-border p-5">
           <p className="text-body-sm text-muted-foreground">{language === 'en' ? 'Total Paid' : 'إجمالي المدفوع'}</p>
-          <p className="text-display-sm font-bold text-emerald-500">{formatAmount(totalPaid, 'IQD')}</p>
+          <p className="text-display-sm font-bold text-success">{formatAmount(totalPaid, 'IQD')}</p>
         </div>
         {totalOverdue > 0 && (
           <div className="bg-card rounded-xl border border-destructive/30 p-5">
@@ -117,6 +124,7 @@ export default function PortalInvoicesPage() {
                 <th className="text-start text-body-sm font-medium text-muted-foreground px-4 py-3">{language === 'en' ? 'Date' : 'التاريخ'}</th>
                 <th className="text-start text-body-sm font-medium text-muted-foreground px-4 py-3">{language === 'en' ? 'Due Date' : 'تاريخ الاستحقاق'}</th>
                 <th className="text-end text-body-sm font-medium text-muted-foreground px-4 py-3">{language === 'en' ? 'Total' : 'الإجمالي'}</th>
+                <th className="text-end text-body-sm font-medium text-muted-foreground px-4 py-3">{language === 'en' ? 'Paid' : 'المدفوع'}</th>
                 <th className="text-end text-body-sm font-medium text-muted-foreground px-4 py-3">{language === 'en' ? 'Balance' : 'المتبقي'}</th>
                 <th className="text-start text-body-sm font-medium text-muted-foreground px-4 py-3">{t('common.status')}</th>
                 <th className="text-end text-body-sm font-medium text-muted-foreground px-4 py-3">{t('common.actions')}</th>
@@ -126,19 +134,30 @@ export default function PortalInvoicesPage() {
               {invoices.map(inv => {
                 const isOverdue = new Date(inv.due_date) < new Date() && (inv.balance_due || 0) > 0 && inv.status !== 'paid';
                 return (
-                  <tr key={inv.id} className={`border-b border-border/50 hover:bg-muted/30 transition-colors ${isOverdue ? 'bg-destructive/5' : ''}`}>
+                  <tr key={inv.id} className={cn('border-b border-border/50 hover:bg-muted/30 transition-colors', isOverdue && 'bg-destructive/5')}>
                     <td className="px-4 py-3">
                       <Link to={`/portal/invoices/${inv.id}`} className="text-body-md font-mono text-accent hover:underline">
                         {inv.invoice_number}
                       </Link>
                     </td>
                     <td className="px-4 py-3 text-body-sm text-muted-foreground">{formatDate(inv.issue_date)}</td>
-                    <td className={`px-4 py-3 text-body-sm ${isOverdue ? 'text-destructive font-medium' : 'text-muted-foreground'}`}>{formatDate(inv.due_date)}</td>
+                    <td className={cn('px-4 py-3 text-body-sm', isOverdue ? 'text-destructive font-medium' : 'text-muted-foreground')}>{formatDate(inv.due_date)}</td>
                     <td className="px-4 py-3 text-body-sm text-foreground text-end">{formatAmount(inv.total_amount, inv.currency)}</td>
+                    <td className="px-4 py-3 text-body-sm text-foreground text-end">{formatAmount(inv.amount_paid, inv.currency)}</td>
                     <td className="px-4 py-3 text-body-sm text-foreground font-medium text-end">{formatAmount(inv.balance_due, inv.currency)}</td>
                     <td className="px-4 py-3"><StatusBadge status={isOverdue ? 'overdue' : inv.status} type="invoice" size="sm" /></td>
                     <td className="px-4 py-3 text-end">
-                      <Link to={`/portal/invoices/${inv.id}`} className="text-accent hover:underline text-body-sm">{language === 'en' ? 'View' : 'عرض'}</Link>
+                      <div className="inline-flex items-center gap-3">
+                        <Link to={`/portal/invoices/${inv.id}`} className="text-accent hover:underline text-body-sm">{language === 'en' ? 'View' : 'عرض'}</Link>
+                        <a
+                          href={`/portal/invoices/${inv.id}?print=1`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-accent hover:underline text-body-sm inline-flex items-center gap-1"
+                        >
+                          <Download className="h-3.5 w-3.5" /> {language === 'en' ? 'Download' : 'تحميل'}
+                        </a>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -149,4 +168,8 @@ export default function PortalInvoicesPage() {
       )}
     </div>
   );
+}
+
+function cn(...classes: (string | false | null | undefined)[]) {
+  return classes.filter(Boolean).join(' ');
 }
