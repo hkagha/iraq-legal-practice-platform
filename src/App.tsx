@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { TimerProvider } from "@/contexts/TimerContext";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { ImpersonationProvider } from "@/contexts/ImpersonationContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import MainLayout from "@/layouts/MainLayout";
 import ClientLayout from "@/layouts/ClientLayout";
@@ -79,6 +80,8 @@ const AdminAuditLogPage = React.lazy(() => import('@/pages/admin/AdminAuditLogPa
 const AdminAnnouncementsPage = React.lazy(() => import('@/pages/admin/AdminAnnouncementsPage'));
 const AdminSettingsPage = React.lazy(() => import('@/pages/admin/AdminSettingsPage'));
 const AdminSystemHealthPage = React.lazy(() => import('@/pages/admin/AdminSystemHealthPage'));
+const AdminOrganizationDetailPage = React.lazy(() => import('@/pages/admin/AdminOrganizationDetailPage'));
+const AdminRevenuePage = React.lazy(() => import('@/pages/admin/AdminRevenuePage'));
 
 // Redirect stubs for removed placeholders
 const ProfilePage = () => <Navigate to="/settings" replace />;
@@ -90,6 +93,7 @@ const App = () => (
     <LanguageProvider>
       <ErrorBoundary>
       <AuthProvider>
+        <ImpersonationProvider>
         <TimerProvider>
         <TooltipProvider>
           <Toaster />
@@ -172,6 +176,8 @@ const App = () => (
                   <Route path="audit-log" element={<AdminAuditLogPage />} />
                   <Route path="announcements" element={<AdminAnnouncementsPage />} />
                   <Route path="settings" element={<AdminSettingsPage />} />
+                  <Route path="organizations/:id" element={<AdminOrganizationDetailPage />} />
+                  <Route path="revenue" element={<AdminRevenuePage />} />
                   <Route path="system-health" element={<AdminSystemHealthPage />} />
                 </Route>
 
@@ -181,6 +187,7 @@ const App = () => (
           </BrowserRouter>
         </TooltipProvider>
         </TimerProvider>
+        </ImpersonationProvider>
       </AuthProvider>
       </ErrorBoundary>
     </LanguageProvider>
