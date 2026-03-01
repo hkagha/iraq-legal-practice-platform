@@ -3499,6 +3499,10 @@ export type Database = {
         Args: { object_name: string }
         Returns: boolean
       }
+      client_can_see_profile: {
+        Args: { _client_user_id: string; _profile_id: string }
+        Returns: boolean
+      }
       client_mark_invoice_viewed: {
         Args: { p_invoice_id: string }
         Returns: undefined
