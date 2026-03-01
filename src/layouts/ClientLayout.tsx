@@ -9,6 +9,7 @@ import {
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu';
+import NotificationBell from '@/components/notifications/NotificationBell';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 
@@ -57,6 +58,8 @@ export default function ClientLayout() {
             <Globe className="h-4 w-4" />
             {language === 'en' ? 'AR' : 'EN'}
           </button>
+
+          <NotificationBell />
 
           {/* User dropdown */}
           <DropdownMenu>
