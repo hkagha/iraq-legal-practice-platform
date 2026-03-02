@@ -23,6 +23,7 @@ import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import NotFound from "./pages/NotFound";
 import InviteAcceptPage from "@/pages/InviteAcceptPage";
 import AdminLoginPage from '@/pages/admin/AdminLoginPage';
+import PortalLoginPage from '@/pages/portal/PortalLoginPage';
 
 const queryClient = new QueryClient();
 
@@ -109,7 +110,7 @@ const App = () => (
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/invite/:token" element={<InviteAcceptPage />} />
                 <Route path="/admin/login" element={<AdminLoginPage />} />
-
+                <Route path="/portal/login" element={<PortalLoginPage />} />
                 {/* Protected main routes */}
                 <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
                   <Route path="/dashboard" element={<DashboardPage />} />

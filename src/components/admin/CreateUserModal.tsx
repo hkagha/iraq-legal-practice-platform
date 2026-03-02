@@ -3,6 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { logAdminAction } from '@/lib/adminAudit';
+import { adminCreateUser } from '@/lib/passwordService';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { FormField } from '@/components/ui/FormField';
 import { FormInput } from '@/components/ui/FormInput';
@@ -43,27 +44,19 @@ export default function CreateUserModal({ open, onClose, onSuccess, preselectedO
     if (!email || !firstName || !lastName || !orgId || !password || password.length < 8) return;
     setSaving(true);
     try {
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email, password,
-        options: { data: { first_name: firstName, last_name: lastName, role }, emailRedirectTo: `${window.location.origin}/login` },
+      const result = await adminCreateUser({
+        email,
+        password,
+        first_name: firstName,
+        last_name: lastName,
+        role,
+        organization_id: orgId,
+        phone: phone || undefined,
       });
-      if (authError) throw authError;
 
-      await new Promise(r => setTimeout(r, 1500));
-      await supabase.from('profiles').update({
-        organization_id: orgId, role, first_name: firstName, last_name: lastName, phone: phone || null,
-      } as any).eq('email', email);
+      if (!result.success) throw new Error(result.error || 'Failed to create user');
 
-      // Mark password as admin-set
-      if (authData.user?.id) {
-        await supabase.from('profiles').update({
-          password_set_by_admin: true,
-          password_last_changed_at: new Date().toISOString(),
-          password_changed_by: user?.id || null,
-        } as any).eq('id', authData.user.id);
-      }
-
-      if (user) await logAdminAction(user.id, 'user_created', 'user', authData.user?.id || null, email);
+      if (user) await logAdminAction(user.id, 'user_created', 'user', result.user_id || null, email);
       toast.success(isEN ? `User "${email}" created` : `تم إنشاء المستخدم "${email}"`);
       reset(); onClose(); onSuccess();
     } catch (err: any) {

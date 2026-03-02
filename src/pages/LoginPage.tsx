@@ -184,6 +184,14 @@ export default function LoginPage() {
                 {t('auth.signUp')}
               </Link>
             </p>
+
+            {/* Client portal link */}
+            <p className="text-center text-body-sm text-muted-foreground mt-3">
+              {language === 'en' ? 'Are you a client?' : 'هل أنت عميل؟'}{' '}
+              <Link to="/portal/login" className="text-accent font-medium hover:underline">
+                {language === 'en' ? 'Client Portal Login' : 'دخول بوابة العملاء'}
+              </Link>
+            </p>
           </div>
         </div>
       </div>

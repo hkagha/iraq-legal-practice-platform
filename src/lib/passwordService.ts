@@ -27,6 +27,38 @@ export async function adminResetPassword(targetUserId: string, newPassword: stri
   }
 }
 
+export async function adminCreateUser(params: {
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  role: string;
+  organization_id: string;
+  phone?: string;
+}): Promise<{ success: boolean; user_id?: string; error?: string }> {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) return { success: false, error: 'Not authenticated' };
+
+    const response = await supabase.functions.invoke('admin-create-user', {
+      body: params,
+    });
+
+    if (response.error) {
+      return { success: false, error: response.error.message || 'Failed to create user' };
+    }
+
+    const data = response.data as any;
+    if (data?.error) {
+      return { success: false, error: data.error };
+    }
+
+    return { success: true, user_id: data?.user_id };
+  } catch (e: any) {
+    return { success: false, error: e.message || 'Unknown error' };
+  }
+}
+
 export function generateSecurePassword(length: number = 12): string {
   const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
   const lower = 'abcdefghijklmnopqrstuvwxyz';
