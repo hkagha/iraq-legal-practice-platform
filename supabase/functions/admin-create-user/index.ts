@@ -87,8 +87,10 @@ serve(async (req) => {
       });
     }
 
-    // Create user with email auto-confirmed
-    const { data: newUser, error: createError } = await adminClient.auth.admin.createUser({
+    // Create or recover auth user (for previously invitation-created / unconfirmed accounts)
+    let targetUserId: string | null = null;
+
+    const { data: createdUser, error: createError } = await adminClient.auth.admin.createUser({
       email,
       password,
       email_confirm: true,
@@ -96,15 +98,75 @@ serve(async (req) => {
     });
 
     if (createError) {
-      console.error("User creation failed:", createError);
-      return new Response(JSON.stringify({ error: createError.message }), {
-        status: 400,
-        headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+      const alreadyExists =
+        createError.message?.toLowerCase().includes("already") ||
+        createError.message?.toLowerCase().includes("registered");
 
-    // Wait for trigger to create profile
-    await new Promise(r => setTimeout(r, 1000));
+      if (!alreadyExists) {
+        console.error("User creation failed:", createError);
+        return new Response(JSON.stringify({ error: createError.message }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Recover existing user by email and force-confirm + reset password
+      const { data: usersPage, error: usersError } = await adminClient.auth.admin.listUsers({ page: 1, perPage: 1000 });
+      if (usersError) {
+        return new Response(JSON.stringify({ error: "Failed to load existing users" }), {
+          status: 500,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const existingUser = usersPage.users.find((u) => u.email?.toLowerCase() === email.toLowerCase());
+      if (!existingUser) {
+        return new Response(JSON.stringify({ error: "Existing user not found" }), {
+          status: 404,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { data: existingProfile } = await adminClient
+        .from("profiles")
+        .select("id, role, organization_id")
+        .eq("id", existingUser.id)
+        .maybeSingle();
+
+      if (callerProfile.role === "firm_admin") {
+        if (existingProfile?.organization_id && existingProfile.organization_id !== callerProfile.organization_id) {
+          return new Response(JSON.stringify({ error: "Cannot manage users outside your organization" }), {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        if (existingProfile?.role && ["super_admin", "firm_admin"].includes(existingProfile.role)) {
+          return new Response(JSON.stringify({ error: "Insufficient permissions to manage this role" }), {
+            status: 403,
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      }
+
+      const { error: recoverError } = await adminClient.auth.admin.updateUserById(existingUser.id, {
+        password,
+        email_confirm: true,
+        user_metadata: { first_name, last_name, role },
+      });
+
+      if (recoverError) {
+        return new Response(JSON.stringify({ error: recoverError.message }), {
+          status: 400,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      targetUserId = existingUser.id;
+    } else {
+      targetUserId = createdUser.user.id;
+      // Wait for trigger to create profile for new users
+      await new Promise(r => setTimeout(r, 1000));
+    }
 
     // Update profile with org, role, phone
     await adminClient.from("profiles").update({
@@ -116,7 +178,7 @@ serve(async (req) => {
       password_set_by_admin: true,
       password_last_changed_at: new Date().toISOString(),
       password_changed_by: callerProfile.id,
-    }).eq("id", newUser.user.id);
+    }).eq("id", targetUserId);
 
     // Audit log for super_admin
     if (callerProfile.role === "super_admin") {
@@ -124,13 +186,13 @@ serve(async (req) => {
         admin_id: callerProfile.id,
         action: "user_created",
         target_type: "user",
-        target_id: newUser.user.id,
+        target_id: targetUserId,
         target_name: email,
         details: { role, organization_id },
       });
     }
 
-    return new Response(JSON.stringify({ success: true, user_id: newUser.user.id }), {
+    return new Response(JSON.stringify({ success: true, user_id: targetUserId }), {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
