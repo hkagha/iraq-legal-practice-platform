@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { adminCreateUser } from '@/lib/passwordService';
+import { generateSecurePassword } from '@/lib/passwordService';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { FormField } from '@/components/ui/FormField';
 import { FormInput } from '@/components/ui/FormInput';
 import { Button } from '@/components/ui/button';
 import { Eye, EyeOff, Loader2, Wand2, Check, X, Info } from 'lucide-react';
-import { generateSecurePassword } from '@/lib/passwordService';
 import { toast } from 'sonner';
 
 interface Props {
@@ -48,34 +49,22 @@ export default function CreateClientAccountModal({ open, onClose, onSuccess, cli
     if (!email || !isLongEnough || !profile?.organization_id) return;
     setSaving(true);
     try {
-      // Create auth user with client role
-      const { data: authData, error: authError } = await supabase.auth.signUp({
+      // Use admin API to create user with auto-confirmed email
+      const result = await adminCreateUser({
         email,
         password,
-        options: {
-          data: { first_name: clientName, last_name: '', role: 'client' },
-          emailRedirectTo: `${window.location.origin}/login`,
-        },
-      });
-      if (authError) throw authError;
-
-      // Wait for profile trigger
-      await new Promise(r => setTimeout(r, 1500));
-
-      // Update profile with org and role
-      await supabase.from('profiles').update({
-        organization_id: profile.organization_id,
-        role: 'client',
         first_name: clientName,
-        password_set_by_admin: true,
-        password_last_changed_at: new Date().toISOString(),
-        password_changed_by: profile.id,
-      } as any).eq('email', email);
+        last_name: '',
+        role: 'client',
+        organization_id: profile.organization_id,
+      });
+
+      if (!result.success) throw new Error(result.error || 'Failed to create account');
 
       // Create client_user_link
-      if (authData.user?.id) {
+      if (result.user_id) {
         await supabase.from('client_user_links').insert({
-          user_id: authData.user.id,
+          user_id: result.user_id,
           client_id: clientId,
           organization_id: profile.organization_id,
         } as any);

@@ -45,7 +45,7 @@ export default function ClientLayout() {
 
   const handleSignOut = async () => {
     await signOut();
-    navigate('/login');
+    navigate('/portal/login');
   };
 
   function dismissPasswordReminder() {
