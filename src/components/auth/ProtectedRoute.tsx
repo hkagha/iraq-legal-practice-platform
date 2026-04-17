@@ -24,7 +24,12 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
   }
 
   if (!user) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
+    // Redirect to the appropriate login by area
+    const path = location.pathname;
+    let loginPath = '/login/staff';
+    if (path.startsWith('/portal')) loginPath = '/portal/login';
+    else if (path.startsWith('/admin')) loginPath = '/admin/login';
+    return <Navigate to={loginPath} state={{ from: location }} replace />;
   }
 
   if (profile) {
