@@ -35,6 +35,7 @@ export async function adminCreateUser(params: {
   role: string;
   organization_id: string;
   phone?: string;
+  client_id?: string;
 }): Promise<{ success: boolean; user_id?: string; error?: string }> {
   try {
     const { data: { session } } = await supabase.auth.getSession();

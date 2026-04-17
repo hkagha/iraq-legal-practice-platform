@@ -49,7 +49,7 @@ export default function CreateClientAccountModal({ open, onClose, onSuccess, cli
     if (!email || !isLongEnough || !profile?.organization_id) return;
     setSaving(true);
     try {
-      // Use admin API to create user with auto-confirmed email
+      // Use admin API to create user with auto-confirmed email + link to client (server-side)
       const result = await adminCreateUser({
         email,
         password,
@@ -57,18 +57,10 @@ export default function CreateClientAccountModal({ open, onClose, onSuccess, cli
         last_name: '',
         role: 'client',
         organization_id: profile.organization_id,
+        client_id: clientId,
       });
 
       if (!result.success) throw new Error(result.error || 'Failed to create account');
-
-      // Create client_user_link
-      if (result.user_id) {
-        await supabase.from('client_user_links').insert({
-          user_id: result.user_id,
-          client_id: clientId,
-          organization_id: profile.organization_id,
-        } as any);
-      }
 
       toast.success(isEN ? `Portal account created for "${email}"` : `تم إنشاء حساب البوابة لـ "${email}"`);
       onClose();
