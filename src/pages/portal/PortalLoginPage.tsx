@@ -40,8 +40,11 @@ export default function PortalLoginPage() {
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-secondary via-background to-secondary/50">
-      {/* Language toggle */}
-      <div className="flex justify-end p-6">
+      {/* Top bar with back link + language */}
+      <div className="flex justify-between items-center p-6">
+        <Link to="/login" className="text-body-sm text-muted-foreground hover:text-foreground">
+          ← {isEN ? 'Back to login options' : 'العودة لخيارات تسجيل الدخول'}
+        </Link>
         <div className="flex gap-2 text-body-md">
           <button onClick={() => setLanguage('en')} className={`px-2 pb-1 ${language === 'en' ? 'text-accent border-b-2 border-accent font-semibold' : 'text-muted-foreground'}`}>EN</button>
           <button onClick={() => setLanguage('ar')} className={`px-2 pb-1 ${language === 'ar' ? 'text-accent border-b-2 border-accent font-semibold' : 'text-muted-foreground'}`}>AR</button>
