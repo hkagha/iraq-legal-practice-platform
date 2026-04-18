@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback, useEffect, useMemo } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -107,6 +107,7 @@ export default function DocumentUploadModal({
   const [files, setFiles] = useState<FileEntry[]>([]);
   const [isDragOver, setIsDragOver] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const hasContext = !!(preLinkedCase || preLinkedErrand || preLinkedClient);
 
   // Entity search options
   const [caseOptions, setCaseOptions] = useState<{ value: string; label: string; subtitle?: string }[]>([]);
@@ -141,11 +142,8 @@ export default function DocumentUploadModal({
         toast.error(`${file.name}: ${language === 'ar' ? 'نوع الملف غير مدعوم' : 'File type not supported'}`);
         return;
       }
-      const hasContext = !!(preLinkedCase || preLinkedErrand || preLinkedClient);
       const defaultLinkType = preLinkedCase ? 'case' : preLinkedErrand ? 'errand' : preLinkedClient ? 'client' : 'none';
       const defaultLinkedId = preLinkedCase?.id || preLinkedErrand?.id || preLinkedClient?.id || '';
-      // If opened from a case/errand/client page, default to case_specific.
-      // Otherwise default to internal — safest choice; user must opt in to sharing.
       const defaultScope: FileEntry['scope'] = hasContext ? 'case_specific' : 'internal';
       entries.push({
         file, id: crypto.randomUUID(),
@@ -167,17 +165,29 @@ export default function DocumentUploadModal({
   const removeFile = (id: string) => setFiles(prev => prev.filter(f => f.id !== id));
   const updateFile = (id: string, updates: Partial<FileEntry>) => setFiles(prev => prev.map(f => f.id === id ? { ...f, ...updates } : f));
 
+  const optionsReady = useMemo(() => ({
+    case: caseOptions.length > 0,
+    errand: errandOptions.length > 0,
+    client: clientOptions.length > 0,
+  }), [caseOptions.length, errandOptions.length, clientOptions.length]);
+
+  const hasRequiredLink = (entry: FileEntry) => {
+    if (entry.scope !== 'case_specific') return true;
+    if (preLinkedCase || preLinkedErrand || preLinkedClient) return true;
+    if (!entry.linkType || entry.linkType === 'none' || !entry.linkedId) return false;
+    return optionsReady[entry.linkType];
+  };
+
   const canUpload = files.length > 0 && files.every(f => {
     if (!f.category) return false;
-    if (f.scope === 'case_specific') {
-      // Need a link target — either prelinked context or selected linkedId
-      if (!preLinkedCase && !preLinkedErrand && !preLinkedClient && !f.linkedId) return false;
-    }
-    return true;
+    return hasRequiredLink(f);
   }) && !isUploading;
 
   const handleUpload = async () => {
-    if (!profile?.organization_id || !profile.id) return;
+    if (!profile?.organization_id || !profile.id) {
+      toast.error(language === 'ar' ? 'يجب تسجيل الدخول بحساب موظف لرفع المستندات' : 'You must be signed in as a staff member to upload documents');
+      return;
+    }
     setIsUploading(true);
     const orgId = profile.organization_id;
     let successCount = 0;
@@ -188,10 +198,22 @@ export default function DocumentUploadModal({
 
       try {
         // Determine storage path
-        const context = entry.linkType === 'case' ? 'cases' : entry.linkType === 'errand' ? 'errands' : entry.linkType === 'client' ? 'clients' : 'general';
-        const entityId = entry.linkedId || 'general';
+        const resolvedLinkType = entry.scope === 'case_specific'
+          ? (preLinkedCase ? 'case' : preLinkedErrand ? 'errand' : preLinkedClient ? 'client' : entry.linkType)
+          : 'none';
+        const resolvedLinkedId = entry.scope === 'case_specific'
+          ? (preLinkedCase?.id || preLinkedErrand?.id || preLinkedClient?.id || entry.linkedId)
+          : '';
+
+        if (entry.scope === 'case_specific' && (!resolvedLinkType || resolvedLinkType === 'none' || !resolvedLinkedId)) {
+          throw new Error(language === 'ar' ? 'اختر القضية أو المعاملة أو العميل لهذا المستند' : 'Choose the case, errand, or client for this document');
+        }
+
+        const safeName = entry.file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+        const context = resolvedLinkType === 'case' ? 'cases' : resolvedLinkType === 'errand' ? 'errands' : resolvedLinkType === 'client' ? 'clients' : entry.scope === 'shared_library' ? 'shared-library' : 'internal';
+        const entityId = resolvedLinkedId || entry.scope;
         const timestamp = Date.now();
-        const storagePath = `${orgId}/${context}/${entityId}/${timestamp}-${entry.file.name}`;
+        const storagePath = `${orgId}/${context}/${entityId}/${timestamp}-${safeName}`;
 
         updateFile(entry.id, { progress: 30 });
 
@@ -226,9 +248,9 @@ export default function DocumentUploadModal({
           document_category: entry.category,
           title: entry.title || null,
           tags: entry.tags.length > 0 ? entry.tags : [],
-          client_id: isCaseSpec && entry.linkType === 'client' ? entry.linkedId : (isCaseSpec ? (preLinkedClient?.id || null) : null),
-          case_id: isCaseSpec && entry.linkType === 'case' ? entry.linkedId : (isCaseSpec ? (preLinkedCase?.id || null) : null),
-          errand_id: isCaseSpec && entry.linkType === 'errand' ? entry.linkedId : (isCaseSpec ? (preLinkedErrand?.id || null) : null),
+          client_id: isCaseSpec && resolvedLinkType === 'client' ? resolvedLinkedId : null,
+          case_id: isCaseSpec && resolvedLinkType === 'case' ? resolvedLinkedId : null,
+          errand_id: isCaseSpec && resolvedLinkType === 'errand' ? resolvedLinkedId : null,
           is_visible_to_client: isCaseSpec ? entry.visibleToClient : false,
           visibility_scope: entry.scope,
           uploaded_by: profile.id,
@@ -271,7 +293,11 @@ export default function DocumentUploadModal({
         successCount++;
       } catch (err: any) {
         console.error('Upload error:', err);
-        updateFile(entry.id, { status: 'error', error: err.message });
+        updateFile(entry.id, {
+          status: 'error',
+          progress: 0,
+          error: err?.message || (language === 'ar' ? 'فشل رفع المستند' : 'Document upload failed'),
+        });
       }
     }
 
@@ -474,7 +500,7 @@ export default function DocumentUploadModal({
                     </div>
 
                     {/* Link to entity (only for case_specific) */}
-                    {entry.scope === 'case_specific' && !preLinkedCase && !preLinkedErrand && !preLinkedClient && (
+                    {entry.scope === 'case_specific' && !hasContext && (
                       <div>
                         <label className="text-body-sm font-medium text-foreground mb-1.5 block">{language === 'ar' ? 'ربط بـ' : 'Link to'}</label>
                         <div className="flex gap-2 mb-2">
