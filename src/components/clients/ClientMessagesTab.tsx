@@ -235,40 +235,42 @@ export default function ClientMessagesTab({ clientId, defaultThread, lockedThrea
   })();
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-      <div className="lg:col-span-2 bg-card border border-border rounded-xl overflow-hidden">
-        <div className="px-4 py-3 border-b border-border">
-          <p className="text-heading-sm font-semibold text-foreground">{language === 'en' ? 'Threads' : 'المحادثات'}</p>
-        </div>
-        <div className="max-h-[520px] overflow-y-auto">
-          {threads.map(th => {
-            const Icon = th.icon;
-            return (
-              <button
-                key={th.key}
-                onClick={() => { setActiveThread(th.key); setPendingAttachments([]); }}
-                className={cn(
-                  'w-full flex items-start gap-3 px-4 py-3 text-start hover:bg-muted/50 transition-colors border-b border-border/50',
-                  activeThread === th.key && 'bg-accent/10'
-                )}
-              >
-                <Icon className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-body-sm font-medium text-foreground truncate">{th.label}</span>
-                    {th.unread > 0 && (
-                      <span className="h-5 w-5 rounded-full bg-accent text-accent-foreground text-[10px] flex items-center justify-center font-bold">{th.unread}</span>
-                    )}
+    <div className={cn('grid grid-cols-1 gap-4', !lockedThread && 'lg:grid-cols-5')}>
+      {!lockedThread && (
+        <div className="lg:col-span-2 bg-card border border-border rounded-xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-border">
+            <p className="text-heading-sm font-semibold text-foreground">{language === 'en' ? 'Threads' : 'المحادثات'}</p>
+          </div>
+          <div className="max-h-[520px] overflow-y-auto">
+            {threads.map(th => {
+              const Icon = th.icon;
+              return (
+                <button
+                  key={th.key}
+                  onClick={() => { setActiveThread(th.key); setPendingAttachments([]); }}
+                  className={cn(
+                    'w-full flex items-start gap-3 px-4 py-3 text-start hover:bg-muted/50 transition-colors border-b border-border/50',
+                    activeThread === th.key && 'bg-accent/10'
+                  )}
+                >
+                  <Icon className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-body-sm font-medium text-foreground truncate">{th.label}</span>
+                      {th.unread > 0 && (
+                        <span className="h-5 w-5 rounded-full bg-accent text-accent-foreground text-[10px] flex items-center justify-center font-bold">{th.unread}</span>
+                      )}
+                    </div>
+                    {th.lastMessage && <p className="text-body-sm text-muted-foreground truncate">{th.lastMessage}</p>}
                   </div>
-                  {th.lastMessage && <p className="text-body-sm text-muted-foreground truncate">{th.lastMessage}</p>}
-                </div>
-              </button>
-            );
-          })}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="lg:col-span-3 bg-card border border-border rounded-xl overflow-hidden flex flex-col">
+      <div className={cn('bg-card border border-border rounded-xl overflow-hidden flex flex-col', !lockedThread && 'lg:col-span-3')}>
         <div className="px-4 py-3 border-b border-border">
           <p className="text-heading-sm font-semibold text-foreground">{clientName}</p>
         </div>
