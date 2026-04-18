@@ -4,12 +4,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePortalOrg } from '@/contexts/PortalOrgContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { FileText, Download, Search } from 'lucide-react';
+import { FileText, Download, Search, Upload, Loader2, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar as arLocale } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import PortalDocumentDetailSlideOver from '@/components/portal/PortalDocumentDetailSlideOver';
 
 interface DocItem {
@@ -41,11 +43,74 @@ export default function PortalDocumentsPage() {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [linkedTo, setLinkedTo] = useState<'all' | 'cases' | 'errands' | 'general'>('all');
   const [detailDocId, setDetailDocId] = useState<string | null>(null);
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [uploadCases, setUploadCases] = useState<any[]>([]);
+  const [uploadCaseId, setUploadCaseId] = useState('');
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (!activeClientId) return;
     loadDocuments();
+    loadUploadCases();
   }, [activeClientId]);
+
+  const loadUploadCases = async () => {
+    const { data } = await supabase
+      .from('cases')
+      .select('id, case_number, title, title_ar')
+      .eq('client_id', activeClientId!)
+      .eq('is_visible_to_client', true)
+      .order('created_at', { ascending: false });
+    setUploadCases(data || []);
+  };
+
+  const handleUploadNew = async () => {
+    if (!uploadFile || !uploadCaseId || !profile?.id || !activeClientId) return;
+    if (uploadFile.size > 10 * 1024 * 1024) { toast({ title: 'Error', description: language === 'ar' ? 'الملف كبير جداً (الحد ١٠MB)' : 'File too large (10MB max)', variant: 'destructive' }); return; }
+    setUploading(true);
+    try {
+      const caseObj = uploadCases.find(c => c.id === uploadCaseId);
+      if (!caseObj) throw new Error('Case not found');
+      const { data: orgData } = await supabase.from('cases').select('organization_id').eq('id', uploadCaseId).maybeSingle();
+      const orgId = orgData?.organization_id;
+      if (!orgId) throw new Error('Organization not found');
+
+      const safeName = uploadFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const path = `${orgId}/clients/${activeClientId}/case-${uploadCaseId}/${Date.now()}-${safeName}`;
+      const { error: upErr } = await supabase.storage.from('documents').upload(path, uploadFile, { contentType: uploadFile.type });
+      if (upErr) throw new Error(`Storage: ${upErr.message}`);
+
+      const ext = uploadFile.name.split('.').pop()?.toLowerCase() || '';
+      const { error: insErr } = await supabase.from('documents').insert({
+        organization_id: orgId,
+        file_name: uploadFile.name,
+        file_path: path,
+        file_size_bytes: uploadFile.size,
+        file_type: ext,
+        mime_type: uploadFile.type,
+        document_category: 'client_upload',
+        case_id: uploadCaseId,
+        client_id: activeClientId,
+        is_visible_to_client: true,
+        visibility_scope: 'case_specific',
+        version: 1,
+        is_latest_version: true,
+        uploaded_by: profile.id,
+      } as any);
+      if (insErr) throw new Error(`Database: ${insErr.message}`);
+
+      toast({ title: language === 'ar' ? 'تم رفع المستند' : 'Document uploaded' });
+      setUploadOpen(false);
+      setUploadFile(null);
+      setUploadCaseId('');
+      await loadDocuments();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message || 'Upload failed', variant: 'destructive' });
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const loadDocuments = async () => {
     setLoading(true);
@@ -151,9 +216,17 @@ export default function PortalDocumentsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-display-lg font-bold text-foreground">{t('portal.documents.title')}</h1>
-        <p className="text-body-md text-muted-foreground mt-1">{t('portal.documents.subtitle')}</p>
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h1 className="text-display-lg font-bold text-foreground">{t('portal.documents.title')}</h1>
+          <p className="text-body-md text-muted-foreground mt-1">{t('portal.documents.subtitle')}</p>
+        </div>
+        {uploadCases.length > 0 && (
+          <Button onClick={() => setUploadOpen(true)} className="bg-accent text-accent-foreground hover:bg-accent/90">
+            <Upload className="h-4 w-4 me-2" />
+            {language === 'ar' ? 'رفع مستند' : 'Upload document'}
+          </Button>
+        )}
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
@@ -217,6 +290,48 @@ export default function PortalDocumentsPage() {
         onClose={() => setDetailDocId(null)}
         onRefresh={loadDocuments}
       />
+
+      <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{language === 'ar' ? 'رفع مستند جديد' : 'Upload new document'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <label className="text-body-sm font-medium text-foreground mb-1 block">
+                {language === 'ar' ? 'اختر القضية' : 'Select case'}
+              </label>
+              <select value={uploadCaseId} onChange={e => setUploadCaseId(e.target.value)} className="w-full h-10 rounded-md border border-input bg-background px-3 text-body-sm">
+                <option value="">{language === 'ar' ? '— اختر —' : '— Select —'}</option>
+                {uploadCases.map(c => (
+                  <option key={c.id} value={c.id}>{c.case_number} — {language === 'ar' && c.title_ar ? c.title_ar : c.title}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-body-sm font-medium text-foreground mb-1 block">
+                {language === 'ar' ? 'الملف' : 'File'}
+              </label>
+              <input type="file" onChange={e => setUploadFile(e.target.files?.[0] || null)} className="block w-full text-body-sm" />
+              {uploadFile && (
+                <p className="text-body-sm text-muted-foreground mt-1 inline-flex items-center gap-2">
+                  {uploadFile.name}
+                  <button onClick={() => setUploadFile(null)}><X className="h-3 w-3" /></button>
+                </p>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setUploadOpen(false)} disabled={uploading}>
+              {language === 'ar' ? 'إلغاء' : 'Cancel'}
+            </Button>
+            <Button onClick={handleUploadNew} disabled={!uploadFile || !uploadCaseId || uploading} className="bg-accent text-accent-foreground hover:bg-accent/90">
+              {uploading ? <Loader2 className="h-4 w-4 me-2 animate-spin" /> : <Upload className="h-4 w-4 me-2" />}
+              {language === 'ar' ? 'رفع' : 'Upload'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

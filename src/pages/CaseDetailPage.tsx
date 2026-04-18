@@ -36,6 +36,7 @@ import EntityDocumentsTab from '@/components/documents/EntityDocumentsTab';
 import CaseTimeBillingTab from '@/components/cases/CaseTimeBillingTab';
 import CaseQuickTasks from '@/components/tasks/CaseQuickTasks';
 import AICaseSummary from '@/components/cases/AICaseSummary';
+import ClientMessagesTab from '@/components/clients/ClientMessagesTab';
 
 const CASE_STATUS_ORDER = ['intake','active','pending_hearing','pending_judgment','on_hold','won','lost','settled','closed'] as const;
 const STATUS_PROGRESS: Record<string, number> = {
@@ -607,6 +608,7 @@ export default function CaseDetailPage() {
             { key: 'hearings', label: t('cases.detail.hearings'), count: hearings.length },
             { key: 'notes', label: t('cases.detail.notes'), count: notes.length },
             { key: 'documents', label: t('cases.detail.documents'), count: undefined },
+            { key: 'messages', label: language === 'ar' ? 'الرسائل' : 'Messages' },
             { key: 'timeBilling', label: t('cases.detail.timeBilling'), count: timeEntriesCount + invoicesCount },
             { key: 'activity', label: t('cases.detail.activity') },
           ].map(tab => (
@@ -927,6 +929,18 @@ export default function CaseDetailPage() {
         {/* DOCUMENTS TAB */}
         <TabsContent value="documents" className="mt-6">
           <EntityDocumentsTab entityType="case" entityId={id!} caseInfo={caseData ? { id: caseData.id, case_number: caseData.case_number, title: caseData.title } : undefined} />
+        </TabsContent>
+
+        {/* MESSAGES TAB */}
+        <TabsContent value="messages" className="mt-6">
+          {caseData?.client_id && (
+            <ClientMessagesTab
+              clientId={caseData.client_id}
+              defaultThread={`case-${caseData.id}`}
+              lockedThread
+              caseLabel={`${caseData.case_number} — ${language === 'ar' && caseData.title_ar ? caseData.title_ar : caseData.title}`}
+            />
+          )}
         </TabsContent>
 
         {/* TIME & BILLING TAB */}

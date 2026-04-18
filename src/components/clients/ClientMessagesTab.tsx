@@ -32,13 +32,24 @@ interface Thread {
   unread: number;
 }
 
-export default function ClientMessagesTab({ clientId }: { clientId: string }) {
+interface ClientMessagesTabProps {
+  clientId: string;
+  defaultThread?: string;
+  lockedThread?: boolean;
+  caseLabel?: string;
+}
+
+export default function ClientMessagesTab({ clientId, defaultThread, lockedThread, caseLabel }: ClientMessagesTabProps) {
   const { language } = useLanguage();
   const { profile } = useAuth();
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [threads, setThreads] = useState<Thread[]>([]);
-  const [activeThread, setActiveThread] = useState('general');
+  const [activeThread, setActiveThread] = useState(defaultThread || 'general');
+
+  useEffect(() => {
+    if (defaultThread) setActiveThread(defaultThread);
+  }, [defaultThread]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
 
@@ -93,6 +104,24 @@ export default function ClientMessagesTab({ clientId }: { clientId: string }) {
       unread: 0,
     };
 
+    if (defaultThread && defaultThread.startsWith('case-')) {
+      const cid = defaultThread.replace('case-', '');
+      threadMap[defaultThread] = {
+        key: defaultThread,
+        label: caseLabel || (language === 'en' ? 'Case' : 'قضية'),
+        icon: Scale, case_id: cid, errand_id: null,
+        lastMessage: '', lastDate: '', unread: 0,
+      };
+    } else if (defaultThread && defaultThread.startsWith('errand-')) {
+      const eid = defaultThread.replace('errand-', '');
+      threadMap[defaultThread] = {
+        key: defaultThread,
+        label: caseLabel || (language === 'en' ? 'Errand' : 'معاملة'),
+        icon: FileCheck, case_id: null, errand_id: eid,
+        lastMessage: '', lastDate: '', unread: 0,
+      };
+    }
+
     msgs.forEach(m => {
       const key = m.case_id ? `case-${m.case_id}` : m.errand_id ? `errand-${m.errand_id}` : 'general';
       if (!threadMap[key]) {
@@ -102,9 +131,7 @@ export default function ClientMessagesTab({ clientId }: { clientId: string }) {
           icon: m.case_id ? Scale : FileCheck,
           case_id: m.case_id,
           errand_id: m.errand_id,
-          lastMessage: '',
-          lastDate: '',
-          unread: 0,
+          lastMessage: '', lastDate: '', unread: 0,
         };
       }
       threadMap[key].lastMessage = m.content.slice(0, 60);
@@ -112,12 +139,15 @@ export default function ClientMessagesTab({ clientId }: { clientId: string }) {
       if (!m.is_read && m.sender_type === 'client') threadMap[key].unread++;
     });
 
-    setThreads(Object.values(threadMap).sort((a, b) => (b.lastDate || '').localeCompare(a.lastDate || '')));
+    let list = Object.values(threadMap).sort((a, b) => (b.lastDate || '').localeCompare(a.lastDate || ''));
+    if (lockedThread && defaultThread) list = list.filter(t => t.key === defaultThread);
+    setThreads(list);
   };
 
   useEffect(() => {
     buildThreads(messages);
-  }, [messages]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, defaultThread, lockedThread, language]);
 
   // Realtime
   useEffect(() => {
@@ -205,40 +235,42 @@ export default function ClientMessagesTab({ clientId }: { clientId: string }) {
   })();
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-5 gap-4">
-      <div className="lg:col-span-2 bg-card border border-border rounded-xl overflow-hidden">
-        <div className="px-4 py-3 border-b border-border">
-          <p className="text-heading-sm font-semibold text-foreground">{language === 'en' ? 'Threads' : 'المحادثات'}</p>
-        </div>
-        <div className="max-h-[520px] overflow-y-auto">
-          {threads.map(th => {
-            const Icon = th.icon;
-            return (
-              <button
-                key={th.key}
-                onClick={() => { setActiveThread(th.key); setPendingAttachments([]); }}
-                className={cn(
-                  'w-full flex items-start gap-3 px-4 py-3 text-start hover:bg-muted/50 transition-colors border-b border-border/50',
-                  activeThread === th.key && 'bg-accent/10'
-                )}
-              >
-                <Icon className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-body-sm font-medium text-foreground truncate">{th.label}</span>
-                    {th.unread > 0 && (
-                      <span className="h-5 w-5 rounded-full bg-accent text-accent-foreground text-[10px] flex items-center justify-center font-bold">{th.unread}</span>
-                    )}
+    <div className={cn('grid grid-cols-1 gap-4', !lockedThread && 'lg:grid-cols-5')}>
+      {!lockedThread && (
+        <div className="lg:col-span-2 bg-card border border-border rounded-xl overflow-hidden">
+          <div className="px-4 py-3 border-b border-border">
+            <p className="text-heading-sm font-semibold text-foreground">{language === 'en' ? 'Threads' : 'المحادثات'}</p>
+          </div>
+          <div className="max-h-[520px] overflow-y-auto">
+            {threads.map(th => {
+              const Icon = th.icon;
+              return (
+                <button
+                  key={th.key}
+                  onClick={() => { setActiveThread(th.key); setPendingAttachments([]); }}
+                  className={cn(
+                    'w-full flex items-start gap-3 px-4 py-3 text-start hover:bg-muted/50 transition-colors border-b border-border/50',
+                    activeThread === th.key && 'bg-accent/10'
+                  )}
+                >
+                  <Icon className="h-5 w-5 text-muted-foreground shrink-0 mt-0.5" />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between gap-2">
+                      <span className="text-body-sm font-medium text-foreground truncate">{th.label}</span>
+                      {th.unread > 0 && (
+                        <span className="h-5 w-5 rounded-full bg-accent text-accent-foreground text-[10px] flex items-center justify-center font-bold">{th.unread}</span>
+                      )}
+                    </div>
+                    {th.lastMessage && <p className="text-body-sm text-muted-foreground truncate">{th.lastMessage}</p>}
                   </div>
-                  {th.lastMessage && <p className="text-body-sm text-muted-foreground truncate">{th.lastMessage}</p>}
-                </div>
-              </button>
-            );
-          })}
+                </button>
+              );
+            })}
+          </div>
         </div>
-      </div>
+      )}
 
-      <div className="lg:col-span-3 bg-card border border-border rounded-xl overflow-hidden flex flex-col">
+      <div className={cn('bg-card border border-border rounded-xl overflow-hidden flex flex-col', !lockedThread && 'lg:col-span-3')}>
         <div className="px-4 py-3 border-b border-border">
           <p className="text-heading-sm font-semibold text-foreground">{clientName}</p>
         </div>

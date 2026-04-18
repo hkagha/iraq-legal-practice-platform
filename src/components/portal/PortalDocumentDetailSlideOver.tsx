@@ -79,12 +79,13 @@ export default function PortalDocumentDetailSlideOver({ documentId, isOpen, onCl
       const orgId = doc.organization_id;
       const clientLink = await supabase.from('client_user_links').select('client_id').eq('user_id', profile.id).maybeSingle();
       const clientId = clientLink.data?.client_id;
-      if (!clientId) throw new Error('No client link');
+      if (!clientId) throw new Error(language === 'ar' ? 'لا يوجد ربط بالعميل' : 'No client link found');
 
       const rootId = doc.parent_document_id || doc.id;
-      const newPath = `${orgId}/clients/${clientId}/${rootId}/${Date.now()}-${file.name}`;
+      const safeName = file.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const newPath = `${orgId}/clients/${clientId}/${rootId}/${Date.now()}-${safeName}`;
       const { error: upErr } = await supabase.storage.from('documents').upload(newPath, file, { contentType: file.type });
-      if (upErr) throw upErr;
+      if (upErr) throw new Error(`Storage: ${upErr.message}`);
 
       const ext = file.name.split('.').pop()?.toLowerCase() || '';
       const { error: insertErr } = await supabase.from('documents').insert({
@@ -107,7 +108,7 @@ export default function PortalDocumentDetailSlideOver({ documentId, isOpen, onCl
         is_latest_version: true,
         uploaded_by: profile.id,
       } as any);
-      if (insertErr) throw insertErr;
+      if (insertErr) throw new Error(`Database: ${insertErr.message}`);
 
       toast.success(language === 'ar' ? 'تم رفع الإصدار الجديد' : 'New version uploaded');
       await fetchDoc();

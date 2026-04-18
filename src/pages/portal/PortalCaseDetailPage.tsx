@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
+import ClientMessagesTab from '@/components/clients/ClientMessagesTab';
 
 export default function PortalCaseDetailPage() {
   const { id } = useParams<{ id: string }>();
@@ -24,6 +25,7 @@ export default function PortalCaseDetailPage() {
   const [hearings, setHearings] = useState<any[]>([]);
   const [documents, setDocuments] = useState<any[]>([]);
   const [team, setTeam] = useState<any[]>([]);
+  const [notes, setNotes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
 
@@ -46,7 +48,7 @@ export default function PortalCaseDetailPage() {
     setCaseData(c);
 
     // Parallel loads
-    const [hearingsRes, docsRes, teamRes] = await Promise.all([
+    const [hearingsRes, docsRes, teamRes, notesRes] = await Promise.all([
       supabase.from('case_hearings').select('*')
         .eq('case_id', id!).eq('is_visible_to_client', true)
         .order('hearing_date', { ascending: false }),
@@ -54,10 +56,14 @@ export default function PortalCaseDetailPage() {
         .eq('case_id', id!).eq('is_visible_to_client', true)
         .order('created_at', { ascending: false }),
       supabase.from('case_team_members').select('user_id, role').eq('case_id', id!),
+      supabase.from('case_notes').select('id, content, content_ar, is_pinned, created_at, author_id')
+        .eq('case_id', id!).eq('is_visible_to_client', true)
+        .order('is_pinned', { ascending: false }).order('created_at', { ascending: false }),
     ]);
 
     setHearings(hearingsRes.data || []);
     setDocuments(docsRes.data || []);
+    setNotes(notesRes.data || []);
 
     if (teamRes.data && teamRes.data.length > 0) {
       const uids = [...new Set(teamRes.data.map((m: any) => m.user_id))];
@@ -115,7 +121,7 @@ export default function PortalCaseDetailPage() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-transparent border-b border-border rounded-none w-full justify-start h-auto p-0 gap-0">
-          {['overview', 'hearings', 'documents'].map(tab => (
+          {['overview', 'hearings', 'documents', 'notes', 'messages'].map(tab => (
             <TabsTrigger
               key={tab}
               value={tab}
@@ -126,7 +132,9 @@ export default function PortalCaseDetailPage() {
             >
               {tab === 'overview' ? (language === 'en' ? 'Overview' : 'نظرة عامة') :
                tab === 'hearings' ? t('portal.cases.hearings') :
-               t('portal.myDocuments')}
+               tab === 'documents' ? t('portal.myDocuments') :
+               tab === 'notes' ? (language === 'en' ? 'Notes' : 'ملاحظات') :
+               (language === 'en' ? 'Messages' : 'الرسائل')}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -249,6 +257,39 @@ export default function PortalCaseDetailPage() {
                 </div>
               ))}
             </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="notes" className="mt-6">
+          {notes.length === 0 ? (
+            <p className="text-body-md text-muted-foreground py-8 text-center">
+              {language === 'en' ? 'No notes shared with you yet.' : 'لا توجد ملاحظات مشاركة معك بعد.'}
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {notes.map(n => (
+                <div key={n.id} className="bg-card rounded-xl border border-border p-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    {n.is_pinned && <span className="text-[10px] bg-accent/10 text-accent rounded px-1.5 py-0.5">{language === 'en' ? 'Pinned' : 'مثبتة'}</span>}
+                    <span className="text-body-sm text-muted-foreground">{formatDate(n.created_at)}</span>
+                  </div>
+                  <p className="text-body-md text-foreground whitespace-pre-wrap">
+                    {language === 'ar' && n.content_ar ? n.content_ar : n.content}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="messages" className="mt-6">
+          {activeClientId && (
+            <ClientMessagesTab
+              clientId={activeClientId}
+              defaultThread={`case-${caseData.id}`}
+              lockedThread
+              caseLabel={`${caseData.case_number} — ${language === 'ar' && caseData.title_ar ? caseData.title_ar : caseData.title}`}
+            />
           )}
         </TabsContent>
       </Tabs>
