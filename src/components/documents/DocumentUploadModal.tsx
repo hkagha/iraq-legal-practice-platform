@@ -356,6 +356,58 @@ export default function DocumentUploadModal({
                 {/* Form fields (only when pending) */}
                 {entry.status === 'pending' && (
                   <>
+                    {/* STEP 1 — Where does this document belong? (primary choice, drives the rest) */}
+                    <div>
+                      <label className="text-body-sm font-medium text-foreground mb-1.5 block">
+                        {language === 'ar' ? 'أين ينتمي هذا المستند؟' : 'Where does this document belong?'} *
+                      </label>
+                      <div className="grid grid-cols-1 gap-2">
+                        {([
+                          {
+                            v: 'internal',
+                            en: 'Internal use', ar: 'استخدام داخلي',
+                            d_en: 'Firm policies, instructions, internal references — visible to your team only.',
+                            d_ar: 'سياسات وتعليمات ومراجع داخلية للمكتب — مرئية لفريقك فقط.',
+                          },
+                          {
+                            v: 'shared_library',
+                            en: 'Shared library', ar: 'مكتبة مشتركة',
+                            d_en: 'Reusable templates and explainers that can be sent to clients (e.g. how to register a company).',
+                            d_ar: 'قوالب وشروحات قابلة لإعادة الاستخدام يمكن إرسالها للعملاء (مثل كيفية تسجيل شركة).',
+                          },
+                          {
+                            v: 'case_specific',
+                            en: 'Case-specific', ar: 'خاص بقضية',
+                            d_en: 'Belongs to a specific case, errand, or client — visible to assigned team and optionally the client.',
+                            d_ar: 'يخص قضية أو معاملة أو عميلاً معيناً — مرئي للفريق المعيّن واختيارياً للعميل.',
+                          },
+                        ] as const).map(opt => (
+                          <button
+                            key={opt.v}
+                            type="button"
+                            onClick={() => updateFile(entry.id, {
+                              scope: opt.v as any,
+                              linkType: opt.v === 'case_specific' ? (entry.linkType === 'none' ? 'case' : entry.linkType) : 'none',
+                              linkedId: opt.v === 'case_specific' ? entry.linkedId : '',
+                              visibleToClient: opt.v === 'case_specific' ? entry.visibleToClient : false,
+                            })}
+                            className={cn(
+                              'p-3 rounded-button text-start border transition-colors',
+                              entry.scope === opt.v ? 'border-accent bg-accent/10' : 'border-border hover:bg-muted',
+                            )}
+                          >
+                            <div className={cn('text-body-sm font-medium', entry.scope === opt.v ? 'text-accent' : 'text-foreground')}>
+                              {language === 'ar' ? opt.ar : opt.en}
+                            </div>
+                            <div className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
+                              {language === 'ar' ? opt.d_ar : opt.d_en}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* STEP 2 — Category + title */}
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                          <div className="flex items-center gap-2 mb-1">
@@ -418,25 +470,6 @@ export default function DocumentUploadModal({
                       <div>
                         <label className="text-body-sm font-medium text-foreground mb-1 block">{t('documents.fields.title')}</label>
                         <FormInput value={entry.title} onChange={e => updateFile(entry.id, { title: e.target.value })} placeholder={language === 'ar' ? 'عنوان وصفي (اختياري)' : 'Descriptive title (optional)'} />
-                      </div>
-                    </div>
-
-                    {/* Document type / scope */}
-                    <div>
-                      <label className="text-body-sm font-medium text-foreground mb-1.5 block">{language === 'ar' ? 'نوع المستند' : 'Document type'} *</label>
-                      <div className="grid grid-cols-3 gap-2">
-                        {([
-                          { v: 'internal', en: 'Internal', ar: 'داخلي', d_en: 'Firm only', d_ar: 'الفريق فقط' },
-                          { v: 'shared_library', en: 'Shared Library', ar: 'مكتبة مشتركة', d_en: 'Reusable', d_ar: 'قابل لإعادة الاستخدام' },
-                          { v: 'case_specific', en: 'Case-Specific', ar: 'خاص بقضية', d_en: 'Linked', d_ar: 'مرتبط' },
-                        ] as const).map(opt => (
-                          <button key={opt.v} type="button" onClick={() => updateFile(entry.id, { scope: opt.v as any, linkType: opt.v === 'case_specific' ? (entry.linkType === 'none' ? 'case' : entry.linkType) : 'none', linkedId: opt.v === 'case_specific' ? entry.linkedId : '' })}
-                            className={cn('p-2 rounded-button text-start border transition-colors',
-                              entry.scope === opt.v ? 'border-accent bg-accent/10' : 'border-border hover:bg-muted')}>
-                            <div className={cn('text-body-sm font-medium', entry.scope === opt.v ? 'text-accent' : 'text-foreground')}>{language === 'ar' ? opt.ar : opt.en}</div>
-                            <div className="text-[11px] text-muted-foreground">{language === 'ar' ? opt.d_ar : opt.d_en}</div>
-                          </button>
-                        ))}
                       </div>
                     </div>
 
