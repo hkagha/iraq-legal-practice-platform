@@ -1332,6 +1332,63 @@ export type Database = {
           },
         ]
       }
+      document_comments: {
+        Row: {
+          author_id: string
+          author_type: string
+          content: string
+          content_ar: string | null
+          created_at: string
+          document_id: string
+          id: string
+          is_visible_to_client: boolean
+          organization_id: string
+          parent_comment_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          author_type?: string
+          content: string
+          content_ar?: string | null
+          created_at?: string
+          document_id: string
+          id?: string
+          is_visible_to_client?: boolean
+          organization_id: string
+          parent_comment_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          author_type?: string
+          content?: string
+          content_ar?: string | null
+          created_at?: string
+          document_id?: string
+          id?: string
+          is_visible_to_client?: boolean
+          organization_id?: string
+          parent_comment_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_comments_document_id_fkey"
+            columns: ["document_id"]
+            isOneToOne: false
+            referencedRelation: "documents"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "document_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "document_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       document_templates: {
         Row: {
           category: string
@@ -1421,6 +1478,7 @@ export type Database = {
           is_visible_to_client: boolean
           last_accessed_at: string | null
           last_accessed_by: string | null
+          library_tags: string[] | null
           mime_type: string | null
           organization_id: string
           parent_document_id: string | null
@@ -1431,6 +1489,7 @@ export type Database = {
           updated_at: string
           uploaded_by: string
           version: number
+          visibility_scope: string
         }
         Insert: {
           case_id?: string | null
@@ -1451,6 +1510,7 @@ export type Database = {
           is_visible_to_client?: boolean
           last_accessed_at?: string | null
           last_accessed_by?: string | null
+          library_tags?: string[] | null
           mime_type?: string | null
           organization_id: string
           parent_document_id?: string | null
@@ -1461,6 +1521,7 @@ export type Database = {
           updated_at?: string
           uploaded_by: string
           version?: number
+          visibility_scope?: string
         }
         Update: {
           case_id?: string | null
@@ -1481,6 +1542,7 @@ export type Database = {
           is_visible_to_client?: boolean
           last_accessed_at?: string | null
           last_accessed_by?: string | null
+          library_tags?: string[] | null
           mime_type?: string | null
           organization_id?: string
           parent_document_id?: string | null
@@ -1491,6 +1553,7 @@ export type Database = {
           updated_at?: string
           uploaded_by?: string
           version?: number
+          visibility_scope?: string
         }
         Relationships: [
           {
@@ -3541,6 +3604,14 @@ export type Database = {
       }
       get_user_org_id: { Args: { _user_id: string }; Returns: string }
       get_user_role: { Args: { _user_id: string }; Returns: string }
+      user_can_access_case: {
+        Args: { _case_id: string; _user_id: string }
+        Returns: boolean
+      }
+      user_can_access_errand: {
+        Args: { _errand_id: string; _user_id: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never
