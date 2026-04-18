@@ -6,7 +6,7 @@ import { cn } from '@/lib/utils';
 import { Folder, FolderOpen, ChevronDown, ChevronRight, FileText } from 'lucide-react';
 
 export interface FolderFilter {
-  type: 'all' | 'cases' | 'errands' | 'clients' | 'templates' | 'general';
+  type: 'all' | 'cases' | 'errands' | 'clients' | 'templates' | 'general' | 'internal' | 'shared_library' | 'case_specific';
   entityId?: string;
   entityLabel?: string;
 }
@@ -31,6 +31,7 @@ export default function DocumentFolderSidebar({ activeFolder, onFolderChange }: 
   const [folders, setFolders] = useState<FolderNode[]>([]);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({ cases: false, errands: false, clients: false });
   const [totalCount, setTotalCount] = useState(0);
+  const [scopeCounts, setScopeCounts] = useState({ internal: 0, shared_library: 0, case_specific: 0 });
 
   useEffect(() => {
     if (!profile?.organization_id) return;
@@ -39,7 +40,7 @@ export default function DocumentFolderSidebar({ activeFolder, onFolderChange }: 
     const fetchFolders = async () => {
       const { data: docs } = await supabase
         .from('documents')
-        .select('case_id, errand_id, client_id, document_category, cases:cases(case_number), errands:errands(errand_number), clients:clients(first_name,last_name,company_name,client_type,first_name_ar,last_name_ar,company_name_ar)')
+        .select('case_id, errand_id, client_id, document_category, visibility_scope, cases:cases(case_number), errands:errands(errand_number), clients:clients(first_name,last_name,company_name,client_type,first_name_ar,last_name_ar,company_name_ar)')
         .eq('organization_id', orgId)
         .eq('status', 'active')
         .eq('is_latest_version', true);
@@ -47,6 +48,13 @@ export default function DocumentFolderSidebar({ activeFolder, onFolderChange }: 
       if (!docs) return;
 
       setTotalCount(docs.length);
+
+      const sc = { internal: 0, shared_library: 0, case_specific: 0 };
+      docs.forEach((d: any) => {
+        const s = (d.visibility_scope || 'case_specific') as keyof typeof sc;
+        if (sc[s] !== undefined) sc[s]++;
+      });
+      setScopeCounts(sc);
 
       // Group by cases
       const caseMap = new Map<string, { label: string; count: number }>();
@@ -176,6 +184,33 @@ export default function DocumentFolderSidebar({ activeFolder, onFolderChange }: 
           <span className="text-muted-foreground text-[11px]">{totalCount}</span>
         </button>
 
+        {/* Library section */}
+        <div className="mt-3 mb-1 px-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+          {language === 'ar' ? 'المكتبة' : 'Library'}
+        </div>
+        {([
+          { type: 'internal' as const, en: 'Internal Use', ar: 'استخدام داخلي', count: scopeCounts.internal },
+          { type: 'shared_library' as const, en: 'Shared with Clients', ar: 'مشترك مع العملاء', count: scopeCounts.shared_library },
+          { type: 'case_specific' as const, en: 'Case Documents', ar: 'مستندات القضايا', count: scopeCounts.case_specific },
+        ]).map(item => (
+          <button
+            key={item.type}
+            onClick={() => onFolderChange({ type: item.type })}
+            className={cn(
+              'w-full flex items-center gap-2 h-9 px-2 rounded-md text-body-sm transition-colors',
+              activeFolder.type === item.type ? 'bg-accent/10 text-accent font-medium' : 'text-foreground hover:bg-muted',
+            )}
+          >
+            <Folder size={16} className="shrink-0" />
+            <span className="flex-1 text-start">{language === 'ar' ? item.ar : item.en}</span>
+            <span className="text-muted-foreground text-[11px]">{item.count}</span>
+          </button>
+        ))}
+
+        {/* Folders section */}
+        <div className="mt-3 mb-1 px-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+          {language === 'ar' ? 'المجلدات' : 'Folders'}
+        </div>
         {folders.map(node => renderNode(node))}
       </div>
     </div>
