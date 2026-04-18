@@ -290,6 +290,48 @@ export default function PortalDocumentsPage() {
         onClose={() => setDetailDocId(null)}
         onRefresh={loadDocuments}
       />
+
+      <Dialog open={uploadOpen} onOpenChange={setUploadOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{language === 'ar' ? 'رفع مستند جديد' : 'Upload new document'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-2">
+            <div>
+              <label className="text-body-sm font-medium text-foreground mb-1 block">
+                {language === 'ar' ? 'اختر القضية' : 'Select case'}
+              </label>
+              <select value={uploadCaseId} onChange={e => setUploadCaseId(e.target.value)} className="w-full h-10 rounded-md border border-input bg-background px-3 text-body-sm">
+                <option value="">{language === 'ar' ? '— اختر —' : '— Select —'}</option>
+                {uploadCases.map(c => (
+                  <option key={c.id} value={c.id}>{c.case_number} — {language === 'ar' && c.title_ar ? c.title_ar : c.title}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="text-body-sm font-medium text-foreground mb-1 block">
+                {language === 'ar' ? 'الملف' : 'File'}
+              </label>
+              <input type="file" onChange={e => setUploadFile(e.target.files?.[0] || null)} className="block w-full text-body-sm" />
+              {uploadFile && (
+                <p className="text-body-sm text-muted-foreground mt-1 inline-flex items-center gap-2">
+                  {uploadFile.name}
+                  <button onClick={() => setUploadFile(null)}><X className="h-3 w-3" /></button>
+                </p>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setUploadOpen(false)} disabled={uploading}>
+              {language === 'ar' ? 'إلغاء' : 'Cancel'}
+            </Button>
+            <Button onClick={handleUploadNew} disabled={!uploadFile || !uploadCaseId || uploading} className="bg-accent text-accent-foreground hover:bg-accent/90">
+              {uploading ? <Loader2 className="h-4 w-4 me-2 animate-spin" /> : <Upload className="h-4 w-4 me-2" />}
+              {language === 'ar' ? 'رفع' : 'Upload'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
