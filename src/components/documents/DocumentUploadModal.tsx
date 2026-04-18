@@ -141,9 +141,12 @@ export default function DocumentUploadModal({
         toast.error(`${file.name}: ${language === 'ar' ? 'نوع الملف غير مدعوم' : 'File type not supported'}`);
         return;
       }
+      const hasContext = !!(preLinkedCase || preLinkedErrand || preLinkedClient);
       const defaultLinkType = preLinkedCase ? 'case' : preLinkedErrand ? 'errand' : preLinkedClient ? 'client' : 'none';
       const defaultLinkedId = preLinkedCase?.id || preLinkedErrand?.id || preLinkedClient?.id || '';
-      const defaultScope: FileEntry['scope'] = defaultLinkType === 'none' ? 'internal' : 'case_specific';
+      // If opened from a case/errand/client page, default to case_specific.
+      // Otherwise default to internal — safest choice; user must opt in to sharing.
+      const defaultScope: FileEntry['scope'] = hasContext ? 'case_specific' : 'internal';
       entries.push({
         file, id: crypto.randomUUID(),
         category: suggestCategory(file.name), title: '', tags: [],
