@@ -40,6 +40,7 @@ export default function PortalDocumentsPage() {
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [linkedTo, setLinkedTo] = useState<'all' | 'cases' | 'errands' | 'general'>('all');
+  const [detailDocId, setDetailDocId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!activeClientId) return;
