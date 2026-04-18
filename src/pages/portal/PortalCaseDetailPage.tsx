@@ -121,7 +121,7 @@ export default function PortalCaseDetailPage() {
       {/* Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab}>
         <TabsList className="bg-transparent border-b border-border rounded-none w-full justify-start h-auto p-0 gap-0">
-          {['overview', 'hearings', 'documents'].map(tab => (
+          {['overview', 'hearings', 'documents', 'notes', 'messages'].map(tab => (
             <TabsTrigger
               key={tab}
               value={tab}
@@ -132,7 +132,9 @@ export default function PortalCaseDetailPage() {
             >
               {tab === 'overview' ? (language === 'en' ? 'Overview' : 'نظرة عامة') :
                tab === 'hearings' ? t('portal.cases.hearings') :
-               t('portal.myDocuments')}
+               tab === 'documents' ? t('portal.myDocuments') :
+               tab === 'notes' ? (language === 'en' ? 'Notes' : 'ملاحظات') :
+               (language === 'en' ? 'Messages' : 'الرسائل')}
             </TabsTrigger>
           ))}
         </TabsList>
