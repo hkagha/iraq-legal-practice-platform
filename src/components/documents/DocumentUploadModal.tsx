@@ -164,7 +164,14 @@ export default function DocumentUploadModal({
   const removeFile = (id: string) => setFiles(prev => prev.filter(f => f.id !== id));
   const updateFile = (id: string, updates: Partial<FileEntry>) => setFiles(prev => prev.map(f => f.id === id ? { ...f, ...updates } : f));
 
-  const canUpload = files.length > 0 && files.every(f => f.category) && !isUploading;
+  const canUpload = files.length > 0 && files.every(f => {
+    if (!f.category) return false;
+    if (f.scope === 'case_specific') {
+      // Need a link target — either prelinked context or selected linkedId
+      if (!preLinkedCase && !preLinkedErrand && !preLinkedClient && !f.linkedId) return false;
+    }
+    return true;
+  }) && !isUploading;
 
   const handleUpload = async () => {
     if (!profile?.organization_id || !profile.id) return;
@@ -205,7 +212,8 @@ export default function DocumentUploadModal({
 
         // Insert document record
         const ext = getExt(entry.file.name);
-        const { data: newDoc, error: insertErr } = await supabase.from('documents').insert({
+        const isCaseSpec = entry.scope === 'case_specific';
+        const insertPayload: any = {
           organization_id: orgId,
           file_name: entry.file.name,
           file_path: storagePath,
@@ -215,18 +223,32 @@ export default function DocumentUploadModal({
           document_category: entry.category,
           title: entry.title || null,
           tags: entry.tags.length > 0 ? entry.tags : [],
-          client_id: entry.scope === 'case_specific' && entry.linkType === 'client' ? entry.linkedId : (entry.scope === 'case_specific' ? (preLinkedClient?.id || null) : null),
-          case_id: entry.scope === 'case_specific' && entry.linkType === 'case' ? entry.linkedId : (entry.scope === 'case_specific' ? (preLinkedCase?.id || null) : null),
-          errand_id: entry.scope === 'case_specific' && entry.linkType === 'errand' ? entry.linkedId : (entry.scope === 'case_specific' ? (preLinkedErrand?.id || null) : null),
-          is_visible_to_client: entry.scope === 'case_specific' ? entry.visibleToClient : false,
+          client_id: isCaseSpec && entry.linkType === 'client' ? entry.linkedId : (isCaseSpec ? (preLinkedClient?.id || null) : null),
+          case_id: isCaseSpec && entry.linkType === 'case' ? entry.linkedId : (isCaseSpec ? (preLinkedCase?.id || null) : null),
+          errand_id: isCaseSpec && entry.linkType === 'errand' ? entry.linkedId : (isCaseSpec ? (preLinkedErrand?.id || null) : null),
+          is_visible_to_client: isCaseSpec ? entry.visibleToClient : false,
           visibility_scope: entry.scope,
           uploaded_by: profile.id,
           version,
           parent_document_id: parentDocId,
           is_latest_version: true,
-        } as any).select().single();
+        };
+        const { data: insertedDoc, error: insertErr } = await supabase
+          .from('documents').insert(insertPayload).select().maybeSingle();
 
         if (insertErr) throw insertErr;
+
+        // Fallback: if RLS prevents reading the new row back, fetch by file_path
+        let newDoc = insertedDoc;
+        if (!newDoc) {
+          const { data: fetched } = await supabase
+            .from('documents')
+            .select('*')
+            .eq('organization_id', orgId)
+            .eq('file_path', storagePath)
+            .maybeSingle();
+          newDoc = fetched;
+        }
 
         updateFile(entry.id, { progress: 85 });
 
