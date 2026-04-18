@@ -104,6 +104,24 @@ export default function ClientMessagesTab({ clientId, defaultThread, lockedThrea
       unread: 0,
     };
 
+    if (defaultThread && defaultThread.startsWith('case-')) {
+      const cid = defaultThread.replace('case-', '');
+      threadMap[defaultThread] = {
+        key: defaultThread,
+        label: caseLabel || (language === 'en' ? 'Case' : 'قضية'),
+        icon: Scale, case_id: cid, errand_id: null,
+        lastMessage: '', lastDate: '', unread: 0,
+      };
+    } else if (defaultThread && defaultThread.startsWith('errand-')) {
+      const eid = defaultThread.replace('errand-', '');
+      threadMap[defaultThread] = {
+        key: defaultThread,
+        label: caseLabel || (language === 'en' ? 'Errand' : 'معاملة'),
+        icon: FileCheck, case_id: null, errand_id: eid,
+        lastMessage: '', lastDate: '', unread: 0,
+      };
+    }
+
     msgs.forEach(m => {
       const key = m.case_id ? `case-${m.case_id}` : m.errand_id ? `errand-${m.errand_id}` : 'general';
       if (!threadMap[key]) {
@@ -113,9 +131,7 @@ export default function ClientMessagesTab({ clientId, defaultThread, lockedThrea
           icon: m.case_id ? Scale : FileCheck,
           case_id: m.case_id,
           errand_id: m.errand_id,
-          lastMessage: '',
-          lastDate: '',
-          unread: 0,
+          lastMessage: '', lastDate: '', unread: 0,
         };
       }
       threadMap[key].lastMessage = m.content.slice(0, 60);
@@ -123,7 +139,9 @@ export default function ClientMessagesTab({ clientId, defaultThread, lockedThrea
       if (!m.is_read && m.sender_type === 'client') threadMap[key].unread++;
     });
 
-    setThreads(Object.values(threadMap).sort((a, b) => (b.lastDate || '').localeCompare(a.lastDate || '')));
+    let list = Object.values(threadMap).sort((a, b) => (b.lastDate || '').localeCompare(a.lastDate || ''));
+    if (lockedThread && defaultThread) list = list.filter(t => t.key === defaultThread);
+    setThreads(list);
   };
 
   useEffect(() => {
