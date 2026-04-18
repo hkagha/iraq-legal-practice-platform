@@ -259,6 +259,39 @@ export default function PortalCaseDetailPage() {
             </div>
           )}
         </TabsContent>
+
+        <TabsContent value="notes" className="mt-6">
+          {notes.length === 0 ? (
+            <p className="text-body-md text-muted-foreground py-8 text-center">
+              {language === 'en' ? 'No notes shared with you yet.' : 'لا توجد ملاحظات مشاركة معك بعد.'}
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {notes.map(n => (
+                <div key={n.id} className="bg-card rounded-xl border border-border p-4">
+                  <div className="flex items-center gap-2 mb-1">
+                    {n.is_pinned && <span className="text-[10px] bg-accent/10 text-accent rounded px-1.5 py-0.5">{language === 'en' ? 'Pinned' : 'مثبتة'}</span>}
+                    <span className="text-body-sm text-muted-foreground">{formatDate(n.created_at)}</span>
+                  </div>
+                  <p className="text-body-md text-foreground whitespace-pre-wrap">
+                    {language === 'ar' && n.content_ar ? n.content_ar : n.content}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="messages" className="mt-6">
+          {activeClientId && (
+            <ClientMessagesTab
+              clientId={activeClientId}
+              defaultThread={`case-${caseData.id}`}
+              lockedThread
+              caseLabel={`${caseData.case_number} — ${language === 'ar' && caseData.title_ar ? caseData.title_ar : caseData.title}`}
+            />
+          )}
+        </TabsContent>
       </Tabs>
     </div>
   );
