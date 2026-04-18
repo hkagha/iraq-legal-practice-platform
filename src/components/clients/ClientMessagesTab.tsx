@@ -146,7 +146,8 @@ export default function ClientMessagesTab({ clientId, defaultThread, lockedThrea
 
   useEffect(() => {
     buildThreads(messages);
-  }, [messages]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [messages, defaultThread, lockedThread, language]);
 
   // Realtime
   useEffect(() => {
