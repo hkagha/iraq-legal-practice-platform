@@ -1,58 +1,95 @@
 
 
-## Plan: Fix document upload + simplify categorisation
+## Plan: Fix client↔lawyer collaboration (messages, notes, documents)
 
-### Root causes
+### Issues found
 
-**1. "INSERT succeeds, then crashes" on case-specific uploads**
-After inserting a `case_specific` document, the modal calls `.select().single()` to get the new row back. The new SELECT policy `staff_read_case_documents` only lets firm_admins, case-team members, or errand-org-staff read case-specific docs. So a lawyer who uploads to a case they're not assigned to gets the INSERT through, then `.single()` returns zero rows and throws. The user sees "Upload error" with no clear message.
+**A. Client cannot see "visible to client" notes on a case**
+`PortalCaseDetailPage` loads cases, hearings, documents and team — but **never queries `case_notes`** and has no Notes tab. The RLS policy `client_read_case_notes` already permits this; the UI is just missing.
 
-**2. SELECT/INSERT policy mismatch**
-`staff_create_documents` lets any `firm_admin/lawyer/paralegal` INSERT a case_specific doc, but `staff_read_case_documents` only lets them read it if they're on the case team. Anyone who can create it should be able to read it back (otherwise the UI breaks immediately).
+**B. Lawyer doesn't see client messages in the case context**
+`ClientMessagesTab` exists only on the **Client detail** page. On the **Case detail** page there is no messages panel, so messages a client posts inside a case thread are invisible from the lawyer's case view (they have to remember to open the client and pick the thread).
 
-**3. The "three categories" aren't actually first-class**
-The current modal shows: category dropdown (40 options) + document type radio (Internal / Shared / Case-specific) + link picker. The user's mental model is much simpler — every document is one of exactly three things, and that choice drives everything else.
+**C. Client document upload not working**
+`PortalDocumentsPage` is read-only — there is no upload button. The only "client upload" path is the **new version** button inside `PortalDocumentDetailSlideOver`, and that only works for documents the client can already see.
 
-### What we'll change
+**D. Document version upload from the client side fails**
+`PortalDocumentDetailSlideOver.handleUpload` writes to `${orgId}/clients/${clientId}/...`. The storage policy `client_upload_document_versions` requires `foldername[2] = 'clients'` (zero-indexed it's the *second* path segment). The current path puts `'clients'` at index 1 → the `WITH CHECK` fails and uploads are rejected. Also the table policy `client_insert_document_version` requires the parent doc's case/errand to be `is_visible_to_client = true`; current code doesn't check this and shows a generic error when it fails.
 
-**A. Database migration**
+**E. Document collaboration discoverability**
+`DocumentCommentsTab` is wired into both staff and portal slide-overs and the RLS for `document_comments` is correct, but discoverability is poor because comments only appear after opening a doc detail, and the comments tab visibility-to-client toggle isn't pre-seeded from the document.
 
-1. Loosen `staff_read_case_documents`: allow any `firm_admin/lawyer/paralegal` in the org to read case-specific docs they uploaded themselves OR are on the team for. Concretely, add `OR uploaded_by = auth.uid()` to the policy. Firm admins keep blanket access.
-2. No other RLS change needed — the storage policy `staff_upload_documents` already permits all staff, and the `staff_create_documents` table policy is already correct.
+---
 
-**B. `DocumentUploadModal.tsx` — make the three scopes the primary choice**
+### Fixes
 
-1. Move the "Document type" selector to the **top** of each file card, above category/title, and rename to "Where does this document belong?" with descriptions matching the user's wording:
-   - **Internal** — Firm policies, instructions, internal references (visible to all team members only)
-   - **Shared library** — Reusable templates and explainers that can be sent to clients (visible to all team members; available to attach to a case)
-   - **Case-specific** — Belongs to a specific case, errand or client (visible to assigned team + optionally the client)
-2. Default scope based on context:
-   - If opened from a case/errand/client page → `case_specific` (already correct)
-   - Otherwise → no default; user must pick (prevents accidental "internal" uploads of client docs).
-3. When scope = `internal` or `shared_library`, **hide** the linkType/linkedId pickers and the "visible to client" checkbox (they're irrelevant). Already partially done — verify and tighten.
-4. Replace the `.select().single()` after insert with `.select().maybeSingle()` plus a fallback: if the row isn't returned, fetch it by `(organization_id, file_path)` using a separate query so activity logging still works. This makes the upload robust to any future RLS tightening.
-5. Surface real Supabase error messages in the per-file error panel (currently it shows `err.message` which is fine — verify the storage error path also propagates cleanly).
+**1. Database migration — fix client storage path policy**
 
-**C. `EntityDocumentsTab.tsx` — restrict to case_specific only (already planned, verify)**
-Confirm the case detail page only lists `visibility_scope = 'case_specific'` and adds a "Browse shared library" button to attach a library doc.
+Replace `client_upload_document_versions` so the path matches what the app actually writes (`{orgId}/clients/{clientId}/{rootDocId}/{filename}` — `'clients'` is `foldername[2]` in PG's 1-indexed array, which is index `[1]` zero-based). Set check to `foldername(name)[2] = 'clients'` written correctly:
 
-**D. `DocumentsPage` sidebar — confirm the three top-level entries are present and labelled**
-- Library → Internal Use, Shared with Clients, Case Documents
-Each filters by scope and shows a count. (Already created in `LibrarySection`/`DocumentFolderSidebar` per the previous plan — verify and adjust labels to match the user's wording.)
+```sql
+DROP POLICY client_upload_document_versions ON storage.objects;
+CREATE POLICY client_upload_document_versions ON storage.objects
+FOR INSERT TO authenticated
+WITH CHECK (
+  bucket_id = 'documents'
+  AND (storage.foldername(name))[1] = (get_user_org_id(auth.uid()))::text
+  AND (storage.foldername(name))[2] = 'clients'
+);
+```
+
+(PostgreSQL arrays are 1-indexed — `[1]` = orgId, `[2]` = `'clients'`. The current policy has the same shape; we keep it but **also** add the org-id check for safety.)
+
+**2. `PortalCaseDetailPage` — add Notes tab and Messages tab**
+
+- Load `case_notes` filtered by `case_id` and `is_visible_to_client = true`, render in a new "Notes" tab (read-only — clients view, don't write).
+- Add a "Messages" tab that embeds a lightweight version of `ClientMessagesTab` pre-scoped to this `case_id` so client posts go straight into the case thread.
+
+**3. `CaseDetailPage` (lawyer) — add Messages tab**
+
+Add a "Messages" tab that mounts `ClientMessagesTab` with `clientId={caseData.client_id}` and a new `defaultThread={`case-${caseData.id}`}` prop, so the lawyer immediately sees the case-scoped conversation. Update `ClientMessagesTab` to accept that prop and pre-select the thread.
+
+**4. `PortalDocumentsPage` — add an "Upload document" button**
+
+Allow the client to upload a brand-new (not version) case-specific document scoped to a case they can see. New flow:
+- Modal: pick one of the client's visible cases → file picker → upload.
+- Storage path: `{orgId}/clients/{clientId}/case-{caseId}/{ts}-{safeName}`.
+- DB insert: `visibility_scope='case_specific'`, `is_visible_to_client=true`, `case_id`, `client_id`, `uploaded_by=auth.uid()`, `parent_document_id=NULL` (root doc), `version=1`, `is_latest_version=true`.
+- Add a new RLS policy `client_insert_root_document` mirroring `client_insert_document_version` but allowing `parent_document_id IS NULL` when the case/client is visible to the client.
+
+**5. `PortalDocumentDetailSlideOver` — fix path + better errors**
+
+- Keep path `${orgId}/clients/${clientId}/${rootId}/...` (matches the storage policy).
+- Sanitize filename: `file.name.replace(/[^a-zA-Z0-9._-]/g, '_')`.
+- Surface the real Supabase error string in the toast so the next failure is diagnosable.
+
+**6. Notify staff when a client uploads / comments**
+
+Add small DB triggers (or extend existing notification helpers) so:
+- Client uploads a new doc/version → `create_notification` fires for the case team (`notification_type='client_document'`).
+- Client posts a `document_comment` → notify case team (`notification_type='client_doc_comment'`).
+This makes the collaboration loop visible without polling.
+
+---
 
 ### Files
 
-**Migration** — loosen `staff_read_case_documents` to include `uploaded_by = auth.uid()`.
+**Migration**
+- Recreate `client_upload_document_versions` with org-id guard.
+- Add `client_insert_root_document` policy on `public.documents` for net-new client uploads on visible cases.
+- Add `notify_staff_on_client_document` trigger on `documents` (when `uploaded_by` is a client linked user) and `notify_staff_on_client_doc_comment` trigger on `document_comments` (when `author_type='client'`).
 
-**Edit**
-- `src/components/documents/DocumentUploadModal.tsx` — promote scope picker to top, hide irrelevant fields per scope, switch `.single()` → `.maybeSingle()` with fallback fetch, clearer error display.
-- `src/components/documents/EntityDocumentsTab.tsx` — verify case-specific filter + "Browse shared library" entry.
-- `src/components/documents/DocumentFolderSidebar.tsx` — verify the three library entries' labels and descriptions.
+**Edits**
+- `src/pages/portal/PortalCaseDetailPage.tsx` — load `case_notes`, add Notes + Messages tabs.
+- `src/components/clients/ClientMessagesTab.tsx` — accept optional `defaultThread` and `lockedThread` props.
+- `src/pages/CaseDetailPage.tsx` — add Messages tab embedding `ClientMessagesTab`.
+- `src/pages/portal/PortalDocumentsPage.tsx` — add "Upload document" button + modal scoped to visible cases.
+- `src/components/portal/PortalDocumentDetailSlideOver.tsx` — sanitize filename, surface real errors.
 
 ### Outcome
 
-- Lawyers, paralegals, and firm admins can upload documents in any of the three categories without any silent RLS dead-ends.
-- The three-way categorisation matches the user's exact mental model (internal / shared library / case-specific) and drives the rest of the form.
-- A lawyer can always re-read a doc they just uploaded, even before being added to the case team.
-- Existing internal/shared/case visibility rules continue to enforce the right access at the database level.
+- Client sees notes the lawyer marked "visible to client" inside the relevant case.
+- Lawyer sees client messages directly in the case detail's Messages tab.
+- Client can upload both new documents and new versions on cases they have access to, with paths that satisfy storage RLS.
+- Both sides receive notifications when the other uploads or comments, closing the collaboration loop.
 
