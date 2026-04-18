@@ -48,7 +48,7 @@ export default function PortalCaseDetailPage() {
     setCaseData(c);
 
     // Parallel loads
-    const [hearingsRes, docsRes, teamRes] = await Promise.all([
+    const [hearingsRes, docsRes, teamRes, notesRes] = await Promise.all([
       supabase.from('case_hearings').select('*')
         .eq('case_id', id!).eq('is_visible_to_client', true)
         .order('hearing_date', { ascending: false }),
@@ -56,10 +56,14 @@ export default function PortalCaseDetailPage() {
         .eq('case_id', id!).eq('is_visible_to_client', true)
         .order('created_at', { ascending: false }),
       supabase.from('case_team_members').select('user_id, role').eq('case_id', id!),
+      supabase.from('case_notes').select('id, content, content_ar, is_pinned, created_at, author_id')
+        .eq('case_id', id!).eq('is_visible_to_client', true)
+        .order('is_pinned', { ascending: false }).order('created_at', { ascending: false }),
     ]);
 
     setHearings(hearingsRes.data || []);
     setDocuments(docsRes.data || []);
+    setNotes(notesRes.data || []);
 
     if (teamRes.data && teamRes.data.length > 0) {
       const uids = [...new Set(teamRes.data.map((m: any) => m.user_id))];
