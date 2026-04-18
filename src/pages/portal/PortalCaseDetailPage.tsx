@@ -25,6 +25,7 @@ export default function PortalCaseDetailPage() {
   const [hearings, setHearings] = useState<any[]>([]);
   const [documents, setDocuments] = useState<any[]>([]);
   const [team, setTeam] = useState<any[]>([]);
+  const [notes, setNotes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('overview');
 
