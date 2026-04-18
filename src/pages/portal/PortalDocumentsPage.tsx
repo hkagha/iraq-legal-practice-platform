@@ -216,9 +216,17 @@ export default function PortalDocumentsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-display-lg font-bold text-foreground">{t('portal.documents.title')}</h1>
-        <p className="text-body-md text-muted-foreground mt-1">{t('portal.documents.subtitle')}</p>
+      <div className="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h1 className="text-display-lg font-bold text-foreground">{t('portal.documents.title')}</h1>
+          <p className="text-body-md text-muted-foreground mt-1">{t('portal.documents.subtitle')}</p>
+        </div>
+        {uploadCases.length > 0 && (
+          <Button onClick={() => setUploadOpen(true)} className="bg-accent text-accent-foreground hover:bg-accent/90">
+            <Upload className="h-4 w-4 me-2" />
+            {language === 'ar' ? 'رفع مستند' : 'Upload document'}
+          </Button>
+        )}
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3">
