@@ -12,6 +12,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { cn } from '@/lib/utils';
+import ClientMessagesTab from '@/components/clients/ClientMessagesTab';
 
 export default function PortalCaseDetailPage() {
   const { id } = useParams<{ id: string }>();
