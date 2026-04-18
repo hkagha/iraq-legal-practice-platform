@@ -186,7 +186,7 @@ export default function PortalDocumentsPage() {
               : null;
 
             return (
-              <div key={doc.id} className="bg-card border border-border rounded-lg p-4 hover:shadow-md transition-shadow">
+              <div key={doc.id} onClick={() => setDetailDocId(doc.id)} className="bg-card border border-border rounded-lg p-4 hover:shadow-md transition-shadow cursor-pointer">
                 <div className="flex items-start justify-between gap-3">
                   <div className="min-w-0">
                     <p className="text-body-md font-medium text-foreground truncate" title={name}>{name}</p>
@@ -199,7 +199,7 @@ export default function PortalDocumentsPage() {
                   </div>
                 </div>
                 <button
-                  onClick={() => handleDownload(doc)}
+                  onClick={(e) => { e.stopPropagation(); handleDownload(doc); }}
                   className="mt-3 w-full inline-flex items-center justify-center gap-2 h-9 rounded-md border border-accent text-accent text-body-sm font-medium hover:bg-accent/10 transition-colors"
                 >
                   <Download className="h-4 w-4" /> {t('portal.documents.download')}
@@ -209,6 +209,13 @@ export default function PortalDocumentsPage() {
           })}
         </div>
       )}
+
+      <PortalDocumentDetailSlideOver
+        documentId={detailDocId}
+        isOpen={!!detailDocId}
+        onClose={() => setDetailDocId(null)}
+        onRefresh={loadDocuments}
+      />
     </div>
   );
 }
