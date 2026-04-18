@@ -10,6 +10,7 @@ import { ar as arLocale } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Input } from '@/components/ui/input';
+import PortalDocumentDetailSlideOver from '@/components/portal/PortalDocumentDetailSlideOver';
 
 interface DocItem {
   id: string;
