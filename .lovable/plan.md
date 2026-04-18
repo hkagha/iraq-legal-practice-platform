@@ -1,59 +1,99 @@
 
 
-## Plan: Fix admin user/client creation + unify password management
+## Plan: Document Collaboration + Org Document Library
 
-### Root causes of the current "non-2xx status code" error
+Two related features:
+1. Client ↔ lawyer collaboration on case documents (comments + new versions from either side)
+2. A library categorising every document into Internal / Shared-with-clients / Case-specific, with the right visibility rules
 
-1. The `admin-create-user` Edge Function returns generic `"Internal error"` on any thrown exception, hiding the real cause. The likely failure is one of:
-   - The `handle_new_user` trigger inserts into `profiles` with `role='client'` — if `profiles.role` has a CHECK constraint that rejects `'client'`, `auth.admin.createUser` fails.
-   - The follow-up `INSERT` into `client_user_links` from the browser hits an RLS policy that only allows the linked client (not the firm admin) to insert.
-   - The `password_set_by_admin` / `password_changed_by` columns may not exist on `profiles`, causing the post-create UPDATE to silently fail (but it would not throw a non-2xx; the create itself is the failing step).
+---
 
-2. `InviteMemberModal` still uses the old token-based invitation flow — admins cannot directly create staff with a password.
+### 1. Document collaboration (comments + client uploads)
 
-3. `admin-reset-password` only allows `firm_admin` to reset their own password (the check `targetProfile.id !== callerProfile.id` blocks resets for other firm admins, which is fine, but it also lets firm_admin reset *any* lawyer/paralegal — that part already works). Super_admin can already reset anyone. We just need to make sure the UI exposes it everywhere.
+**New table `document_comments`**
+- `id`, `organization_id`, `document_id`, `author_id`, `author_type` ('staff' | 'client'), `content`, `content_ar`, `is_visible_to_client`, `parent_comment_id` (for threaded replies), `created_at`, `updated_at`
+- RLS:
+  - Staff (firm_admin/lawyer/paralegal) in the org → full CRUD on comments for their org's documents
+  - Client → SELECT comments where the document is visible to them AND `is_visible_to_client = true`; INSERT comments where `author_id = auth.uid()`, `author_type = 'client'`, document is visible to them (server-side defaults `is_visible_to_client = true` for client-authored)
+  - Super admin → all
+- Realtime: add `document_comments` to `supabase_realtime` so both sides see new comments live.
 
-### What we'll change
+**Client-uploaded new versions**
+- Extend RLS on `documents` and `storage.objects` (`documents` bucket) so a client linked to the case/errand/client_id can INSERT a new row that:
+  - References an existing `parent_document_id` whose latest version is visible to them
+  - Sets `uploaded_by = auth.uid()`, `is_visible_to_client = true`, `is_latest_version = true`
+  - Sets `version = parent.version + 1`, copies `case_id` / `errand_id` / `client_id` / `organization_id` from parent
+- A `BEFORE INSERT` trigger on `documents` enforces the parent-version rules for client uploads (so a client cannot create unrelated documents) and flips the previous latest version's `is_latest_version = false`.
+- Storage path for client uploads: `{org_id}/clients/{client_id}/{parent_doc_id}/{filename}`.
 
-**1. Edge Function `admin-create-user` — make it robust and return real errors**
-- Return the actual error message (not `"Internal error"`) so debugging stops being a guessing game.
-- Move the `client_user_links` insert *into* the Edge Function (so it runs with the service role and bypasses RLS). When `role === 'client'` and a `client_id` is passed, link the new user to that client inside the function.
-- Ensure the `profiles` row exists (upsert it) instead of relying solely on the `handle_new_user` trigger — this avoids races and works even if the trigger's CHECK constraint rejects `'client'`.
+**UI changes**
+- `DocumentDetailSlideOver` (staff) → new "Comments" tab with threaded list, compose box (EN/AR), and a "Visible to client" toggle (defaults on for client-collaborative docs). Show client-authored comments with a distinct avatar/colour.
+- New `PortalDocumentDetailSlideOver` opened from `PortalDocumentsPage` when a client clicks a document. Shows: metadata, version history, comments (read + post), and "Upload new version" button.
+- `PortalDocumentsPage` cards gain a comment-count badge and a "New version" indicator when staff/client adds one.
 
-**2. Migration: ensure `profiles.role` accepts `'client'` and `'sales_admin'`**
-- Drop the existing role CHECK constraint (if any) and replace it with one that allows: `super_admin`, `sales_admin`, `firm_admin`, `lawyer`, `paralegal`, `secretary`, `accountant`, `client`.
-- Confirm `password_set_by_admin`, `password_last_changed_at`, `password_changed_by` columns exist on `profiles`; add them if missing.
+---
 
-**3. Replace `InviteMemberModal` with direct creation flow**
-- Convert it into "Add Team Member" that calls `adminCreateUser` with email + password (with a Generate Password button) — same UX as `CreateClientAccountModal`. Shows credentials to share with the user. No invitation email, no token, no expiry.
-- Remove the "Send Invitation" path entirely from the staff-add UI (the legacy `invitations` table can stay for backwards compatibility but is no longer used).
+### 2. Three-tier document library
 
-**4. Update `CreateClientAccountModal` to pass `client_id` to the Edge Function**
-- Stop inserting into `client_user_links` from the browser (RLS-prone); the function will do it.
+**Schema change on `documents`**
+- New column `visibility_scope text NOT NULL DEFAULT 'case_specific'` with allowed values:
+  - `internal` — firm-internal only
+  - `shared_library` — firm-wide, can be attached to client cases
+  - `case_specific` — restricted to assigned team + (optionally) client
+- Backfill existing rows:
+  - `document_category = 'template'` → `shared_library`
+  - has `case_id` or `errand_id` or `client_id` → `case_specific`
+  - everything else → `internal`
+- Add `library_tags text[]` for organising the shared library.
 
-**5. Surface password reset for super admin across all users**
-- In the Super Admin Users page (`AdminUsersPage`), confirm a "Reset Password" action exists for every user. Add it if missing.
-- The existing `admin-reset-password` function already authorizes super_admin for any user — no backend change needed there.
+**Updated RLS on `documents`** (replaces current `users_read_org_documents`)
+- `internal`: visible to any staff role in the org (`firm_admin`, `lawyer`, `paralegal`, `secretary`, `accountant`); NEVER visible to clients regardless of `is_visible_to_client`.
+- `shared_library`: visible to all staff in the org; clients only see a copy if it's been attached to their case (i.e. a `case_specific` child document with `is_visible_to_client = true`).
+- `case_specific`: visible to firm_admin (always) and to staff who are members of `case_team_members` for that case (or assigned to the errand); plus clients only when `is_visible_to_client = true` AND they're linked via `client_user_links`.
+- Helper SECURITY DEFINER function `user_can_access_case(_user_id, _case_id)` to keep policies non-recursive.
+- Super admin policy already exists — keep as-is.
 
-**6. Confirm "login works directly without verification"**
-- The Edge Function already passes `email_confirm: true`, and the previous repair migration confirmed existing accounts. Once #1–#3 above land, every admin-created account will be immediately usable on the correct login portal.
+**"Use in case" action**
+- From the shared library, staff can click "Add to case/errand". This creates a new `documents` row with `visibility_scope = 'case_specific'`, `parent_document_id` pointing to the library doc, `case_id` set, `is_visible_to_client` chosen by user. The file is copied in storage to the case-scoped path so further versions don't pollute the library original.
+
+**UI changes**
+- `DocumentsPage` left sidebar gets three top-level sections above the existing folder tree:
+  - Library → Internal Use, Shared with Clients, Case Documents
+  - Each shows count and filters the main list by `visibility_scope`.
+- Upload modal (`DocumentUploadModal`) gains a required "Document type" radio: Internal / Shared library / Case-specific. Choosing Case-specific keeps the existing case/errand/client picker; the others hide it.
+- Shared library rows show an "Attach to case" button (staff only).
+- Case detail's documents tab (`EntityDocumentsTab`) only shows `case_specific` docs for that case + a "Browse shared library" button.
+
+---
 
 ### Files
 
-**Edit**
-- `supabase/functions/admin-create-user/index.ts` — return real errors; insert `client_user_links` server-side; upsert profile.
-- `src/components/clients/CreateClientAccountModal.tsx` — pass `client_id`; drop client-side `client_user_links` insert.
-- `src/components/settings/InviteMemberModal.tsx` — convert to direct create-with-password flow.
-- `src/pages/admin/AdminUsersPage.tsx` — ensure "Reset Password" action is present for every user (verify, add if missing).
+**Database (migration)**
+- New table `document_comments` + RLS + realtime
+- `documents`: add `visibility_scope`, `library_tags`; backfill; replace SELECT/INSERT/UPDATE policies with the tiered ones; add trigger enforcing client-version rules
+- New helper `public.user_can_access_case(uuid, uuid)`
+- Storage RLS update on `documents` bucket so clients can upload to `{org}/clients/{client_id}/...` paths and read paths for documents they have access to
 
-**Database migration**
-- Loosen/replace `profiles.role` CHECK constraint to include `'client'` and `'sales_admin'`.
-- Add `password_set_by_admin`, `password_last_changed_at`, `password_changed_by` columns if not already present.
+**Frontend create**
+- `src/components/documents/DocumentCommentsTab.tsx` — shared comments UI (staff + client variants via prop)
+- `src/components/portal/PortalDocumentDetailSlideOver.tsx` — client-side detail view with comments + new version upload
+- `src/components/documents/AttachToCaseModal.tsx` — pick case/errand + visibility for shared library docs
+- `src/components/documents/LibrarySection.tsx` — Internal / Shared / Case nav block
+
+**Frontend edit**
+- `src/components/documents/DocumentDetailSlideOver.tsx` — add Comments tab; show version history including client-uploaded versions
+- `src/components/documents/DocumentUploadModal.tsx` — Document type selector
+- `src/components/documents/DocumentFolderSidebar.tsx` — render `LibrarySection` above folders; filter by scope
+- `src/pages/DocumentsPage.tsx` — accept scope filter; pass to list + sidebar
+- `src/components/documents/EntityDocumentsTab.tsx` — restrict to case_specific; "Browse shared library" entry
+- `src/pages/portal/PortalDocumentsPage.tsx` — open detail slide-over on click; add comment count + new-version indicator
+- `src/i18n/en.json`, `src/i18n/ar.json` — strings for comments, library tabs, document types
+
+---
 
 ### Outcome
 
-- Firm admins → create clients **and** team members (lawyers, paralegals, etc.) with a password they set; user logs in immediately on their respective portal.
-- Super admin → create, view, edit, and reset password for any user across any organization.
-- No email invitations, no email verification step.
-- Real error messages bubble up if anything still fails, so future issues are diagnosable in one shot.
+- Lawyer and client can converse in-thread on any case document and either party can upload a new version, with full version history.
+- Every org has a clear three-tier library: internal-only, reusable shared docs, and case-locked docs — visibility enforced at the database level so RLS guarantees correctness even outside the UI.
+- Super admins continue to see everything; staff outside a case team can no longer accidentally read its documents.
 
