@@ -128,13 +128,15 @@ export default function AttachToCaseModal({ open, onClose, sourceDocument, onAtt
             </div>
           </div>
 
-          <FormSearchSelect
-            label={language === 'ar' ? 'اختر' : 'Select'}
-            options={targetOptions}
-            value={targetId}
-            onChange={setTargetId}
-            placeholder={language === 'ar' ? 'بحث...' : 'Search...'}
-          />
+          <div>
+            <label className="text-body-sm font-medium block mb-1.5">{language === 'ar' ? 'اختر' : 'Select'}</label>
+            <FormSearchSelect
+              options={targetOptions}
+              value={targetId}
+              onChange={setTargetId}
+              placeholder={language === 'ar' ? 'بحث...' : 'Search...'}
+            />
+          </div>
 
           <label className="flex items-center justify-between gap-3 cursor-pointer">
             <span className="text-body-sm">{language === 'ar' ? 'مرئي للعميل' : 'Visible to client'}</span>
