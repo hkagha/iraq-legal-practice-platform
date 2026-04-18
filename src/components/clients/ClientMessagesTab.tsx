@@ -32,13 +32,24 @@ interface Thread {
   unread: number;
 }
 
-export default function ClientMessagesTab({ clientId }: { clientId: string }) {
+interface ClientMessagesTabProps {
+  clientId: string;
+  defaultThread?: string;
+  lockedThread?: boolean;
+  caseLabel?: string;
+}
+
+export default function ClientMessagesTab({ clientId, defaultThread, lockedThread, caseLabel }: ClientMessagesTabProps) {
   const { language } = useLanguage();
   const { profile } = useAuth();
 
   const [messages, setMessages] = useState<Message[]>([]);
   const [threads, setThreads] = useState<Thread[]>([]);
-  const [activeThread, setActiveThread] = useState('general');
+  const [activeThread, setActiveThread] = useState(defaultThread || 'general');
+
+  useEffect(() => {
+    if (defaultThread) setActiveThread(defaultThread);
+  }, [defaultThread]);
   const [input, setInput] = useState('');
   const [sending, setSending] = useState(false);
 
