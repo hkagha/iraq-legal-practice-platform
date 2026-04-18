@@ -171,11 +171,13 @@ export default function InvoiceFormPage() {
     let invoiceId = id;
 
     if (isEdit) {
-      await supabase.from('invoices').update(invoiceData).eq('id', id);
-      await supabase.from('invoice_line_items').delete().eq('invoice_id', id!);
+      const { error: updErr } = await supabase.from('invoices').update(invoiceData).eq('id', id);
+      if (updErr) { toast({ title: updErr.message || 'Failed to update invoice', variant: 'destructive' }); setSaving(false); return; }
+      const { error: delErr } = await supabase.from('invoice_line_items').delete().eq('invoice_id', id!);
+      if (delErr) { toast({ title: delErr.message || 'Failed to update line items', variant: 'destructive' }); setSaving(false); return; }
     } else {
-      const { data: newInv } = await supabase.from('invoices').insert(invoiceData).select().single();
-      if (!newInv) { setSaving(false); return; }
+      const { data: newInv, error: insErr } = await supabase.from('invoices').insert(invoiceData).select().single();
+      if (insErr || !newInv) { toast({ title: insErr?.message || 'Failed to create invoice', variant: 'destructive' }); setSaving(false); return; }
       invoiceId = newInv.id;
     }
 
@@ -191,7 +193,8 @@ export default function InvoiceFormPage() {
       sort_order: i,
     }));
     if (itemsToInsert.length) {
-      await supabase.from('invoice_line_items').insert(itemsToInsert);
+      const { error: liErr } = await supabase.from('invoice_line_items').insert(itemsToInsert);
+      if (liErr) { toast({ title: liErr.message || 'Failed to save line items', variant: 'destructive' }); setSaving(false); return; }
     }
 
     // Update time entries with invoice_id
