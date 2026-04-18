@@ -36,6 +36,7 @@ import EntityDocumentsTab from '@/components/documents/EntityDocumentsTab';
 import CaseTimeBillingTab from '@/components/cases/CaseTimeBillingTab';
 import CaseQuickTasks from '@/components/tasks/CaseQuickTasks';
 import AICaseSummary from '@/components/cases/AICaseSummary';
+import ClientMessagesTab from '@/components/clients/ClientMessagesTab';
 
 const CASE_STATUS_ORDER = ['intake','active','pending_hearing','pending_judgment','on_hold','won','lost','settled','closed'] as const;
 const STATUS_PROGRESS: Record<string, number> = {
