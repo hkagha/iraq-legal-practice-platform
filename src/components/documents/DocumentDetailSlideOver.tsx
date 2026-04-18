@@ -17,6 +17,8 @@ import {
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import AIContractReview from '@/components/ai/AIContractReview';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
+import DocumentCommentsTab from '@/components/documents/DocumentCommentsTab';
 
 const FILE_TYPE_ICONS: Record<string, { icon: typeof FileText; color: string }> = {
   pdf: { icon: FileType, color: '#EF4444' },
@@ -172,7 +174,20 @@ export default function DocumentDetailSlideOver({ documentId, isOpen, onClose, o
           </div>
         }
       >
-        <div className="space-y-6">
+        <Tabs defaultValue="details" className="space-y-4">
+          <TabsList>
+            <TabsTrigger value="details">{language === 'ar' ? 'التفاصيل' : 'Details'}</TabsTrigger>
+            <TabsTrigger value="comments">{language === 'ar' ? 'التعليقات' : 'Comments'}</TabsTrigger>
+          </TabsList>
+          <TabsContent value="comments">
+            <DocumentCommentsTab
+              documentId={doc.id}
+              organizationId={doc.organization_id}
+              variant="staff"
+              documentVisibleToClient={doc.is_visible_to_client}
+            />
+          </TabsContent>
+          <TabsContent value="details" className="space-y-6">
           {/* Preview */}
           <div className="border border-border rounded-lg overflow-hidden bg-muted/30">
             {isPdf && previewUrl ? (
@@ -288,7 +303,8 @@ export default function DocumentDetailSlideOver({ documentId, isOpen, onClose, o
               caseData={doc.case ? { title: doc.case.title, case_type: 'N/A' } : undefined}
             />
           )}
-        </div>
+          </TabsContent>
+        </Tabs>
       </SlideOver>
 
       <ConfirmDialog isOpen={deleteConfirm} onClose={() => setDeleteConfirm(false)} onConfirm={handleDelete}
