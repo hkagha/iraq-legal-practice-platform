@@ -43,11 +43,74 @@ export default function PortalDocumentsPage() {
   const [categoryFilter, setCategoryFilter] = useState('all');
   const [linkedTo, setLinkedTo] = useState<'all' | 'cases' | 'errands' | 'general'>('all');
   const [detailDocId, setDetailDocId] = useState<string | null>(null);
+  const [uploadOpen, setUploadOpen] = useState(false);
+  const [uploadCases, setUploadCases] = useState<any[]>([]);
+  const [uploadCaseId, setUploadCaseId] = useState('');
+  const [uploadFile, setUploadFile] = useState<File | null>(null);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
     if (!activeClientId) return;
     loadDocuments();
+    loadUploadCases();
   }, [activeClientId]);
+
+  const loadUploadCases = async () => {
+    const { data } = await supabase
+      .from('cases')
+      .select('id, case_number, title, title_ar')
+      .eq('client_id', activeClientId!)
+      .eq('is_visible_to_client', true)
+      .order('created_at', { ascending: false });
+    setUploadCases(data || []);
+  };
+
+  const handleUploadNew = async () => {
+    if (!uploadFile || !uploadCaseId || !profile?.id || !activeClientId) return;
+    if (uploadFile.size > 10 * 1024 * 1024) { toast({ title: 'Error', description: language === 'ar' ? 'الملف كبير جداً (الحد ١٠MB)' : 'File too large (10MB max)', variant: 'destructive' }); return; }
+    setUploading(true);
+    try {
+      const caseObj = uploadCases.find(c => c.id === uploadCaseId);
+      if (!caseObj) throw new Error('Case not found');
+      const { data: orgData } = await supabase.from('cases').select('organization_id').eq('id', uploadCaseId).maybeSingle();
+      const orgId = orgData?.organization_id;
+      if (!orgId) throw new Error('Organization not found');
+
+      const safeName = uploadFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+      const path = `${orgId}/clients/${activeClientId}/case-${uploadCaseId}/${Date.now()}-${safeName}`;
+      const { error: upErr } = await supabase.storage.from('documents').upload(path, uploadFile, { contentType: uploadFile.type });
+      if (upErr) throw new Error(`Storage: ${upErr.message}`);
+
+      const ext = uploadFile.name.split('.').pop()?.toLowerCase() || '';
+      const { error: insErr } = await supabase.from('documents').insert({
+        organization_id: orgId,
+        file_name: uploadFile.name,
+        file_path: path,
+        file_size_bytes: uploadFile.size,
+        file_type: ext,
+        mime_type: uploadFile.type,
+        document_category: 'client_upload',
+        case_id: uploadCaseId,
+        client_id: activeClientId,
+        is_visible_to_client: true,
+        visibility_scope: 'case_specific',
+        version: 1,
+        is_latest_version: true,
+        uploaded_by: profile.id,
+      } as any);
+      if (insErr) throw new Error(`Database: ${insErr.message}`);
+
+      toast({ title: language === 'ar' ? 'تم رفع المستند' : 'Document uploaded' });
+      setUploadOpen(false);
+      setUploadFile(null);
+      setUploadCaseId('');
+      await loadDocuments();
+    } catch (err: any) {
+      toast({ title: 'Error', description: err.message || 'Upload failed', variant: 'destructive' });
+    } finally {
+      setUploading(false);
+    }
+  };
 
   const loadDocuments = async () => {
     setLoading(true);
