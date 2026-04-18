@@ -931,6 +931,18 @@ export default function CaseDetailPage() {
           <EntityDocumentsTab entityType="case" entityId={id!} caseInfo={caseData ? { id: caseData.id, case_number: caseData.case_number, title: caseData.title } : undefined} />
         </TabsContent>
 
+        {/* MESSAGES TAB */}
+        <TabsContent value="messages" className="mt-6">
+          {caseData?.client_id && (
+            <ClientMessagesTab
+              clientId={caseData.client_id}
+              defaultThread={`case-${caseData.id}`}
+              lockedThread
+              caseLabel={`${caseData.case_number} — ${language === 'ar' && caseData.title_ar ? caseData.title_ar : caseData.title}`}
+            />
+          )}
+        </TabsContent>
+
         {/* TIME & BILLING TAB */}
         <TabsContent value="timeBilling" className="mt-6">
           <CaseTimeBillingTab caseId={id!} clientId={caseData?.client_id} caseTitle={caseTitle} />
