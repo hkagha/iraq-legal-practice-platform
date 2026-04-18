@@ -132,9 +132,11 @@ export default function DocumentsPage() {
       .select(`*, uploader:profiles!documents_uploaded_by_fkey(id,first_name,last_name,first_name_ar,last_name_ar,avatar_url), client:clients(id,first_name,last_name,first_name_ar,last_name_ar,company_name,company_name_ar,client_type), case:cases(id,case_number,title,title_ar), errand:errands(id,errand_number,title,title_ar)`, { count: 'exact' })
       .eq('organization_id', orgId).eq('status', 'active').eq('is_latest_version', true);
 
-    // Folder filter
+    // Folder / scope filter
     if (activeFolder.type !== 'all') {
-      if (activeFolder.entityId) {
+      if (['internal', 'shared_library', 'case_specific'].includes(activeFolder.type)) {
+        query = query.eq('visibility_scope', activeFolder.type);
+      } else if (activeFolder.entityId) {
         if (activeFolder.type === 'cases') query = query.eq('case_id', activeFolder.entityId);
         else if (activeFolder.type === 'errands') query = query.eq('errand_id', activeFolder.entityId);
         else if (activeFolder.type === 'clients') query = query.eq('client_id', activeFolder.entityId);

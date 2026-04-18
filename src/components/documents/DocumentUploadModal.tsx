@@ -75,6 +75,7 @@ interface FileEntry {
   category: string;
   title: string;
   tags: string[];
+  scope: 'internal' | 'shared_library' | 'case_specific';
   linkType: 'none' | 'case' | 'errand' | 'client';
   linkedId: string;
   visibleToClient: boolean;
@@ -142,9 +143,11 @@ export default function DocumentUploadModal({
       }
       const defaultLinkType = preLinkedCase ? 'case' : preLinkedErrand ? 'errand' : preLinkedClient ? 'client' : 'none';
       const defaultLinkedId = preLinkedCase?.id || preLinkedErrand?.id || preLinkedClient?.id || '';
+      const defaultScope: FileEntry['scope'] = defaultLinkType === 'none' ? 'internal' : 'case_specific';
       entries.push({
         file, id: crypto.randomUUID(),
         category: suggestCategory(file.name), title: '', tags: [],
+        scope: defaultScope,
         linkType: defaultLinkType as any, linkedId: defaultLinkedId,
         visibleToClient: false, isVersion: false, parentDocId: '',
         progress: 0, status: 'pending',
@@ -212,10 +215,11 @@ export default function DocumentUploadModal({
           document_category: entry.category,
           title: entry.title || null,
           tags: entry.tags.length > 0 ? entry.tags : [],
-          client_id: entry.linkType === 'client' ? entry.linkedId : (preLinkedClient?.id || null),
-          case_id: entry.linkType === 'case' ? entry.linkedId : (preLinkedCase?.id || null),
-          errand_id: entry.linkType === 'errand' ? entry.linkedId : (preLinkedErrand?.id || null),
-          is_visible_to_client: entry.visibleToClient,
+          client_id: entry.scope === 'case_specific' && entry.linkType === 'client' ? entry.linkedId : (entry.scope === 'case_specific' ? (preLinkedClient?.id || null) : null),
+          case_id: entry.scope === 'case_specific' && entry.linkType === 'case' ? entry.linkedId : (entry.scope === 'case_specific' ? (preLinkedCase?.id || null) : null),
+          errand_id: entry.scope === 'case_specific' && entry.linkType === 'errand' ? entry.linkedId : (entry.scope === 'case_specific' ? (preLinkedErrand?.id || null) : null),
+          is_visible_to_client: entry.scope === 'case_specific' ? entry.visibleToClient : false,
+          visibility_scope: entry.scope,
           uploaded_by: profile.id,
           version,
           parent_document_id: parentDocId,
@@ -392,16 +396,35 @@ export default function DocumentUploadModal({
                       </div>
                     </div>
 
-                    {/* Link to entity */}
-                    {!preLinkedCase && !preLinkedErrand && !preLinkedClient && (
+                    {/* Document type / scope */}
+                    <div>
+                      <label className="text-body-sm font-medium text-foreground mb-1.5 block">{language === 'ar' ? 'نوع المستند' : 'Document type'} *</label>
+                      <div className="grid grid-cols-3 gap-2">
+                        {([
+                          { v: 'internal', en: 'Internal', ar: 'داخلي', d_en: 'Firm only', d_ar: 'الفريق فقط' },
+                          { v: 'shared_library', en: 'Shared Library', ar: 'مكتبة مشتركة', d_en: 'Reusable', d_ar: 'قابل لإعادة الاستخدام' },
+                          { v: 'case_specific', en: 'Case-Specific', ar: 'خاص بقضية', d_en: 'Linked', d_ar: 'مرتبط' },
+                        ] as const).map(opt => (
+                          <button key={opt.v} type="button" onClick={() => updateFile(entry.id, { scope: opt.v as any, linkType: opt.v === 'case_specific' ? (entry.linkType === 'none' ? 'case' : entry.linkType) : 'none', linkedId: opt.v === 'case_specific' ? entry.linkedId : '' })}
+                            className={cn('p-2 rounded-button text-start border transition-colors',
+                              entry.scope === opt.v ? 'border-accent bg-accent/10' : 'border-border hover:bg-muted')}>
+                            <div className={cn('text-body-sm font-medium', entry.scope === opt.v ? 'text-accent' : 'text-foreground')}>{language === 'ar' ? opt.ar : opt.en}</div>
+                            <div className="text-[11px] text-muted-foreground">{language === 'ar' ? opt.d_ar : opt.d_en}</div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Link to entity (only for case_specific) */}
+                    {entry.scope === 'case_specific' && !preLinkedCase && !preLinkedErrand && !preLinkedClient && (
                       <div>
                         <label className="text-body-sm font-medium text-foreground mb-1.5 block">{language === 'ar' ? 'ربط بـ' : 'Link to'}</label>
                         <div className="flex gap-2 mb-2">
-                          {(['none', 'case', 'errand', 'client'] as const).map(lt => (
+                          {(['case', 'errand', 'client'] as const).map(lt => (
                             <button key={lt} type="button" onClick={() => updateFile(entry.id, { linkType: lt, linkedId: '' })}
                               className={cn('px-3 py-1.5 rounded-button text-body-sm border transition-colors',
                                 entry.linkType === lt ? 'border-accent bg-accent/10 text-accent' : 'border-border text-muted-foreground hover:bg-muted')}>
-                              {lt === 'none' ? (language === 'ar' ? 'بدون' : 'None') : lt === 'case' ? (language === 'ar' ? 'قضية' : 'Case') : lt === 'errand' ? (language === 'ar' ? 'معاملة' : 'Errand') : (language === 'ar' ? 'عميل' : 'Client')}
+                              {lt === 'case' ? (language === 'ar' ? 'قضية' : 'Case') : lt === 'errand' ? (language === 'ar' ? 'معاملة' : 'Errand') : (language === 'ar' ? 'عميل' : 'Client')}
                             </button>
                           ))}
                         </div>
@@ -411,12 +434,14 @@ export default function DocumentUploadModal({
                       </div>
                     )}
 
-                    <div className="flex items-center gap-4">
-                      <label className="flex items-center gap-2 text-body-sm cursor-pointer">
-                        <Checkbox checked={entry.visibleToClient} onCheckedChange={v => updateFile(entry.id, { visibleToClient: !!v })} />
-                        {t('documents.fields.visibleToClient')}
-                      </label>
-                    </div>
+                    {entry.scope === 'case_specific' && (
+                      <div className="flex items-center gap-4">
+                        <label className="flex items-center gap-2 text-body-sm cursor-pointer">
+                          <Checkbox checked={entry.visibleToClient} onCheckedChange={v => updateFile(entry.id, { visibleToClient: !!v })} />
+                          {t('documents.fields.visibleToClient')}
+                        </label>
+                      </div>
+                    )}
                   </>
                 )}
               </div>
