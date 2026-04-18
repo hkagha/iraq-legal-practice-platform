@@ -4,12 +4,14 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePortalOrg } from '@/contexts/PortalOrgContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { FileText, Download, Search } from 'lucide-react';
+import { FileText, Download, Search, Upload, Loader2, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { ar as arLocale } from 'date-fns/locale';
 import { Skeleton } from '@/components/ui/skeleton';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import PortalDocumentDetailSlideOver from '@/components/portal/PortalDocumentDetailSlideOver';
 
 interface DocItem {
