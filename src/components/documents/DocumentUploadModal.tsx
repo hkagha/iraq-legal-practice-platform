@@ -141,9 +141,12 @@ export default function DocumentUploadModal({
         toast.error(`${file.name}: ${language === 'ar' ? 'نوع الملف غير مدعوم' : 'File type not supported'}`);
         return;
       }
+      const hasContext = !!(preLinkedCase || preLinkedErrand || preLinkedClient);
       const defaultLinkType = preLinkedCase ? 'case' : preLinkedErrand ? 'errand' : preLinkedClient ? 'client' : 'none';
       const defaultLinkedId = preLinkedCase?.id || preLinkedErrand?.id || preLinkedClient?.id || '';
-      const defaultScope: FileEntry['scope'] = defaultLinkType === 'none' ? 'internal' : 'case_specific';
+      // If opened from a case/errand/client page, default to case_specific.
+      // Otherwise default to internal — safest choice; user must opt in to sharing.
+      const defaultScope: FileEntry['scope'] = hasContext ? 'case_specific' : 'internal';
       entries.push({
         file, id: crypto.randomUUID(),
         category: suggestCategory(file.name), title: '', tags: [],
@@ -164,7 +167,14 @@ export default function DocumentUploadModal({
   const removeFile = (id: string) => setFiles(prev => prev.filter(f => f.id !== id));
   const updateFile = (id: string, updates: Partial<FileEntry>) => setFiles(prev => prev.map(f => f.id === id ? { ...f, ...updates } : f));
 
-  const canUpload = files.length > 0 && files.every(f => f.category) && !isUploading;
+  const canUpload = files.length > 0 && files.every(f => {
+    if (!f.category) return false;
+    if (f.scope === 'case_specific') {
+      // Need a link target — either prelinked context or selected linkedId
+      if (!preLinkedCase && !preLinkedErrand && !preLinkedClient && !f.linkedId) return false;
+    }
+    return true;
+  }) && !isUploading;
 
   const handleUpload = async () => {
     if (!profile?.organization_id || !profile.id) return;
@@ -205,7 +215,8 @@ export default function DocumentUploadModal({
 
         // Insert document record
         const ext = getExt(entry.file.name);
-        const { data: newDoc, error: insertErr } = await supabase.from('documents').insert({
+        const isCaseSpec = entry.scope === 'case_specific';
+        const insertPayload: any = {
           organization_id: orgId,
           file_name: entry.file.name,
           file_path: storagePath,
@@ -215,18 +226,32 @@ export default function DocumentUploadModal({
           document_category: entry.category,
           title: entry.title || null,
           tags: entry.tags.length > 0 ? entry.tags : [],
-          client_id: entry.scope === 'case_specific' && entry.linkType === 'client' ? entry.linkedId : (entry.scope === 'case_specific' ? (preLinkedClient?.id || null) : null),
-          case_id: entry.scope === 'case_specific' && entry.linkType === 'case' ? entry.linkedId : (entry.scope === 'case_specific' ? (preLinkedCase?.id || null) : null),
-          errand_id: entry.scope === 'case_specific' && entry.linkType === 'errand' ? entry.linkedId : (entry.scope === 'case_specific' ? (preLinkedErrand?.id || null) : null),
-          is_visible_to_client: entry.scope === 'case_specific' ? entry.visibleToClient : false,
+          client_id: isCaseSpec && entry.linkType === 'client' ? entry.linkedId : (isCaseSpec ? (preLinkedClient?.id || null) : null),
+          case_id: isCaseSpec && entry.linkType === 'case' ? entry.linkedId : (isCaseSpec ? (preLinkedCase?.id || null) : null),
+          errand_id: isCaseSpec && entry.linkType === 'errand' ? entry.linkedId : (isCaseSpec ? (preLinkedErrand?.id || null) : null),
+          is_visible_to_client: isCaseSpec ? entry.visibleToClient : false,
           visibility_scope: entry.scope,
           uploaded_by: profile.id,
           version,
           parent_document_id: parentDocId,
           is_latest_version: true,
-        } as any).select().single();
+        };
+        const { data: insertedDoc, error: insertErr } = await supabase
+          .from('documents').insert(insertPayload).select().maybeSingle();
 
         if (insertErr) throw insertErr;
+
+        // Fallback: if RLS prevents reading the new row back, fetch by file_path
+        let newDoc = insertedDoc;
+        if (!newDoc) {
+          const { data: fetched } = await supabase
+            .from('documents')
+            .select('*')
+            .eq('organization_id', orgId)
+            .eq('file_path', storagePath)
+            .maybeSingle();
+          newDoc = fetched;
+        }
 
         updateFile(entry.id, { progress: 85 });
 
@@ -331,6 +356,58 @@ export default function DocumentUploadModal({
                 {/* Form fields (only when pending) */}
                 {entry.status === 'pending' && (
                   <>
+                    {/* STEP 1 — Where does this document belong? (primary choice, drives the rest) */}
+                    <div>
+                      <label className="text-body-sm font-medium text-foreground mb-1.5 block">
+                        {language === 'ar' ? 'أين ينتمي هذا المستند؟' : 'Where does this document belong?'} *
+                      </label>
+                      <div className="grid grid-cols-1 gap-2">
+                        {([
+                          {
+                            v: 'internal',
+                            en: 'Internal use', ar: 'استخدام داخلي',
+                            d_en: 'Firm policies, instructions, internal references — visible to your team only.',
+                            d_ar: 'سياسات وتعليمات ومراجع داخلية للمكتب — مرئية لفريقك فقط.',
+                          },
+                          {
+                            v: 'shared_library',
+                            en: 'Shared library', ar: 'مكتبة مشتركة',
+                            d_en: 'Reusable templates and explainers that can be sent to clients (e.g. how to register a company).',
+                            d_ar: 'قوالب وشروحات قابلة لإعادة الاستخدام يمكن إرسالها للعملاء (مثل كيفية تسجيل شركة).',
+                          },
+                          {
+                            v: 'case_specific',
+                            en: 'Case-specific', ar: 'خاص بقضية',
+                            d_en: 'Belongs to a specific case, errand, or client — visible to assigned team and optionally the client.',
+                            d_ar: 'يخص قضية أو معاملة أو عميلاً معيناً — مرئي للفريق المعيّن واختيارياً للعميل.',
+                          },
+                        ] as const).map(opt => (
+                          <button
+                            key={opt.v}
+                            type="button"
+                            onClick={() => updateFile(entry.id, {
+                              scope: opt.v as any,
+                              linkType: opt.v === 'case_specific' ? (entry.linkType === 'none' ? 'case' : entry.linkType) : 'none',
+                              linkedId: opt.v === 'case_specific' ? entry.linkedId : '',
+                              visibleToClient: opt.v === 'case_specific' ? entry.visibleToClient : false,
+                            })}
+                            className={cn(
+                              'p-3 rounded-button text-start border transition-colors',
+                              entry.scope === opt.v ? 'border-accent bg-accent/10' : 'border-border hover:bg-muted',
+                            )}
+                          >
+                            <div className={cn('text-body-sm font-medium', entry.scope === opt.v ? 'text-accent' : 'text-foreground')}>
+                              {language === 'ar' ? opt.ar : opt.en}
+                            </div>
+                            <div className="text-[11px] text-muted-foreground mt-0.5 leading-snug">
+                              {language === 'ar' ? opt.d_ar : opt.d_en}
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* STEP 2 — Category + title */}
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                          <div className="flex items-center gap-2 mb-1">
@@ -393,25 +470,6 @@ export default function DocumentUploadModal({
                       <div>
                         <label className="text-body-sm font-medium text-foreground mb-1 block">{t('documents.fields.title')}</label>
                         <FormInput value={entry.title} onChange={e => updateFile(entry.id, { title: e.target.value })} placeholder={language === 'ar' ? 'عنوان وصفي (اختياري)' : 'Descriptive title (optional)'} />
-                      </div>
-                    </div>
-
-                    {/* Document type / scope */}
-                    <div>
-                      <label className="text-body-sm font-medium text-foreground mb-1.5 block">{language === 'ar' ? 'نوع المستند' : 'Document type'} *</label>
-                      <div className="grid grid-cols-3 gap-2">
-                        {([
-                          { v: 'internal', en: 'Internal', ar: 'داخلي', d_en: 'Firm only', d_ar: 'الفريق فقط' },
-                          { v: 'shared_library', en: 'Shared Library', ar: 'مكتبة مشتركة', d_en: 'Reusable', d_ar: 'قابل لإعادة الاستخدام' },
-                          { v: 'case_specific', en: 'Case-Specific', ar: 'خاص بقضية', d_en: 'Linked', d_ar: 'مرتبط' },
-                        ] as const).map(opt => (
-                          <button key={opt.v} type="button" onClick={() => updateFile(entry.id, { scope: opt.v as any, linkType: opt.v === 'case_specific' ? (entry.linkType === 'none' ? 'case' : entry.linkType) : 'none', linkedId: opt.v === 'case_specific' ? entry.linkedId : '' })}
-                            className={cn('p-2 rounded-button text-start border transition-colors',
-                              entry.scope === opt.v ? 'border-accent bg-accent/10' : 'border-border hover:bg-muted')}>
-                            <div className={cn('text-body-sm font-medium', entry.scope === opt.v ? 'text-accent' : 'text-foreground')}>{language === 'ar' ? opt.ar : opt.en}</div>
-                            <div className="text-[11px] text-muted-foreground">{language === 'ar' ? opt.d_ar : opt.d_en}</div>
-                          </button>
-                        ))}
                       </div>
                     </div>
 
