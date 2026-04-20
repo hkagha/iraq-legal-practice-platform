@@ -342,6 +342,7 @@ export default function TasksPage() {
         actionLabel={t('tasks.addTask')}
         actionLabelAr={t('tasks.addTask')}
         onAction={() => { setEditTask(null); setShowFormModal(true); }}
+        helpKey="tasks"
         breadcrumbs={[
           { label: 'Dashboard', labelAr: 'لوحة التحكم', href: '/dashboard' },
           { label: t('tasks.title'), labelAr: t('tasks.title') },
