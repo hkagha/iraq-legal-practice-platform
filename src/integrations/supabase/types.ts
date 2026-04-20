@@ -1460,6 +1460,14 @@ export type Database = {
       }
       documents: {
         Row: {
+          ai_dates: Json | null
+          ai_doc_type: string | null
+          ai_language: string | null
+          ai_organizations: string[] | null
+          ai_people: string[] | null
+          ai_places: string[] | null
+          ai_summary: string | null
+          ai_tags: string[] | null
           case_id: string | null
           client_id: string | null
           created_at: string
@@ -1467,6 +1475,7 @@ export type Database = {
           description_ar: string | null
           document_category: string
           errand_id: string | null
+          extracted_text: string | null
           file_name: string
           file_name_ar: string | null
           file_path: string
@@ -1474,6 +1483,10 @@ export type Database = {
           file_type: string
           folder_path: string | null
           id: string
+          indexed_at: string | null
+          indexing_attempts: number
+          indexing_error: string | null
+          indexing_status: string
           is_latest_version: boolean
           is_visible_to_client: boolean
           last_accessed_at: string | null
@@ -1482,6 +1495,7 @@ export type Database = {
           mime_type: string | null
           organization_id: string
           parent_document_id: string | null
+          search_tsv: unknown
           status: string
           tags: string[] | null
           title: string | null
@@ -1492,6 +1506,14 @@ export type Database = {
           visibility_scope: string
         }
         Insert: {
+          ai_dates?: Json | null
+          ai_doc_type?: string | null
+          ai_language?: string | null
+          ai_organizations?: string[] | null
+          ai_people?: string[] | null
+          ai_places?: string[] | null
+          ai_summary?: string | null
+          ai_tags?: string[] | null
           case_id?: string | null
           client_id?: string | null
           created_at?: string
@@ -1499,6 +1521,7 @@ export type Database = {
           description_ar?: string | null
           document_category?: string
           errand_id?: string | null
+          extracted_text?: string | null
           file_name: string
           file_name_ar?: string | null
           file_path: string
@@ -1506,6 +1529,10 @@ export type Database = {
           file_type: string
           folder_path?: string | null
           id?: string
+          indexed_at?: string | null
+          indexing_attempts?: number
+          indexing_error?: string | null
+          indexing_status?: string
           is_latest_version?: boolean
           is_visible_to_client?: boolean
           last_accessed_at?: string | null
@@ -1514,6 +1541,7 @@ export type Database = {
           mime_type?: string | null
           organization_id: string
           parent_document_id?: string | null
+          search_tsv?: unknown
           status?: string
           tags?: string[] | null
           title?: string | null
@@ -1524,6 +1552,14 @@ export type Database = {
           visibility_scope?: string
         }
         Update: {
+          ai_dates?: Json | null
+          ai_doc_type?: string | null
+          ai_language?: string | null
+          ai_organizations?: string[] | null
+          ai_people?: string[] | null
+          ai_places?: string[] | null
+          ai_summary?: string | null
+          ai_tags?: string[] | null
           case_id?: string | null
           client_id?: string | null
           created_at?: string
@@ -1531,6 +1567,7 @@ export type Database = {
           description_ar?: string | null
           document_category?: string
           errand_id?: string | null
+          extracted_text?: string | null
           file_name?: string
           file_name_ar?: string | null
           file_path?: string
@@ -1538,6 +1575,10 @@ export type Database = {
           file_type?: string
           folder_path?: string | null
           id?: string
+          indexed_at?: string | null
+          indexing_attempts?: number
+          indexing_error?: string | null
+          indexing_status?: string
           is_latest_version?: boolean
           is_visible_to_client?: boolean
           last_accessed_at?: string | null
@@ -1546,6 +1587,7 @@ export type Database = {
           mime_type?: string | null
           organization_id?: string
           parent_document_id?: string | null
+          search_tsv?: unknown
           status?: string
           tags?: string[] | null
           title?: string | null
