@@ -30,14 +30,19 @@ export default function PortalInvoiceDetailPage() {
   const { data: invoice, isLoading } = useQuery({
     queryKey: ['portal-invoice', id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      const { data: inv, error } = await supabase
         .from('invoices')
-        .select('*, invoice_line_items(*), payments(id, amount, payment_date, payment_method, reference_number)')
+        .select('*')
         .eq('id', id!)
         .neq('status', 'draft')
         .maybeSingle();
       if (error) throw error;
-      return data;
+      if (!inv) return null;
+      const [{ data: lineItems }, { data: payments }] = await Promise.all([
+        supabase.from('invoice_line_items').select('*').eq('invoice_id', inv.id).order('sort_order'),
+        supabase.from('payments').select('id, amount, payment_date, payment_method, reference_number').eq('invoice_id', inv.id).order('payment_date'),
+      ]);
+      return { ...inv, line_items: lineItems ?? [], payments: payments ?? [] };
     },
     enabled: !!id,
   });
