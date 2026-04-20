@@ -68,11 +68,9 @@ export default function PortalCasesPage() {
         <EmptyState
           icon={Scale}
           title={isEN ? 'No cases yet' : 'لا توجد قضايا'}
-          subtitle={
-            isEN
-              ? 'When your firm shares a case with you, it will appear here.'
-              : 'عندما يشارك مكتبك قضية معك، ستظهر هنا.'
-          }
+          titleAr="لا توجد قضايا"
+          subtitle="When your firm shares a case with you, it will appear here."
+          subtitleAr="عندما يشارك مكتبك قضية معك، ستظهر هنا."
         />
       ) : (
         <div className="space-y-2">
