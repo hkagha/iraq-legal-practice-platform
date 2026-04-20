@@ -501,6 +501,140 @@ export const helpContent: Record<string, HelpEntry> = {
       },
     }],
   },
+
+  'portal.dashboard': {
+    title: { en: 'Your client portal', ar: 'بوابتك كعميل' },
+    intro: {
+      en: 'A secure window into the work your law firm is doing for you.',
+      ar: 'نافذة آمنة على العمل الذي يقوم به مكتب المحاماة لصالحك.',
+    },
+    sections: [
+      {
+        heading: { en: 'What you can see', ar: 'ما يمكنك رؤيته' },
+        body: {
+          en: '• Active cases and their status.\n• Upcoming hearings and deadlines.\n• New documents shared with you.\n• Outstanding invoices.\n• Messages from your legal team.',
+          ar: '• القضايا النشطة وحالتها.\n• الجلسات والمواعيد القادمة.\n• المستندات الجديدة المشاركة معك.\n• الفواتير المستحقة.\n• الرسائل من فريقك القانوني.',
+        },
+      },
+      {
+        heading: { en: 'Privacy', ar: 'الخصوصية' },
+        body: {
+          en: 'You only see items your firm has explicitly marked visible to you. Internal notes stay internal.',
+          ar: 'ترى فقط البنود التي وسمها المكتب صراحة كظاهرة لك. الملاحظات الداخلية تبقى داخلية.',
+        },
+      },
+    ],
+  },
+
+  'portal.cases': {
+    title: { en: 'Your cases', ar: 'قضاياك' },
+    intro: {
+      en: 'All matters your firm is handling on your behalf.',
+      ar: 'كل القضايا التي يديرها مكتبك بالنيابة عنك.',
+    },
+    sections: [{
+      heading: { en: 'Open a case', ar: 'فتح قضية' },
+      body: {
+        en: 'Click any case to see status, upcoming hearings, shared documents, and a brief outcome summary if closed.',
+        ar: 'اضغط أي قضية لرؤية الحالة، الجلسات القادمة، المستندات المشاركة، وملخصاً للنتيجة إن كانت مغلقة.',
+      },
+    }],
+  },
+
+  'portal.errands': {
+    title: { en: 'Your errands', ar: 'معاملاتك' },
+    intro: {
+      en: 'Government and administrative processes your firm is handling for you.',
+      ar: 'المعاملات الحكومية والإدارية التي يتولاها مكتبك لصالحك.',
+    },
+    sections: [{
+      heading: { en: 'Track progress', ar: 'تتبع التقدم' },
+      body: {
+        en: 'Each errand shows a step-by-step tracker. Completed steps are checked; the current step is highlighted.',
+        ar: 'كل معاملة تعرض متتبعاً للخطوات. الخطوات المكتملة معلَّمة؛ الخطوة الحالية مظلَّلة.',
+      },
+    }],
+  },
+
+  'portal.documents': {
+    title: { en: 'Shared documents', ar: 'المستندات المشاركة' },
+    intro: {
+      en: 'Files your law firm has shared with you. Download anytime.',
+      ar: 'الملفات التي شاركها مكتب المحاماة معك. حمِّلها في أي وقت.',
+    },
+    sections: [
+      {
+        heading: { en: 'Download a document', ar: 'تحميل مستند' },
+        body: {
+          en: 'Click any row to preview. Use the download icon to save a copy locally.',
+          ar: 'اضغط أي صف للمعاينة. استخدم أيقونة التحميل لحفظ نسخة محلية.',
+        },
+      },
+      {
+        heading: { en: 'Privacy', ar: 'الخصوصية' },
+        body: {
+          en: 'You only see documents the firm has explicitly marked visible to you.',
+          ar: 'ترى فقط المستندات التي وسمها المكتب صراحة كظاهرة لك.',
+        },
+      },
+    ],
+  },
+
+  'portal.invoices': {
+    title: { en: 'Your invoices', ar: 'فواتيرك' },
+    intro: {
+      en: 'View, download, and pay invoices from your law firm.',
+      ar: 'اعرض وحمِّل وادفع فواتير مكتب المحاماة.',
+    },
+    sections: [
+      {
+        heading: { en: 'Status meanings', ar: 'معاني الحالات' },
+        body: {
+          en: '• Sent — awaiting payment.\n• Partially paid — some payment received.\n• Paid — fully settled (PAID watermark appears).\n• Overdue — past due date with balance.',
+          ar: '• مرسلة — بانتظار الدفع.\n• مدفوعة جزئياً — تم استلام جزء من المبلغ.\n• مدفوعة — مسددة بالكامل (تظهر علامة "مدفوعة").\n• متأخرة — مضى تاريخ الاستحقاق مع رصيد.',
+        },
+      },
+      {
+        heading: { en: 'Pay an invoice', ar: 'دفع فاتورة' },
+        body: {
+          en: 'Open the invoice to see the firm\'s bank transfer details. Send the firm a message after payment so they can confirm receipt.',
+          ar: 'افتح الفاتورة لرؤية تفاصيل التحويل المصرفي للمكتب. أرسل رسالة بعد الدفع ليتمكنوا من تأكيد الاستلام.',
+        },
+      },
+    ],
+  },
+
+  'portal.messages': {
+    title: { en: 'Messages', ar: 'الرسائل' },
+    intro: {
+      en: 'Direct chat with your legal team — case-by-case, in real time.',
+      ar: 'محادثة مباشرة مع فريقك القانوني — قضية بقضية، في الوقت الفعلي.',
+    },
+    sections: [
+      {
+        heading: { en: 'Start a conversation', ar: 'بدء محادثة' },
+        body: {
+          en: '1. Pick a case from the left.\n2. Type your message and press Enter.\n3. Attach files with the paperclip icon.\n4. Replies appear instantly.',
+          ar: '١. اختر قضية من اليسار.\n٢. اكتب رسالتك واضغط Enter.\n٣. أرفق ملفات بأيقونة المشبك.\n٤. الردود تظهر فوراً.',
+        },
+      },
+    ],
+  },
+
+  'portal.profile': {
+    title: { en: 'Your profile', ar: 'ملفك الشخصي' },
+    intro: {
+      en: 'Update your contact details, password, and notification preferences.',
+      ar: 'حدِّث بيانات الاتصال وكلمة المرور وتفضيلات الإشعارات.',
+    },
+    sections: [{
+      heading: { en: 'Keep info current', ar: 'حافظ على التحديث' },
+      body: {
+        en: 'Your firm uses your phone and email for important case alerts. Keep them up to date.',
+        ar: 'يستخدم مكتبك هاتفك وبريدك للتنبيهات المهمة. حافظ على تحديثها.',
+      },
+    }],
+  },
 };
 
 export function getHelp(key: string): HelpEntry | null {
