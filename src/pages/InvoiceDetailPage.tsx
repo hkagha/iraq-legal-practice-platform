@@ -406,12 +406,15 @@ export default function InvoiceDetailPage() {
       </Dialog>
 
       <ConfirmDialog
-        open={confirmCancel}
-        onOpenChange={setConfirmCancel}
+        isOpen={confirmCancel}
+        onClose={() => setConfirmCancel(false)}
         title={t('billing.messages.cancelConfirmTitle')}
-        description={t('billing.messages.cancelConfirmMessage')}
+        titleAr={t('billing.messages.cancelConfirmTitle')}
+        message={t('billing.messages.cancelConfirmMessage')}
+        messageAr={t('billing.messages.cancelConfirmMessage')}
         confirmLabel={t('billing.cancelInvoice')}
-        variant="destructive"
+        confirmLabelAr={t('billing.cancelInvoice')}
+        type="danger"
         onConfirm={cancelInvoice}
       />
     </div>
