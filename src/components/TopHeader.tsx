@@ -8,6 +8,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuLabel,
 } from '@/components/ui/dropdown-menu';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import NotificationBell from '@/components/notifications/NotificationBell';
 
@@ -140,12 +141,18 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
   return (
     <header className="h-16 bg-card border-b border-border flex items-center px-6 gap-4 shrink-0 z-10">
       {showMenu && (
-        <button
-          onClick={onMenuClick}
-          className="lg:hidden h-9 w-9 flex items-center justify-center hover:bg-secondary transition-colors"
-        >
-          <Menu className="h-5 w-5 text-foreground" />
-        </button>
+        <Tooltip delayDuration={200}>
+          <TooltipTrigger asChild>
+            <button
+              onClick={onMenuClick}
+              aria-label={language === 'en' ? 'Open menu' : 'فتح القائمة'}
+              className="lg:hidden h-9 w-9 flex items-center justify-center hover:bg-secondary transition-colors"
+            >
+              <Menu className="h-5 w-5 text-foreground" />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>{language === 'en' ? 'Open menu' : 'فتح القائمة'}</TooltipContent>
+        </Tooltip>
       )}
 
       <div className="flex-1 flex justify-center">
@@ -268,23 +275,36 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
       </div>
 
       <div className="flex items-center gap-1">
-        <button
-          onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
-          className="h-9 px-3 flex items-center justify-center text-[11px] font-semibold text-foreground/70 hover:text-foreground tracking-widest small-caps transition-colors"
-          title="Toggle language"
-        >
-          {language === 'en' ? 'AR' : 'EN'}
-        </button>
+        <Tooltip delayDuration={200}>
+          <TooltipTrigger asChild>
+            <button
+              onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
+              aria-label={language === 'en' ? 'Switch to Arabic' : 'التبديل إلى الإنجليزية'}
+              className="h-9 px-3 flex items-center justify-center text-[11px] font-semibold text-foreground/70 hover:text-foreground tracking-widest small-caps transition-colors"
+            >
+              {language === 'en' ? 'AR' : 'EN'}
+            </button>
+          </TooltipTrigger>
+          <TooltipContent>{language === 'en' ? 'Switch to Arabic' : 'التبديل إلى الإنجليزية'}</TooltipContent>
+        </Tooltip>
 
         <NotificationBell />
 
         {/* Avatar dropdown */}
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button className="h-9 w-9 bg-primary text-primary-foreground flex items-center justify-center text-[12px] font-semibold tracking-wider focus:outline-none">
-              {getInitials() || 'U'}
-            </button>
-          </DropdownMenuTrigger>
+          <Tooltip delayDuration={200}>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                <button
+                  aria-label={language === 'en' ? 'Account menu' : 'قائمة الحساب'}
+                  className="h-9 w-9 bg-primary text-primary-foreground flex items-center justify-center text-[12px] font-semibold tracking-wider focus:outline-none"
+                >
+                  {getInitials() || 'U'}
+                </button>
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent>{language === 'en' ? 'Account menu' : 'قائمة الحساب'}</TooltipContent>
+          </Tooltip>
           <DropdownMenuContent align="end" className="w-[240px] shadow-lg p-1 border-border">
             <DropdownMenuLabel className="px-3 py-3">
               <div className="flex items-center gap-3">

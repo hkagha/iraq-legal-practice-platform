@@ -1,4 +1,4 @@
 import RebuildingStub from '@/components/RebuildingStub';
 export default function CasesPage() {
-  return <RebuildingStub title="Cases" />;
+  return <RebuildingStub title="Cases" helpKey="cases.list" />;
 }
