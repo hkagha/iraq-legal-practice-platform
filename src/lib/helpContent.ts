@@ -301,6 +301,206 @@ export const helpContent: Record<string, HelpEntry> = {
       ar: 'شغِّل تقرير "الذمم المتقادمة" شهرياً لرصد العملاء بطيئي السداد مبكراً.',
     }],
   },
+
+  'settings': {
+    title: { en: 'Settings', ar: 'الإعدادات' },
+    intro: {
+      en: 'Configure your organization, team, personal profile, and platform preferences.',
+      ar: 'اضبط مؤسستك، فريقك، ملفك الشخصي، وتفضيلات المنصة.',
+    },
+    sections: [
+      {
+        heading: { en: 'Organization', ar: 'المؤسسة' },
+        body: {
+          en: '• General — firm name, contact, address.\n• Branding — logo, colors used in invoices and the client portal.\n• Billing config — default currency, hourly rate, tax, bank details.\n• Numbering — prefix and counters for cases, errands, invoices.',
+          ar: '• عام — اسم المكتب، الاتصال، العنوان.\n• الهوية البصرية — الشعار والألوان المستخدمة في الفواتير وبوابة العميل.\n• إعدادات الفواتير — العملة الافتراضية، الأجر بالساعة، الضريبة، تفاصيل البنك.\n• الترقيم — البادئات والعدادات للقضايا والمعاملات والفواتير.',
+        },
+      },
+      {
+        heading: { en: 'Team', ar: 'الفريق' },
+        body: {
+          en: '• Team members — view all users, change roles, deactivate.\n• Roles & permissions — what each role can see and do.\n• Invitations — send invites to new lawyers and staff.',
+          ar: '• أعضاء الفريق — اعرض جميع المستخدمين، غيِّر الأدوار، عطِّل الحسابات.\n• الأدوار والصلاحيات — ما يستطيع كل دور رؤيته والقيام به.\n• الدعوات — أرسل دعوات للمحامين والموظفين الجدد.',
+        },
+      },
+      {
+        heading: { en: 'Personal', ar: 'الشخصي' },
+        body: {
+          en: '• My profile — name, photo, contact info.\n• Security — password, 2FA, active sessions.\n• Notifications — choose what alerts you receive and how.\n• Language & appearance — EN/AR, theme.',
+          ar: '• ملفي — الاسم، الصورة، معلومات الاتصال.\n• الأمان — كلمة المرور، التحقق بخطوتين، الجلسات النشطة.\n• الإشعارات — اختر ما يصلك من تنبيهات وكيفية وصولها.\n• اللغة والمظهر — إنجليزي/عربي، السمة.',
+        },
+      },
+      {
+        heading: { en: 'System (admins only)', ar: 'النظام (للمسؤولين فقط)' },
+        body: {
+          en: '• Subscription — plan and usage.\n• AI config — provider keys, models, usage cap.\n• Data export — download all firm data.\n• Danger zone — irreversible actions (delete org, etc.).',
+          ar: '• الاشتراك — الخطة والاستخدام.\n• إعدادات الذكاء الاصطناعي — مفاتيح المزود، النماذج، حد الاستخدام.\n• تصدير البيانات — نزِّل كافة بيانات المكتب.\n• المنطقة الحرجة — إجراءات لا رجعة فيها (حذف المؤسسة...).',
+        },
+      },
+    ],
+  },
+
+  'admin.dashboard': {
+    title: { en: 'Platform overview', ar: 'نظرة عامة على المنصة' },
+    intro: {
+      en: 'Super-admin command center: tenants, users, revenue, and system health at a glance.',
+      ar: 'مركز قيادة المسؤول الأعلى: المؤسسات والمستخدمون والإيرادات وصحة النظام بنظرة واحدة.',
+    },
+    sections: [
+      {
+        heading: { en: 'Key widgets', ar: 'الودجات الرئيسية' },
+        body: {
+          en: '• Total organizations / users — platform growth.\n• Recent signups — new firms in the last 30 days.\n• Revenue — MRR and trend.\n• System health — DB, storage, edge functions.',
+          ar: '• إجمالي المؤسسات / المستخدمين — نمو المنصة.\n• التسجيلات الأخيرة — مكاتب جديدة آخر ٣٠ يوم.\n• الإيرادات — MRR والاتجاه.\n• صحة النظام — قاعدة البيانات، التخزين، الدوال.',
+        },
+      },
+    ],
+  },
+
+  'admin.organizations': {
+    title: { en: 'Organizations', ar: 'المؤسسات' },
+    intro: {
+      en: 'Every law firm tenant on the platform. Create, edit, suspend, or impersonate.',
+      ar: 'كل مكتب محاماة على المنصة. أنشئ، عدِّل، علِّق، أو ادخل بالنيابة.',
+    },
+    sections: [
+      {
+        heading: { en: 'Common tasks', ar: 'مهام شائعة' },
+        body: {
+          en: '• Click a row to open the org detail.\n• Use "Impersonate" to view the platform exactly as that org\'s admin sees it. A gold banner stays visible until you exit.\n• Suspend an org to block all logins without deleting data.',
+          ar: '• اضغط أي صف لفتح تفاصيل المؤسسة.\n• استخدم "دخول بالنيابة" لرؤية المنصة بعين مسؤول المؤسسة. يظهر شريط ذهبي حتى الخروج.\n• علِّق المؤسسة لمنع تسجيل الدخول دون حذف البيانات.',
+        },
+      },
+    ],
+    tips: [{
+      en: 'All admin actions (impersonate, edit, delete) are recorded in the Audit Log.',
+      ar: 'كل إجراءات المسؤول (دخول بالنيابة، تعديل، حذف) تُسجَّل في سجل التدقيق.',
+    }],
+  },
+
+  'admin.users': {
+    title: { en: 'All users', ar: 'جميع المستخدمين' },
+    intro: {
+      en: 'Cross-tenant view of every user on the platform.',
+      ar: 'عرض شامل لكل مستخدم على المنصة عبر المؤسسات.',
+    },
+    sections: [
+      {
+        heading: { en: 'Actions', ar: 'الإجراءات' },
+        body: {
+          en: '• Create user — provision an account directly.\n• Reset password — generate a temporary password the user must change on first login.\n• Change role — promote/demote within an org.\n• Deactivate — block login while keeping history.',
+          ar: '• إنشاء مستخدم — أنشئ حساباً مباشرة.\n• إعادة تعيين كلمة المرور — أنشئ كلمة مرور مؤقتة يجب تغييرها عند أول دخول.\n• تغيير الدور — رفع/خفض الدور داخل المؤسسة.\n• تعطيل — منع الدخول مع الإبقاء على السجل.',
+        },
+      },
+    ],
+  },
+
+  'admin.analytics': {
+    title: { en: 'Platform analytics', ar: 'تحليلات المنصة' },
+    intro: {
+      en: 'Aggregate usage metrics across all tenants.',
+      ar: 'مقاييس الاستخدام المجمَّعة عبر كل المؤسسات.',
+    },
+    sections: [{
+      heading: { en: 'What\'s tracked', ar: 'ما يتم تتبعه' },
+      body: {
+        en: 'Active users, cases created, AI calls, storage consumed, and feature adoption per tenant.',
+        ar: 'المستخدمون النشطون، القضايا المُنشأة، استدعاءات الذكاء الاصطناعي، التخزين المستهلك، وتبني الميزات لكل مؤسسة.',
+      },
+    }],
+  },
+
+  'admin.revenue': {
+    title: { en: 'Revenue', ar: 'الإيرادات' },
+    intro: {
+      en: 'Subscription revenue, MRR, churn, and per-plan breakdowns.',
+      ar: 'إيرادات الاشتراك، MRR، معدل الإلغاء، والتفاصيل لكل خطة.',
+    },
+    sections: [{
+      heading: { en: 'Reading the chart', ar: 'قراءة الرسم البياني' },
+      body: {
+        en: 'The line shows MRR over time. Hover any point for the exact figure and growth vs. previous month.',
+        ar: 'الخط يُظهر MRR عبر الوقت. مرِّر فوق أي نقطة لرؤية الرقم الدقيق والنمو مقارنة بالشهر السابق.',
+      },
+    }],
+  },
+
+  'admin.audit': {
+    title: { en: 'Audit log', ar: 'سجل التدقيق' },
+    intro: {
+      en: 'Every administrative action recorded with timestamp, actor, target, and details.',
+      ar: 'كل إجراء إداري مسجَّل مع الوقت والمنفِّذ والهدف والتفاصيل.',
+    },
+    sections: [{
+      heading: { en: 'Filtering', ar: 'التصفية' },
+      body: {
+        en: 'Filter by admin, action type (impersonate, create, delete...), or date range. Export to CSV for compliance reviews.',
+        ar: 'صفِّ حسب المسؤول، نوع الإجراء (دخول بالنيابة، إنشاء، حذف...)، أو نطاق التاريخ. صدِّر إلى CSV لمراجعات الامتثال.',
+      },
+    }],
+  },
+
+  'admin.backups': {
+    title: { en: 'Backups', ar: 'النسخ الاحتياطية' },
+    intro: {
+      en: 'Schedule and manage automated backups for the whole platform or specific tenants.',
+      ar: 'جدوِل وأدر النسخ الاحتياطية التلقائية للمنصة بأكملها أو لمؤسسات محددة.',
+    },
+    sections: [
+      {
+        heading: { en: 'Create a schedule', ar: 'إنشاء جدول' },
+        body: {
+          en: '1. Click "Schedule Backup".\n2. Choose scope (full platform / one org), frequency (daily/weekly/monthly), and retention.\n3. Set preferred time and timezone.\n4. Save — runs happen automatically.',
+          ar: '١. اضغط "جدولة نسخة".\n٢. اختر النطاق (كامل المنصة / مؤسسة واحدة)، التكرار (يومي/أسبوعي/شهري)، والاحتفاظ.\n٣. حدد الوقت المفضل والمنطقة الزمنية.\n٤. احفظ — التشغيل يحدث تلقائياً.',
+        },
+      },
+    ],
+  },
+
+  'admin.announcements': {
+    title: { en: 'System announcements', ar: 'إعلانات النظام' },
+    intro: {
+      en: 'Broadcast messages to all users or specific organizations.',
+      ar: 'بثّ رسائل لكل المستخدمين أو لمؤسسات محددة.',
+    },
+    sections: [{
+      heading: { en: 'Send an announcement', ar: 'إرسال إعلان' },
+      body: {
+        en: '1. Click "+ New Announcement".\n2. Write title and body in EN + AR.\n3. Pick audience (all / specific orgs).\n4. Set severity (info/warning/critical) and expiry.\n5. Publish — appears in users\' notification bell instantly.',
+        ar: '١. اضغط "+ إعلان جديد".\n٢. اكتب العنوان والمحتوى بالإنجليزية والعربية.\n٣. اختر الجمهور (الكل / مؤسسات محددة).\n٤. حدد الأهمية (معلومة/تحذير/حرج) وتاريخ الانتهاء.\n٥. انشر — يظهر فوراً في جرس الإشعارات.',
+      },
+    }],
+  },
+
+  'admin.system-health': {
+    title: { en: 'System health', ar: 'صحة النظام' },
+    intro: {
+      en: 'Real-time status of database, storage, edge functions, and key tables.',
+      ar: 'الحالة الفورية لقاعدة البيانات والتخزين والدوال والجداول الأساسية.',
+    },
+    sections: [{
+      heading: { en: 'Status indicators', ar: 'مؤشرات الحالة' },
+      body: {
+        en: '• Green — operational.\n• Amber — degraded performance.\n• Red — outage. Click any indicator for diagnostics.',
+        ar: '• أخضر — يعمل بشكل طبيعي.\n• كهرماني — أداء متدهور.\n• أحمر — انقطاع. اضغط أي مؤشر للتشخيص.',
+      },
+    }],
+  },
+
+  'admin.settings': {
+    title: { en: 'Platform settings', ar: 'إعدادات المنصة' },
+    intro: {
+      en: 'Global defaults applied to every tenant: signup policy, email config, AI keys, limits.',
+      ar: 'القيم الافتراضية المطبَّقة على كل المؤسسات: سياسة التسجيل، إعدادات البريد، مفاتيح الذكاء الاصطناعي، الحدود.',
+    },
+    sections: [{
+      heading: { en: 'Use with care', ar: 'استخدم بحذر' },
+      body: {
+        en: 'Changes here affect every tenant immediately. Review the audit log after any change.',
+        ar: 'التغييرات هنا تؤثر على كل المؤسسات فوراً. راجع سجل التدقيق بعد أي تغيير.',
+      },
+    }],
+  },
 };
 
 export function getHelp(key: string): HelpEntry | null {
