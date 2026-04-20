@@ -88,6 +88,7 @@ export default function FirmPerformanceReport() {
       <PageHeader
         title="Firm Performance"
         titleAr="أداء المكتب"
+        helpKey="reports.firm-performance"
         breadcrumbs={[
           { label: 'Dashboard', labelAr: 'لوحة التحكم', href: '/dashboard' },
           { label: 'Reports', labelAr: 'التقارير', href: '/reports' },

@@ -63,6 +63,7 @@ export default function ReportsPage() {
         titleAr="التقارير"
         subtitle="Analytics and insights for your firm"
         subtitleAr="التحليلات والرؤى لمكتبك"
+        helpKey="reports.hub"
         breadcrumbs={[
           { label: 'Dashboard', labelAr: 'لوحة التحكم', href: '/dashboard' },
           { label: 'Reports', labelAr: 'التقارير' },

@@ -232,6 +232,7 @@ export default function NotificationsPage() {
         title={t('notifications.title')}
         titleAr={language === 'ar' ? 'الإشعارات' : 'Notifications'}
         subtitle={unreadCount > 0 ? `${unreadCount} ${language === 'ar' ? 'إشعارات غير مقروءة' : 'unread notifications'}` : undefined}
+        helpKey="notifications"
         secondaryActions={[
           ...(unreadCount > 0 ? [{
             label: 'Mark All as Read',

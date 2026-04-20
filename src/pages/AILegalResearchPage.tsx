@@ -171,6 +171,7 @@ export default function AILegalResearchPage() {
         titleAr="بحث قانوني بالذكاء الاصطناعي"
         subtitle="Research Iraqi law, legal precedents, and regulations"
         subtitleAr="البحث في القانون العراقي والسوابق القضائية والأنظمة"
+        helpKey="ai.legal-research"
         breadcrumbs={[
           { label: 'Dashboard', labelAr: 'لوحة التحكم', href: '/dashboard' },
           { label: 'Legal Research', labelAr: 'بحث قانوني' },

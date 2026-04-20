@@ -1,4 +1,5 @@
 import RebuildingStub from '@/components/RebuildingStub';
 export default function ActivityFeedPage() {
-  return <RebuildingStub title="Activity feed" />;
+  return <RebuildingStub title="Activity feed" helpKey="activity-feed" />;
 }
+

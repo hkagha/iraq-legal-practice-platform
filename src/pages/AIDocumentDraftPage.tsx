@@ -158,6 +158,7 @@ export default function AIDocumentDraftPage() {
         titleAr="صياغة مستند بالذكاء الاصطناعي"
         subtitle="Describe what you need and AI will draft it for you"
         subtitleAr="صف ما تحتاجه وسيقوم الذكاء الاصطناعي بصياغته لك"
+        helpKey="ai.document-draft"
         breadcrumbs={[
           { label: 'Dashboard', labelAr: 'لوحة التحكم', href: '/dashboard' },
           { label: 'AI Draft', labelAr: 'صياغة ذكية' },
