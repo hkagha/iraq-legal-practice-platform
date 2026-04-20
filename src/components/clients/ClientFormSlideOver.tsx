@@ -166,7 +166,7 @@ export default function ClientFormSlideOver({ isOpen, onClose, onSaved, editClie
         company_type: c.company_type || '', company_registration_number: c.company_registration_number || '',
         industry: c.industry || '', tax_id: c.tax_id || '',
         email: c.email || '',
-        phone: c.phone ? c.phone.replace(/^\+964/, '') : '',
+        phone: c.phone || '',
         secondary_phone: c.secondary_phone || '', whatsapp_number: c.whatsapp_number || '',
         address: c.address || '', address_ar: c.address_ar || '',
         city: c.city || '', governorate: c.governorate || 'Baghdad',
