@@ -255,17 +255,27 @@ export default function DocumentUploadModal({ open, onClose, onComplete, caseId,
             </>
           )}
 
-          <div className="flex items-center justify-between border-t border-border pt-3">
-            <div>
-              <div className="text-body-sm font-medium">
-                {isAR ? 'مرئي للعميل' : 'Visible to client'}
+          {canShareWithClient ? (
+            <div className="flex items-center justify-between border-t border-border pt-3">
+              <div>
+                <div className="text-body-sm font-medium">
+                  {isAR ? 'مرئي للعميل' : 'Visible to client'}
+                </div>
+                <div className="text-[11px] text-muted-foreground">
+                  {isAR
+                    ? (caseId ? 'سيتمكن أطراف هذه القضية من رؤية المستند في البوابة' : 'سيتمكن هذا العميل من رؤية المستند في البوابة')
+                    : (caseId ? 'Parties on this case will see this in their portal' : 'This client will see this in their portal')}
+                </div>
               </div>
-              <div className="text-[11px] text-muted-foreground">
-                {isAR ? 'يسمح للعميل برؤية هذا المستند في البوابة' : 'Allow the client to see this in their portal'}
-              </div>
+              <Switch checked={visibleToClient} onCheckedChange={setVisibleToClient} disabled={uploading} />
             </div>
-            <Switch checked={visibleToClient} onCheckedChange={setVisibleToClient} disabled={uploading} />
-          </div>
+          ) : (
+            <div className="border-t border-border pt-3 text-[11px] text-muted-foreground">
+              {isAR
+                ? 'مستندات الأرشيف العام للشركة تكون داخلية دائمًا. لمشاركتها مع عميل، ارفعها من داخل قضية أو ملف عميل.'
+                : 'Firm archive documents are always internal. To share with a client, upload from within a case or client file.'}
+            </div>
+          )}
 
           {progress && (
             <div className="text-body-sm text-muted-foreground tabular-nums">
