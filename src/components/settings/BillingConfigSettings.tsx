@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Save, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { CurrencySelect } from '@/components/ui/CurrencySelect';
 
 const allDays = [
   { value: 'sunday', en: 'Sunday', ar: 'الأحد' },
@@ -92,13 +93,9 @@ export default function BillingConfigSettings() {
           />
         </FormField>
         <FormField label={t('settings.billingConfig.defaultCurrency')}>
-          <FormSelect
+          <CurrencySelect
             value={form.default_currency}
-            onValueChange={v => setForm(f => ({ ...f, default_currency: v }))}
-            options={[
-              { value: 'IQD', label: 'IQD - Iraqi Dinar' },
-              { value: 'USD', label: 'USD - US Dollar' },
-            ]}
+            onChange={v => setForm(f => ({ ...f, default_currency: v }))}
           />
         </FormField>
       </div>
