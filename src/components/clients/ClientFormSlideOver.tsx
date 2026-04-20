@@ -21,6 +21,10 @@ import {
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { PhoneInput } from '@/components/ui/PhoneInput';
+import { CitySelect } from '@/components/ui/CitySelect';
+import { CountrySelect } from '@/components/ui/CountrySelect';
+import { findGovernorate } from '@/lib/referenceData';
 
 const GOVERNORATES = [
   'Baghdad', 'Basra', 'Maysan', 'Dhi Qar', 'Wasit', 'Babil', 'Karbala', 'Najaf',
