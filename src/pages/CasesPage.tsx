@@ -157,6 +157,15 @@ export default function CasesPage() {
             className="ps-9 h-10"
           />
         </div>
+        <SavedViewsMenu
+          entityType="cases"
+          currentFilters={{ search, statusFilter }}
+          onApply={(v) => {
+            const f = v.filters as any;
+            if (typeof f.search === 'string') setSearch(f.search);
+            if (typeof f.statusFilter === 'string') setStatusFilter(f.statusFilter);
+          }}
+        />
       </div>
 
       <div className="flex items-center gap-1 overflow-x-auto pb-2 mb-4">
