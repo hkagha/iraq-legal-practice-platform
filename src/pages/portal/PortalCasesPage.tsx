@@ -68,7 +68,7 @@ export default function PortalCasesPage() {
         <EmptyState
           icon={Scale}
           title={isEN ? 'No cases yet' : 'لا توجد قضايا'}
-          description={
+          subtitle={
             isEN
               ? 'When your firm shares a case with you, it will appear here.'
               : 'عندما يشارك مكتبك قضية معك، ستظهر هنا.'
@@ -85,7 +85,7 @@ export default function PortalCasesPage() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
                     <span className="font-mono text-body-xs text-muted-foreground">{c.case_number}</span>
-                    <StatusBadge status={c.status} />
+                    <StatusBadge status={c.status} type="case" />
                   </div>
                   <h3 className="font-medium text-foreground truncate">
                     {isEN ? c.title : (c.title_ar || c.title)}

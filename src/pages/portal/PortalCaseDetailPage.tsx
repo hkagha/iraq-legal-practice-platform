@@ -67,7 +67,7 @@ export default function PortalCaseDetailPage() {
         <EmptyState
           icon={Scale}
           title={isEN ? 'Case not available' : 'القضية غير متاحة'}
-          description={
+          subtitle={
             isEN
               ? 'This case is not shared with you, or it does not exist.'
               : 'هذه القضية غير مشاركة معك أو غير موجودة.'
@@ -99,7 +99,7 @@ export default function PortalCaseDetailPage() {
           <div className="flex-1 min-w-0">
             <div className="flex items-center gap-2 mb-2 flex-wrap">
               <span className="font-mono text-body-sm text-muted-foreground">{caseRow.case_number}</span>
-              <StatusBadge status={caseRow.status} />
+              <StatusBadge status={caseRow.status} type="case" />
             </div>
             <h1 className="text-display-sm font-bold text-primary mb-1">
               {isEN ? caseRow.title : (caseRow.title_ar || caseRow.title)}
@@ -180,7 +180,7 @@ export default function PortalCaseDetailPage() {
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="font-medium text-foreground">{fmtDate(h.hearing_date)}</span>
                     {h.hearing_time && <span className="text-body-sm text-muted-foreground">{h.hearing_time}</span>}
-                    <StatusBadge status={h.status} />
+                    <StatusBadge status={h.status} type="custom" />
                   </div>
                   <div className="text-body-sm text-muted-foreground mt-1">
                     {h.hearing_type}{h.court_room ? ` • ${h.court_room}` : ''}
