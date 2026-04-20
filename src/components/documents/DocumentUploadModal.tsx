@@ -590,11 +590,19 @@ export default function DocumentUploadModal({
         </div>
 
         <DialogFooter className="px-6 py-4 border-t border-border flex-shrink-0">
-          <Button variant="outline" onClick={() => { onClose(); setFiles([]); }} disabled={isUploading}>{t('common.cancel')}</Button>
-          <Button onClick={handleUpload} disabled={!canUpload} className="bg-accent text-accent-foreground hover:bg-accent/90">
-            {isUploading ? <><Loader2 size={14} className="animate-spin me-1.5" />{language === 'ar' ? 'جاري الرفع...' : 'Uploading...'}</> :
-              `${language === 'ar' ? 'رفع' : 'Upload'} ${files.filter(f => f.status === 'pending').length} ${language === 'ar' ? 'ملفات' : 'file(s)'}`}
-          </Button>
+          {files.some(f => f.status === 'done') && !files.some(f => f.status === 'pending') ? (
+            <Button onClick={() => { onComplete(); onClose(); setFiles([]); }} className="bg-accent text-accent-foreground hover:bg-accent/90">
+              {language === 'ar' ? 'تم' : 'Done'}
+            </Button>
+          ) : (
+            <>
+              <Button variant="outline" onClick={() => { onClose(); setFiles([]); }} disabled={isUploading}>{t('common.cancel')}</Button>
+              <Button onClick={handleUpload} disabled={!canUpload} className="bg-accent text-accent-foreground hover:bg-accent/90">
+                {isUploading ? <><Loader2 size={14} className="animate-spin me-1.5" />{language === 'ar' ? 'جاري الرفع...' : 'Uploading...'}</> :
+                  `${language === 'ar' ? 'رفع' : 'Upload'} ${files.filter(f => f.status === 'pending').length} ${language === 'ar' ? 'ملفات' : 'file(s)'}`}
+              </Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
