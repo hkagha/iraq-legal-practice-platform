@@ -407,10 +407,32 @@ export default function DocumentUploadModal({
                   <div className="space-y-1">
                     <Progress value={entry.progress} className="h-1" />
                     <p className="text-body-sm text-muted-foreground">
-                      {entry.status === 'uploading' ? `${entry.progress}%` : (language === 'ar' ? '✓ اكتمل' : '✓ Complete')}
+                      {entry.status === 'uploading' ? `${entry.progress}%` : (language === 'ar' ? '✓ تم الرفع' : '✓ Uploaded')}
                     </p>
                   </div>
                 )}
+
+                {/* Live AI indexing status */}
+                {entry.status === 'done' && entry.documentId && (
+                  <div className="flex items-center gap-2 text-body-sm pt-1 border-t border-border/50">
+                    {(!entry.indexingStatus || entry.indexingStatus === 'pending') && (
+                      <><Loader2 size={12} className="animate-spin text-accent" /><span className="text-muted-foreground">{language === 'ar' ? 'في انتظار فهرسة الذكاء الاصطناعي...' : 'Waiting for AI indexing…'}</span></>
+                    )}
+                    {entry.indexingStatus === 'processing' && (
+                      <><Sparkles size={12} className="text-accent animate-pulse" /><span className="text-accent">{language === 'ar' ? 'جارِ تحليل وفهرسة المستند...' : 'AI analyzing & indexing…'}</span></>
+                    )}
+                    {entry.indexingStatus === 'done' && (
+                      <><Check size={12} className="text-success" /><span className="text-success">{language === 'ar' ? 'تمت الفهرسة بالذكاء الاصطناعي' : 'Indexed by AI — searchable now'}</span></>
+                    )}
+                    {entry.indexingStatus === 'failed' && (
+                      <><AlertCircle size={12} className="text-destructive" /><span className="text-destructive">{language === 'ar' ? 'فشلت الفهرسة — يمكنك إعادة المحاولة من التفاصيل' : 'Indexing failed — retry from details'}</span></>
+                    )}
+                    {entry.indexingStatus === 'skipped' && (
+                      <><span className="text-muted-foreground">{language === 'ar' ? 'لم تتم الفهرسة' : 'Not indexed'}</span></>
+                    )}
+                  </div>
+                )}
+
                 {entry.status === 'error' && <p className="text-body-sm text-destructive">{entry.error}</p>}
 
                 {/* Form fields (only when pending) */}
