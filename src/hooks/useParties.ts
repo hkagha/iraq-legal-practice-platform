@@ -35,7 +35,7 @@ export function useParties(opts: UsePartiesOptions = {}) {
     queryKey: ['parties', orgId, search, type, status, limit],
     enabled: !!orgId && enabled,
     queryFn: async (): Promise<UnifiedPartyRow[]> => {
-      const promises: Array<Promise<unknown>> = [];
+      const promises: Array<PromiseLike<unknown>> = [];
 
       if (type === 'all' || type === 'person') {
         let q = supabase.from('persons').select('*').eq('organization_id', orgId!).limit(limit);
@@ -46,7 +46,7 @@ export function useParties(opts: UsePartiesOptions = {}) {
             `first_name.ilike.${s},last_name.ilike.${s},first_name_ar.ilike.${s},last_name_ar.ilike.${s},email.ilike.${s},phone.ilike.${s}`,
           );
         }
-        promises.push(q.order('updated_at', { ascending: false }));
+        promises.push(q.order('updated_at', { ascending: false }).then((r) => r));
       }
       if (type === 'all' || type === 'entity') {
         let q = supabase.from('entities').select('*').eq('organization_id', orgId!).limit(limit);
@@ -55,7 +55,7 @@ export function useParties(opts: UsePartiesOptions = {}) {
           const s = `%${search}%`;
           q = q.or(`company_name.ilike.${s},company_name_ar.ilike.${s},email.ilike.${s},phone.ilike.${s}`);
         }
-        promises.push(q.order('updated_at', { ascending: false }));
+        promises.push(q.order('updated_at', { ascending: false }).then((r) => r));
       }
 
       const results = await Promise.all(promises);
