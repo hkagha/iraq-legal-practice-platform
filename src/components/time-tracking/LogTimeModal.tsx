@@ -12,15 +12,29 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
 interface Props {
-  isOpen: boolean;
-  onClose: () => void;
+  open?: boolean;
+  isOpen?: boolean;
+  onOpenChange?: (open: boolean) => void;
+  onClose?: () => void;
   onSaved?: () => void;
   defaultCaseId?: string;
+  prefillCaseId?: string;
   defaultErrandId?: string;
+  prefillErrandId?: string;
   entryId?: string;
+  editEntry?: { id: string } | null;
 }
 
-export default function LogTimeModal({ isOpen, onClose, onSaved, defaultCaseId, defaultErrandId, entryId }: Props) {
+export default function LogTimeModal(props: Props) {
+  const isOpen = props.open ?? props.isOpen ?? false;
+  const onClose = () => {
+    props.onClose?.();
+    props.onOpenChange?.(false);
+  };
+  const onSaved = props.onSaved;
+  const defaultCaseId = props.prefillCaseId ?? props.defaultCaseId;
+  const defaultErrandId = props.prefillErrandId ?? props.defaultErrandId;
+  const entryId = props.editEntry?.id ?? props.entryId;
   const { profile } = useAuth();
   const { language } = useLanguage();
   const t = (en: string, ar: string) => language === 'ar' ? ar : en;
