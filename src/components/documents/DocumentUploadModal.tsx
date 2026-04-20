@@ -292,7 +292,7 @@ export default function DocumentUploadModal({
           } as any);
         }
 
-        updateFile(entry.id, { progress: 100, status: 'done' });
+        updateFile(entry.id, { progress: 100, status: 'done', documentId: newDoc?.id, indexingStatus: 'pending' });
         successCount++;
         // Fire-and-forget AI indexing in the background
         if (newDoc?.id) triggerDocumentIndexing(newDoc.id);
