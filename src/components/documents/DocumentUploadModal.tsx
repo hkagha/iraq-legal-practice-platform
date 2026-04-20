@@ -3,6 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { streamAI } from '@/lib/aiService';
+import { triggerDocumentIndexing } from '@/lib/documentIndexing';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { FormInput } from '@/components/ui/FormInput';
@@ -291,6 +292,8 @@ export default function DocumentUploadModal({
 
         updateFile(entry.id, { progress: 100, status: 'done' });
         successCount++;
+        // Fire-and-forget AI indexing in the background
+        if (newDoc?.id) triggerDocumentIndexing(newDoc.id);
       } catch (err: any) {
         console.error('Upload error:', err);
         updateFile(entry.id, {

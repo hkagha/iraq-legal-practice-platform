@@ -19,6 +19,7 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import AIContractReview from '@/components/ai/AIContractReview';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import DocumentCommentsTab from '@/components/documents/DocumentCommentsTab';
+import DocumentAIIndexPanel from '@/components/documents/DocumentAIIndexPanel';
 
 const FILE_TYPE_ICONS: Record<string, { icon: typeof FileText; color: string }> = {
   pdf: { icon: FileType, color: '#EF4444' },
@@ -204,6 +205,16 @@ export default function DocumentDetailSlideOver({ documentId, isOpen, onClose, o
               </div>
             )}
           </div>
+
+          {/* AI extracted metadata */}
+          <DocumentAIIndexPanel
+            document={doc}
+            onChanged={async () => {
+              const { data } = await supabase.from('documents').select('*').eq('id', doc.id).maybeSingle();
+              if (data) setDoc((prev: any) => ({ ...prev, ...data }));
+              onRefresh();
+            }}
+          />
 
           {/* Metadata */}
           <div className="grid grid-cols-2 gap-4">
