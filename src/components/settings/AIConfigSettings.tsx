@@ -237,13 +237,10 @@ export default function AIConfigSettings() {
             <FormField label={language === 'ar' ? 'المزوّد' : 'Provider'}>
               <FormSelect
                 value={provider}
-                onChange={e => { setProvider(e.target.value as Provider); setUseCustomModel(false); setModel(''); }}
+                onValueChange={(v) => { setProvider(v as Provider); setUseCustomModel(false); setModel(''); }}
                 disabled={!isAdmin}
-              >
-                {PROVIDER_OPTIONS.map(o => (
-                  <option key={o.value} value={o.value}>{language === 'ar' ? o.labelAr : o.label}</option>
-                ))}
-              </FormSelect>
+                options={PROVIDER_OPTIONS.map(o => ({ value: o.value, label: language === 'ar' ? o.labelAr : o.label }))}
+              />
             </FormField>
 
             {isBYOK && (
