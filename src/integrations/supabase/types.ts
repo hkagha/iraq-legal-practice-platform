@@ -2554,7 +2554,9 @@ export type Database = {
           address: string | null
           address_ar: string | null
           ai_api_key_encrypted: string | null
+          ai_base_url: string | null
           ai_enabled: boolean | null
+          ai_fallback_to_platform: boolean
           ai_last_reset_date: string | null
           ai_model: string | null
           ai_monthly_token_limit: number | null
@@ -2614,7 +2616,9 @@ export type Database = {
           address?: string | null
           address_ar?: string | null
           ai_api_key_encrypted?: string | null
+          ai_base_url?: string | null
           ai_enabled?: boolean | null
+          ai_fallback_to_platform?: boolean
           ai_last_reset_date?: string | null
           ai_model?: string | null
           ai_monthly_token_limit?: number | null
@@ -2674,7 +2678,9 @@ export type Database = {
           address?: string | null
           address_ar?: string | null
           ai_api_key_encrypted?: string | null
+          ai_base_url?: string | null
           ai_enabled?: boolean | null
+          ai_fallback_to_platform?: boolean
           ai_last_reset_date?: string | null
           ai_model?: string | null
           ai_monthly_token_limit?: number | null
@@ -3766,6 +3772,7 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      _ai_key_passphrase: { Args: never; Returns: string }
       client_can_access_document_object: {
         Args: { object_name: string }
         Returns: boolean
@@ -3794,8 +3801,10 @@ export type Database = {
         }
         Returns: string
       }
+      get_org_ai_key: { Args: { _org_id: string }; Returns: string }
       get_user_org_id: { Args: { _user_id: string }; Returns: string }
       get_user_role: { Args: { _user_id: string }; Returns: string }
+      org_has_ai_key: { Args: { _org_id: string }; Returns: boolean }
       portal_user_can_access_case: {
         Args: { _case_id: string }
         Returns: boolean
@@ -3807,6 +3816,10 @@ export type Database = {
       portal_user_can_access_person: {
         Args: { _person_id: string }
         Returns: boolean
+      }
+      set_org_ai_key: {
+        Args: { _org_id: string; _plaintext: string }
+        Returns: undefined
       }
       user_can_access_case: {
         Args: { _case_id: string; _user_id: string }
