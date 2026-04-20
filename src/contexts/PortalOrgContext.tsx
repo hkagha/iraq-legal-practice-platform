@@ -1,12 +1,21 @@
 import { createContext, useContext, ReactNode } from 'react';
 
+interface OrgRef {
+  id: string;
+  name: string;
+  organization_id?: string;
+  organization_name?: string;
+  organization_name_ar?: string | null;
+  organization_logo_url?: string | null;
+}
+
 interface PortalOrgContextValue {
   currentOrgId: string | null;
-  availableOrgs: Array<{ id: string; name: string }>;
+  availableOrgs: OrgRef[];
   setCurrentOrgId: (id: string | null) => void;
   loading: boolean;
-  linkedOrgs: Array<{ id: string; name: string }>;
-  activeOrg: { id: string; name: string } | null;
+  linkedOrgs: OrgRef[];
+  activeOrg: OrgRef | null;
   hasMultipleOrgs: boolean;
   switchOrg: (id: string) => void;
   isSwitching: boolean;
