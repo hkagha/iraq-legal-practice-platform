@@ -11,6 +11,7 @@ import { FormSelect } from '@/components/ui/FormSelect';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 
 const ROLES = ['firm_admin', 'lawyer', 'paralegal', 'secretary', 'accountant', 'client'];
 
@@ -81,7 +82,7 @@ export default function CreateUserModal({ open, onClose, onSuccess, preselectedO
             </FormField>
           </div>
           <FormField label={isEN ? 'Phone' : 'الهاتف'}>
-            <FormInput value={phone} onChange={e => setPhone(e.target.value)} />
+            <PhoneInput value={phone} onChange={setPhone} />
           </FormField>
           <FormField label={isEN ? 'Organization' : 'المؤسسة'} required>
             <FormSelect value={orgId} onValueChange={setOrgId} options={orgs} placeholder={isEN ? 'Select organization...' : 'اختر المؤسسة...'} />

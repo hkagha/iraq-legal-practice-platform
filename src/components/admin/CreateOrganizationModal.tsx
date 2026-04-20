@@ -10,6 +10,7 @@ import { FormSelect } from '@/components/ui/FormSelect';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 
 interface Props { open: boolean; onClose: () => void; onSuccess: () => void; }
 
@@ -106,7 +107,7 @@ export default function CreateOrganizationModal({ open, onClose, onSuccess }: Pr
             </FormField>
           </div>
           <FormField label={isEN ? 'Phone' : 'الهاتف'}>
-            <FormInput value={phone} onChange={e => setPhone(e.target.value)} />
+            <PhoneInput value={phone} onChange={setPhone} />
           </FormField>
           <FormField label={isEN ? 'Temporary Password' : 'كلمة المرور المؤقتة'} required>
             <FormInput type="password" value={tempPassword} onChange={e => setTempPassword(e.target.value)} />
