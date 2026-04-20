@@ -80,6 +80,7 @@ export default function Employee360Report() {
       <PageHeader
         title="Employee 360°"
         titleAr="تقييم الموظف ٣٦٠°"
+        helpKey="reports.employee-360"
         breadcrumbs={[
           { label: 'Dashboard', labelAr: 'لوحة التحكم', href: '/dashboard' },
           { label: 'Reports', labelAr: 'التقارير', href: '/reports' },

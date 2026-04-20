@@ -70,6 +70,7 @@ export default function AITranslatePage() {
         titleAr="ترجمة بالذكاء الاصطناعي"
         subtitle="Translate legal texts between Arabic and English"
         subtitleAr="ترجمة النصوص القانونية بين العربية والإنجليزية"
+        helpKey="ai.translate"
         breadcrumbs={[
           { label: 'Dashboard', labelAr: 'لوحة التحكم', href: '/dashboard' },
           { label: 'Translate', labelAr: 'ترجمة' },

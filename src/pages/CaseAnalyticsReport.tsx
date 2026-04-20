@@ -153,6 +153,7 @@ export default function CaseAnalyticsReport() {
     <div className="print:p-0">
       <PageHeader
         title="Case Analytics" titleAr="تحليلات القضايا"
+        helpKey="reports.case-analytics"
         breadcrumbs={[
           { label: 'Dashboard', labelAr: 'لوحة التحكم', href: '/dashboard' },
           { label: 'Reports', labelAr: 'التقارير', href: '/reports' },

@@ -140,6 +140,7 @@ export default function TimeUtilizationReport() {
     <div className="print:p-0">
       <PageHeader
         title="Time Utilization" titleAr="استخدام الوقت"
+        helpKey="reports.time-utilization"
         breadcrumbs={[
           { label: 'Dashboard', labelAr: 'لوحة التحكم', href: '/dashboard' },
           { label: 'Reports', labelAr: 'التقارير', href: '/reports' },
