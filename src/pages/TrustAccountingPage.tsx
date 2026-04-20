@@ -16,8 +16,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { PageHeader } from '@/components/ui/PageHeader';
-import { SEO } from '@/components/SEO';
+import SEO from '@/components/SEO';
 import { toast } from 'sonner';
 import { Plus, Wallet } from 'lucide-react';
 
@@ -127,15 +126,15 @@ export default function TrustAccountingPage() {
   return (
     <div className="p-6 space-y-6">
       <SEO title="Trust Accounting" description="Client retainer trust ledger" />
-      <PageHeader
-        title="Trust Accounting"
-        description="Manage client retainer balances and ledger entries"
-        action={
-          <Button onClick={() => setOpenAcct(true)}>
-            <Plus className="h-4 w-4 mr-2" /> New Trust Account
-          </Button>
-        }
-      />
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold">Trust Accounting</h1>
+          <p className="text-sm text-muted-foreground mt-1">Manage client retainer balances and ledger entries</p>
+        </div>
+        <Button onClick={() => setOpenAcct(true)}>
+          <Plus className="h-4 w-4 mr-2" /> New Trust Account
+        </Button>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
         <Card>
