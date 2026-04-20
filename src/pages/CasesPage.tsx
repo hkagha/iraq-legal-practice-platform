@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { Briefcase, Search } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Briefcase, Search, Archive, UserPlus } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,6 +14,13 @@ import { resolveEntityName, resolvePersonName } from '@/lib/parties';
 import { PartyChip } from '@/components/parties/PartyChip';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
+import SEO from '@/components/SEO';
+import BulkActionBar from '@/components/BulkActionBar';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
+import { toast } from '@/hooks/use-toast';
 
 const STATUSES = ['all', 'intake', 'active', 'pending_hearing', 'pending_judgment', 'on_hold', 'won', 'lost', 'settled', 'closed'] as const;
 type StatusFilter = typeof STATUSES[number];
@@ -42,9 +49,20 @@ export default function CasesPage() {
   const { language } = useLanguage();
   const { profile } = useAuth();
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const lang = language as 'en' | 'ar';
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
+
+  const toggleOne = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: ['cases', profile?.organization_id, search, statusFilter],
