@@ -21,6 +21,7 @@ import {
   Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
 } from '@/components/ui/select';
 import { toast } from '@/hooks/use-toast';
+import SavedViewsMenu from '@/components/SavedViewsMenu';
 
 const STATUSES = ['all', 'intake', 'active', 'pending_hearing', 'pending_judgment', 'on_hold', 'won', 'lost', 'settled', 'closed'] as const;
 type StatusFilter = typeof STATUSES[number];
