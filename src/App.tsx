@@ -71,6 +71,7 @@ const SettingsPage = React.lazy(() => import('@/pages/SettingsPage'));
 const AIDocumentDraftPage = React.lazy(() => import('@/pages/AIDocumentDraftPage'));
 const AILegalResearchPage = React.lazy(() => import('@/pages/AILegalResearchPage'));
 const AITranslatePage = React.lazy(() => import('@/pages/AITranslatePage'));
+const ConflictCheckerPage = React.lazy(() => import('@/pages/ConflictCheckerPage'));
 
 // Portal pages
 const PortalDashboardPage = React.lazy(() => import('@/pages/portal/PortalDashboardPage'));
@@ -162,6 +163,7 @@ const App = () => (
                   <Route path="/ai/draft" element={<AIDocumentDraftPage />} />
                   <Route path="/ai/research" element={<AILegalResearchPage />} />
                   <Route path="/ai/translate" element={<AITranslatePage />} />
+                  <Route path="/conflict-checker" element={<ConflictCheckerPage />} />
                   <Route path="/notifications" element={<NotificationsPage />} />
                   <Route path="/activity" element={<ActivityFeedPage />} />
                   <Route path="/profile" element={<ProfilePage />} />

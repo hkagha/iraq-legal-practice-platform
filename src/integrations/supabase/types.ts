@@ -1082,6 +1082,63 @@ export type Database = {
           },
         ]
       }
+      conflict_checks: {
+        Row: {
+          case_id: string | null
+          checked_by: string
+          created_at: string
+          id: string
+          match_count: number
+          notes: string | null
+          organization_id: string
+          query_email: string | null
+          query_name: string
+          query_name_ar: string | null
+          query_phone: string | null
+          query_tax_id: string | null
+          query_type: string
+          results: Json
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          case_id?: string | null
+          checked_by: string
+          created_at?: string
+          id?: string
+          match_count?: number
+          notes?: string | null
+          organization_id: string
+          query_email?: string | null
+          query_name: string
+          query_name_ar?: string | null
+          query_phone?: string | null
+          query_tax_id?: string | null
+          query_type?: string
+          results?: Json
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          case_id?: string | null
+          checked_by?: string
+          created_at?: string
+          id?: string
+          match_count?: number
+          notes?: string | null
+          organization_id?: string
+          query_email?: string | null
+          query_name?: string
+          query_name_ar?: string | null
+          query_phone?: string | null
+          query_tax_id?: string | null
+          query_type?: string
+          results?: Json
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       document_activities: {
         Row: {
           activity_type: string
@@ -1139,6 +1196,86 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      document_bundle_items: {
+        Row: {
+          added_at: string
+          bundle_id: string
+          document_id: string
+          id: string
+          organization_id: string
+          sort_order: number
+        }
+        Insert: {
+          added_at?: string
+          bundle_id: string
+          document_id: string
+          id?: string
+          organization_id: string
+          sort_order?: number
+        }
+        Update: {
+          added_at?: string
+          bundle_id?: string
+          document_id?: string
+          id?: string
+          organization_id?: string
+          sort_order?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "document_bundle_items_bundle_id_fkey"
+            columns: ["bundle_id"]
+            isOneToOne: false
+            referencedRelation: "document_bundles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      document_bundles: {
+        Row: {
+          case_id: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          errand_id: string | null
+          id: string
+          is_visible_to_client: boolean
+          name: string
+          name_ar: string | null
+          organization_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          case_id?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          errand_id?: string | null
+          id?: string
+          is_visible_to_client?: boolean
+          name: string
+          name_ar?: string | null
+          organization_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          case_id?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          errand_id?: string | null
+          id?: string
+          is_visible_to_client?: boolean
+          name?: string
+          name_ar?: string | null
+          organization_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       document_comments: {
         Row: {
@@ -3319,6 +3456,51 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      saved_views: {
+        Row: {
+          columns: Json
+          created_at: string
+          entity_type: string
+          filters: Json
+          id: string
+          is_default: boolean
+          is_shared: boolean
+          name: string
+          organization_id: string
+          sort: Json
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          columns?: Json
+          created_at?: string
+          entity_type: string
+          filters?: Json
+          id?: string
+          is_default?: boolean
+          is_shared?: boolean
+          name: string
+          organization_id: string
+          sort?: Json
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          columns?: Json
+          created_at?: string
+          entity_type?: string
+          filters?: Json
+          id?: string
+          is_default?: boolean
+          is_shared?: boolean
+          name?: string
+          organization_id?: string
+          sort?: Json
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
       }
       system_backups: {
         Row: {
