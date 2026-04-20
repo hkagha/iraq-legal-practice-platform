@@ -4142,6 +4142,20 @@ export type Database = {
         Returns: string
       }
       get_org_ai_key: { Args: { _org_id: string }; Returns: string }
+      get_organization_safe: {
+        Args: { org_id: string }
+        Returns: {
+          created_at: string
+          id: string
+          logo_url: string
+          name: string
+          name_ar: string
+          slug: string
+          subscription_status: string
+          subscription_tier: string
+          updated_at: string
+        }[]
+      }
       get_user_org_id: { Args: { _user_id: string }; Returns: string }
       get_user_role: { Args: { _user_id: string }; Returns: string }
       has_role: {
