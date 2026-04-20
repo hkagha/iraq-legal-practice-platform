@@ -42,6 +42,7 @@ const CalendarPage = React.lazy(() => import('@/pages/CalendarPage'));
 const TasksPage = React.lazy(() => import('@/pages/TasksPage'));
 const DocumentsPage = React.lazy(() => import('@/pages/DocumentsPage'));
 const DocumentArchivePage = React.lazy(() => import('@/pages/DocumentArchivePage'));
+const DocumentsArchivedPage = React.lazy(() => import('@/pages/DocumentsArchivedPage'));
 const TimeTrackingPage = React.lazy(() => import('@/pages/TimeTrackingPage'));
 const BillingPage = React.lazy(() => import('@/pages/BillingPage'));
 const InvoiceFormPage = React.lazy(() => import('@/pages/InvoiceFormPage'));
@@ -129,8 +130,9 @@ const App = () => (
                   <Route path="/clients/:id" element={<ClientDetailPage />} />
                   <Route path="/calendar" element={<CalendarPage />} />
                   <Route path="/tasks" element={<TasksPage />} />
-                  <Route path="/documents" element={<DocumentsPage />} />
-                  <Route path="/documents/archive" element={<DocumentArchivePage />} />
+                 <Route path="/documents" element={<DocumentsPage />} />
+                 <Route path="/documents/archive" element={<DocumentArchivePage />} />
+                 <Route path="/documents/archived" element={<DocumentsArchivedPage />} />
                   <Route path="/time-tracking" element={<TimeTrackingPage />} />
                   <Route path="/billing" element={<BillingPage />} />
                   <Route path="/billing/new" element={<InvoiceFormPage />} />

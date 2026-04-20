@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import {
   LayoutDashboard, Scale, FileCheck, Users, Calendar, CheckSquare,
   FileText, Clock, Receipt, BarChart3, MessageSquare, Sparkles,
-  UserCog, Settings, ChevronLeft, ChevronRight, Activity, Bell
+  UserCog, Settings, ChevronLeft, ChevronRight, Activity, Bell, Archive
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -19,6 +19,7 @@ const mainNavItems = [
   { key: 'errands', path: '/errands', icon: FileCheck },
   { key: 'documents', path: '/documents', icon: FileText },
   { key: 'archive', path: '/documents/archive', icon: Sparkles },
+  { key: 'archived', path: '/documents/archived', icon: Archive },
   { key: 'timeTracking', path: '/time-tracking', icon: Clock },
   { key: 'billing', path: '/billing', icon: Receipt },
   { key: 'tasks', path: '/tasks', icon: CheckSquare },
