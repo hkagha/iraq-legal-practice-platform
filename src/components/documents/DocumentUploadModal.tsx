@@ -49,6 +49,9 @@ export default function DocumentUploadModal({ open, onClose, onComplete, caseId,
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
   const [visibleToClient, setVisibleToClient] = useState(false);
+  // Only documents linked to a case or a specific client can be shared with that client.
+  // Firm-archive uploads (no case / no client) are always internal-only.
+  const canShareWithClient = Boolean(caseId || clientId);
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState<{ done: number; total: number } | null>(null);
 
