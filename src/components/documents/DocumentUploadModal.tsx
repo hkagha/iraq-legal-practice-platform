@@ -134,6 +134,33 @@ export default function DocumentUploadModal({
     });
   }, [open, profile?.organization_id, language]);
 
+  // Subscribe to indexing status updates for uploaded documents in this session
+  useEffect(() => {
+    const orgId = profile?.organization_id;
+    if (!open || !orgId) return;
+    const trackedIds = files.map(f => f.documentId).filter(Boolean) as string[];
+    if (trackedIds.length === 0) return;
+
+    const channel = supabase
+      .channel(`upload-modal-indexing-${orgId}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'documents', filter: `organization_id=eq.${orgId}` },
+        (payload: any) => {
+          const updated = payload.new;
+          if (!updated?.id || !trackedIds.includes(updated.id)) return;
+          setFiles(prev => prev.map(f =>
+            f.documentId === updated.id
+              ? { ...f, indexingStatus: updated.indexing_status }
+              : f
+          ));
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [open, profile?.organization_id, files.map(f => f.documentId).filter(Boolean).join(',')]);
+
   const addFiles = useCallback((newFiles: FileList | File[]) => {
     const entries: FileEntry[] = [];
     Array.from(newFiles).forEach(file => {
