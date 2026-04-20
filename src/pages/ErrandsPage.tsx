@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { ClipboardList, Search } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { ClipboardList, Search, Archive } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,6 +13,11 @@ import SkeletonLoader from '@/components/SkeletonLoader';
 import { PartyChip } from '@/components/parties/PartyChip';
 import { resolveEntityName, resolvePersonName } from '@/lib/parties';
 import { cn } from '@/lib/utils';
+import SEO from '@/components/SEO';
+import BulkActionBar from '@/components/BulkActionBar';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from '@/hooks/use-toast';
 
 const STATUSES = ['all', 'new', 'in_progress', 'awaiting_documents', 'submitted_to_government', 'under_review_by_government', 'additional_requirements', 'approved', 'rejected', 'completed', 'cancelled'] as const;
 type StatusFilter = typeof STATUSES[number];
@@ -37,9 +42,20 @@ export default function ErrandsPage() {
   const { language } = useLanguage();
   const { profile } = useAuth();
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const lang = language as 'en' | 'ar';
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
+
+  const toggleOne = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: ['errands', profile?.organization_id, search, statusFilter],
@@ -69,8 +85,47 @@ export default function ErrandsPage() {
     return c;
   }, [data]);
 
+  const bulkUpdateStatus = async (newStatus: string) => {
+    if (selected.size === 0) return;
+    setBulkBusy(true);
+    const ids = Array.from(selected);
+    const { error } = await supabase.from('errands').update({ status: newStatus }).in('id', ids);
+    setBulkBusy(false);
+    if (error) {
+      toast({ title: lang === 'ar' ? 'فشل التحديث' : 'Update failed', description: error.message, variant: 'destructive' });
+      return;
+    }
+    toast({ title: lang === 'ar' ? `تم تحديث ${ids.length} معاملة` : `${ids.length} errands updated` });
+    setSelected(new Set());
+    qc.invalidateQueries({ queryKey: ['errands'] });
+  };
+
   return (
     <div>
+      <SEO
+        title={lang === 'ar' ? 'المعاملات — Qanuni' : 'Errands — Qanuni'}
+        description={lang === 'ar' ? 'إدارة المعاملات الحكومية والإدارية.' : 'Manage government and administrative processes.'}
+      />
+      <BulkActionBar count={selected.size} onClear={() => setSelected(new Set())}>
+        <Select onValueChange={bulkUpdateStatus} disabled={bulkBusy}>
+          <SelectTrigger className="h-9 w-[200px] bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground">
+            <SelectValue placeholder={lang === 'ar' ? 'تغيير الحالة…' : 'Change status…'} />
+          </SelectTrigger>
+          <SelectContent>
+            {STATUSES.filter((s) => s !== 'all').map((s) => (
+              <SelectItem key={s} value={s}>{s.replace(/_/g, ' ')}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <button
+          onClick={() => bulkUpdateStatus('cancelled')}
+          disabled={bulkBusy}
+          className="h-9 px-3 bg-primary-foreground/10 hover:bg-primary-foreground/20 rounded text-body-sm flex items-center gap-1.5 transition-colors"
+        >
+          <Archive className="h-3.5 w-3.5" />
+          {lang === 'ar' ? 'إلغاء' : 'Cancel'}
+        </button>
+      </BulkActionBar>
       <PageHeader
         title="Errands"
         titleAr="المعاملات"
@@ -134,28 +189,36 @@ export default function ErrandsPage() {
                   : '';
               const pct = e.total_steps > 0 ? Math.round((e.completed_steps / e.total_steps) * 100) : 0;
               return (
-                <Link key={e.id} to={`/errands/${e.id}`} className="flex items-center gap-4 p-4 hover:bg-muted/40 transition-colors">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[11px] font-mono text-muted-foreground">{e.errand_number}</span>
-                      <StatusBadge status={e.status} type="errand" size="sm" />
+                <div key={e.id} className="flex items-center gap-3 p-4 hover:bg-muted/40 transition-colors">
+                  <Checkbox
+                    checked={selected.has(e.id)}
+                    onCheckedChange={() => toggleOne(e.id)}
+                    aria-label={lang === 'ar' ? 'تحديد المعاملة' : 'Select errand'}
+                    className="shrink-0"
+                  />
+                  <Link to={`/errands/${e.id}`} className="flex items-center gap-4 flex-1 min-w-0">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[11px] font-mono text-muted-foreground">{e.errand_number}</span>
+                        <StatusBadge status={e.status} type="errand" size="sm" />
+                      </div>
+                      <p className="text-body-md font-medium text-foreground truncate">{title}</p>
+                      {partyName && (
+                        <div className="mt-1.5">
+                          <PartyChip partyType={e.party_type as 'person' | 'entity'} displayName={partyName} size="sm" />
+                        </div>
+                      )}
                     </div>
-                    <p className="text-body-md font-medium text-foreground truncate">{title}</p>
-                    {partyName && (
-                      <div className="mt-1.5">
-                        <PartyChip partyType={e.party_type as 'person' | 'entity'} displayName={partyName} size="sm" />
+                    {e.total_steps > 0 && (
+                      <div className="hidden md:flex flex-col items-end shrink-0 w-32">
+                        <span className="text-body-sm text-muted-foreground">{e.completed_steps}/{e.total_steps}</span>
+                        <div className="w-full h-1.5 bg-muted rounded-full mt-1 overflow-hidden">
+                          <div className="h-full bg-accent" style={{ width: `${pct}%` }} />
+                        </div>
                       </div>
                     )}
-                  </div>
-                  {e.total_steps > 0 && (
-                    <div className="hidden md:flex flex-col items-end shrink-0 w-32">
-                      <span className="text-body-sm text-muted-foreground">{e.completed_steps}/{e.total_steps}</span>
-                      <div className="w-full h-1.5 bg-muted rounded-full mt-1 overflow-hidden">
-                        <div className="h-full bg-accent" style={{ width: `${pct}%` }} />
-                      </div>
-                    </div>
-                  )}
-                </Link>
+                  </Link>
+                </div>
               );
             })}
           </div>

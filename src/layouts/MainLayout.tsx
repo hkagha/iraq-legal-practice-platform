@@ -13,6 +13,7 @@ import TaskFormModal from '@/components/tasks/TaskFormModal';
 import EventFormModal from '@/components/calendar/EventFormModal';
 import ClientFormSlideOver from '@/components/clients/ClientFormSlideOver';
 import AIChatPanel from '@/components/ai/AIChatPanel';
+import CommandPalette from '@/components/CommandPalette';
 import { KeyRound, X } from 'lucide-react';
 
 export default function MainLayout() {
@@ -161,6 +162,9 @@ export default function MainLayout() {
 
       {/* AI Chat Panel */}
       <AIChatPanel />
+
+      {/* Global Command Palette (⌘K) */}
+      <CommandPalette />
       </div>
     </div>
   );

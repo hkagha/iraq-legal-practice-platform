@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { Briefcase, Search } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { Briefcase, Search, Archive, UserPlus } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,6 +14,13 @@ import { resolveEntityName, resolvePersonName } from '@/lib/parties';
 import { PartyChip } from '@/components/parties/PartyChip';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
+import SEO from '@/components/SEO';
+import BulkActionBar from '@/components/BulkActionBar';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
+import { toast } from '@/hooks/use-toast';
 
 const STATUSES = ['all', 'intake', 'active', 'pending_hearing', 'pending_judgment', 'on_hold', 'won', 'lost', 'settled', 'closed'] as const;
 type StatusFilter = typeof STATUSES[number];
@@ -42,9 +49,20 @@ export default function CasesPage() {
   const { language } = useLanguage();
   const { profile } = useAuth();
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const lang = language as 'en' | 'ar';
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
+
+  const toggleOne = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: ['cases', profile?.organization_id, search, statusFilter],
@@ -76,8 +94,47 @@ export default function CasesPage() {
     return c;
   }, [data]);
 
+  const bulkUpdateStatus = async (newStatus: string) => {
+    if (selected.size === 0) return;
+    setBulkBusy(true);
+    const ids = Array.from(selected);
+    const { error } = await supabase.from('cases').update({ status: newStatus }).in('id', ids);
+    setBulkBusy(false);
+    if (error) {
+      toast({ title: lang === 'ar' ? 'فشل التحديث' : 'Update failed', description: error.message, variant: 'destructive' });
+      return;
+    }
+    toast({ title: lang === 'ar' ? `تم تحديث ${ids.length} قضية` : `${ids.length} cases updated` });
+    setSelected(new Set());
+    qc.invalidateQueries({ queryKey: ['cases'] });
+  };
+
   return (
     <div>
+      <SEO
+        title={lang === 'ar' ? 'القضايا — Qanuni' : 'Cases — Qanuni'}
+        description={lang === 'ar' ? 'إدارة جميع القضايا التي يتولاها مكتبك.' : 'Manage all matters your firm is handling.'}
+      />
+      <BulkActionBar count={selected.size} onClear={() => setSelected(new Set())}>
+        <Select onValueChange={bulkUpdateStatus} disabled={bulkBusy}>
+          <SelectTrigger className="h-9 w-[180px] bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground">
+            <SelectValue placeholder={lang === 'ar' ? 'تغيير الحالة…' : 'Change status…'} />
+          </SelectTrigger>
+          <SelectContent>
+            {STATUSES.filter((s) => s !== 'all').map((s) => (
+              <SelectItem key={s} value={s}>{lang === 'ar' ? statusLabelAr(s) : statusLabelEn(s)}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <button
+          onClick={() => bulkUpdateStatus('closed')}
+          disabled={bulkBusy}
+          className="h-9 px-3 bg-primary-foreground/10 hover:bg-primary-foreground/20 rounded text-body-sm flex items-center gap-1.5 transition-colors"
+        >
+          <Archive className="h-3.5 w-3.5" />
+          {lang === 'ar' ? 'إغلاق' : 'Close'}
+        </button>
+      </BulkActionBar>
       <PageHeader
         title="Cases"
         titleAr="القضايا"
@@ -146,21 +203,29 @@ export default function CasesPage() {
                   : resolveEntityName(primary.entity as any, lang)
                 : '';
               return (
-                <Link key={c.id} to={`/cases/${c.id}`} className="flex items-center gap-4 p-4 hover:bg-muted/40 transition-colors">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[11px] font-mono text-muted-foreground">{c.case_number}</span>
-                      <StatusBadge status={c.status} type="case" size="sm" />
-                      <StatusBadge status={c.priority} type="priority" size="sm" />
-                    </div>
-                    <p className="text-body-md font-medium text-foreground truncate">{title}</p>
-                    {primaryName && (
-                      <div className="mt-1.5">
-                        <PartyChip partyType={primary!.party_type as 'person' | 'entity'} displayName={primaryName} size="sm" />
+                <div key={c.id} className="flex items-center gap-3 p-4 hover:bg-muted/40 transition-colors">
+                  <Checkbox
+                    checked={selected.has(c.id)}
+                    onCheckedChange={() => toggleOne(c.id)}
+                    aria-label={lang === 'ar' ? 'تحديد القضية' : 'Select case'}
+                    className="shrink-0"
+                  />
+                  <Link to={`/cases/${c.id}`} className="flex items-center gap-4 flex-1 min-w-0">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[11px] font-mono text-muted-foreground">{c.case_number}</span>
+                        <StatusBadge status={c.status} type="case" size="sm" />
+                        <StatusBadge status={c.priority} type="priority" size="sm" />
                       </div>
-                    )}
-                  </div>
-                </Link>
+                      <p className="text-body-md font-medium text-foreground truncate">{title}</p>
+                      {primaryName && (
+                        <div className="mt-1.5">
+                          <PartyChip partyType={primary!.party_type as 'person' | 'entity'} displayName={primaryName} size="sm" />
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                </div>
               );
             })}
           </div>
