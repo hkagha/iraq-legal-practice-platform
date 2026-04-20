@@ -203,21 +203,29 @@ export default function CasesPage() {
                   : resolveEntityName(primary.entity as any, lang)
                 : '';
               return (
-                <Link key={c.id} to={`/cases/${c.id}`} className="flex items-center gap-4 p-4 hover:bg-muted/40 transition-colors">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="text-[11px] font-mono text-muted-foreground">{c.case_number}</span>
-                      <StatusBadge status={c.status} type="case" size="sm" />
-                      <StatusBadge status={c.priority} type="priority" size="sm" />
-                    </div>
-                    <p className="text-body-md font-medium text-foreground truncate">{title}</p>
-                    {primaryName && (
-                      <div className="mt-1.5">
-                        <PartyChip partyType={primary!.party_type as 'person' | 'entity'} displayName={primaryName} size="sm" />
+                <div key={c.id} className="flex items-center gap-3 p-4 hover:bg-muted/40 transition-colors">
+                  <Checkbox
+                    checked={selected.has(c.id)}
+                    onCheckedChange={() => toggleOne(c.id)}
+                    aria-label={lang === 'ar' ? 'تحديد القضية' : 'Select case'}
+                    className="shrink-0"
+                  />
+                  <Link to={`/cases/${c.id}`} className="flex items-center gap-4 flex-1 min-w-0">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-[11px] font-mono text-muted-foreground">{c.case_number}</span>
+                        <StatusBadge status={c.status} type="case" size="sm" />
+                        <StatusBadge status={c.priority} type="priority" size="sm" />
                       </div>
-                    )}
-                  </div>
-                </Link>
+                      <p className="text-body-md font-medium text-foreground truncate">{title}</p>
+                      {primaryName && (
+                        <div className="mt-1.5">
+                          <PartyChip partyType={primary!.party_type as 'person' | 'entity'} displayName={primaryName} size="sm" />
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                </div>
               );
             })}
           </div>
