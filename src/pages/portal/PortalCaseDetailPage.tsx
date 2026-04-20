@@ -66,12 +66,10 @@ export default function PortalCaseDetailPage() {
       <div className="max-w-[1100px] mx-auto p-4 md:p-6">
         <EmptyState
           icon={Scale}
-          title={isEN ? 'Case not available' : 'القضية غير متاحة'}
-          subtitle={
-            isEN
-              ? 'This case is not shared with you, or it does not exist.'
-              : 'هذه القضية غير مشاركة معك أو غير موجودة.'
-          }
+          title="Case not available"
+          titleAr="القضية غير متاحة"
+          subtitle="This case is not shared with you, or it does not exist."
+          subtitleAr="هذه القضية غير مشاركة معك أو غير موجودة."
         />
       </div>
     );
