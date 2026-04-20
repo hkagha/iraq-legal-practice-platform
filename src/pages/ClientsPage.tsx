@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { PartyChip } from '@/components/parties/PartyChip';
 import ClientFormSlideOver from '@/components/clients/ClientFormSlideOver';
-import { SkeletonLoader } from '@/components/SkeletonLoader';
+import SkeletonLoader from '@/components/SkeletonLoader';
 import { cn } from '@/lib/utils';
 
 type TypeFilter = 'all' | 'person' | 'entity';
