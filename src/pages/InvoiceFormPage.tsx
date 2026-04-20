@@ -255,7 +255,8 @@ export default function InvoiceFormPage() {
             </div>
             <div>
               <Label>{t('billing.invoice.currency')}</Label>
-              <CurrencySelect value={currency} onValueChange={setCurrency} />
+              <CurrencySelect value={currency} onChange={(v) => setCurrency(v || 'IQD')} />}
+              <CurrencySelect value={currency} onChange={(v) => setCurrency(v || 'IQD')} />
             </div>
           </Card>
 
