@@ -98,11 +98,10 @@ export default function ConflictCheckerPage() {
         }
       />
       <PageHeader
-        title={t('Conflict Checker', 'فاحص تعارض المصالح')}
-        subtitle={t(
-          'Screen new clients and matters before intake.',
-          'فحص العملاء والقضايا الجديدة قبل القبول.'
-        )}
+        title="Conflict Checker"
+        titleAr="فاحص تعارض المصالح"
+        subtitle="Screen new clients and matters before intake."
+        subtitleAr="فحص العملاء والقضايا الجديدة قبل القبول."
       />
 
       <Card className="mb-6">
