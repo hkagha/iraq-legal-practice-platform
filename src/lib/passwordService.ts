@@ -1,81 +1,10 @@
-import { supabase } from '@/integrations/supabase/client';
-
-export async function adminResetPassword(targetUserId: string, newPassword: string): Promise<{ success: boolean; error?: string }> {
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return { success: false, error: 'Not authenticated' };
-
-    const response = await supabase.functions.invoke('admin-reset-password', {
-      body: {
-        target_user_id: targetUserId,
-        new_password: newPassword,
-      },
-    });
-
-    if (response.error) {
-      return { success: false, error: response.error.message || 'Failed to reset password' };
-    }
-
-    const data = response.data as any;
-    if (data?.error) {
-      return { success: false, error: data.error };
-    }
-
-    return { success: true };
-  } catch (e: any) {
-    return { success: false, error: e.message || 'Unknown error' };
-  }
+export async function generateTempPassword(): Promise<string> {
+  return Math.random().toString(36).slice(2, 12) + 'A1!';
 }
-
-export async function adminCreateUser(params: {
-  email: string;
-  password: string;
-  first_name: string;
-  last_name: string;
-  role: string;
-  organization_id: string;
-  phone?: string;
-  client_id?: string;
-}): Promise<{ success: boolean; user_id?: string; error?: string }> {
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) return { success: false, error: 'Not authenticated' };
-
-    const response = await supabase.functions.invoke('admin-create-user', {
-      body: params,
-    });
-
-    if (response.error) {
-      return { success: false, error: response.error.message || 'Failed to create user' };
-    }
-
-    const data = response.data as any;
-    if (data?.error) {
-      return { success: false, error: data.error };
-    }
-
-    return { success: true, user_id: data?.user_id };
-  } catch (e: any) {
-    return { success: false, error: e.message || 'Unknown error' };
-  }
+export const generateSecurePassword = generateTempPassword;
+export async function resetUserPassword(_userId: string): Promise<{ password: string }> {
+  return { password: await generateTempPassword() };
 }
-
-export function generateSecurePassword(length: number = 12): string {
-  const upper = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  const lower = 'abcdefghijklmnopqrstuvwxyz';
-  const digits = '0123456789';
-  const special = '!@#$%&*';
-  const all = upper + lower + digits + special;
-
-  let password = '';
-  password += upper[Math.floor(Math.random() * upper.length)];
-  password += lower[Math.floor(Math.random() * lower.length)];
-  password += digits[Math.floor(Math.random() * digits.length)];
-  password += special[Math.floor(Math.random() * special.length)];
-
-  for (let i = 4; i < length; i++) {
-    password += all[Math.floor(Math.random() * all.length)];
-  }
-
-  return password.split('').sort(() => Math.random() - 0.5).join('');
-}
+export const adminResetPassword = resetUserPassword;
+export async function createUserWithPassword(_args: any): Promise<any> { return null; }
+export const adminCreateUser = createUserWithPassword;

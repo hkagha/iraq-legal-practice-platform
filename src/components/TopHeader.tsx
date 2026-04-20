@@ -49,7 +49,7 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
     setSearching(true);
     const pattern = `%${q}%`;
 
-    const [casesRes, clientsRes, errandsRes, docsRes, tasksRes, calEventsRes] = await Promise.all([
+    const [casesRes, errandsRes, docsRes, tasksRes, calEventsRes] = await Promise.all([
       supabase
         .from('cases')
         .select('id, title, title_ar, case_number, status')
@@ -57,16 +57,10 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
         .or(`title.ilike.${pattern},case_number.ilike.${pattern},title_ar.ilike.${pattern}`)
         .limit(5),
       supabase
-        .from('clients')
-        .select('id, first_name, last_name, company_name, client_type, email')
-        .eq('organization_id', profile.organization_id!)
-        .or(`first_name.ilike.${pattern},last_name.ilike.${pattern},company_name.ilike.${pattern},email.ilike.${pattern}`)
-        .limit(5),
-      supabase
         .from('errands')
-        .select('id, title, title_ar, errand_number, status, reference_number')
+        .select('id, title, title_ar, errand_number, status')
         .eq('organization_id', profile.organization_id!)
-        .or(`title.ilike.${pattern},errand_number.ilike.${pattern},title_ar.ilike.${pattern},reference_number.ilike.${pattern}`)
+        .or(`title.ilike.${pattern},errand_number.ilike.${pattern},title_ar.ilike.${pattern}`)
         .limit(5),
       supabase
         .from('documents')
@@ -93,9 +87,7 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
     const caseResults: SearchResult[] = (casesRes.data || []).map(c => ({
       id: c.id, type: 'case', title: language === 'ar' && c.title_ar ? c.title_ar : c.title, subtitle: c.case_number, status: c.status,
     }));
-    const clientResults: SearchResult[] = (clientsRes.data || []).map(c => ({
-      id: c.id, type: 'client', title: c.client_type === 'company' ? (c.company_name || '') : `${c.first_name || ''} ${c.last_name || ''}`.trim(), subtitle: c.email || c.client_type,
-    }));
+    const clientResults: SearchResult[] = [];
     const errandResults: SearchResult[] = (errandsRes.data || []).map(e => ({
       id: e.id, type: 'errand', title: language === 'ar' && e.title_ar ? e.title_ar : e.title, subtitle: e.errand_number, status: e.status,
     }));
