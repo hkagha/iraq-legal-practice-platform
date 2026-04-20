@@ -3926,6 +3926,110 @@ export type Database = {
           },
         ]
       }
+      trust_accounts: {
+        Row: {
+          balance: number
+          created_at: string
+          created_by: string | null
+          currency: string
+          entity_id: string | null
+          id: string
+          name: string
+          notes: string | null
+          organization_id: string
+          party_type: string
+          person_id: string | null
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          balance?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          entity_id?: string | null
+          id?: string
+          name: string
+          notes?: string | null
+          organization_id: string
+          party_type: string
+          person_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          balance?: number
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          entity_id?: string | null
+          id?: string
+          name?: string
+          notes?: string | null
+          organization_id?: string
+          party_type?: string
+          person_id?: string | null
+          status?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      trust_transactions: {
+        Row: {
+          amount: number
+          case_id: string | null
+          created_at: string
+          created_by: string | null
+          currency: string
+          id: string
+          invoice_id: string | null
+          notes: string | null
+          organization_id: string
+          reference: string | null
+          transaction_date: string
+          transaction_type: string
+          trust_account_id: string
+        }
+        Insert: {
+          amount: number
+          case_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          invoice_id?: string | null
+          notes?: string | null
+          organization_id: string
+          reference?: string | null
+          transaction_date?: string
+          transaction_type: string
+          trust_account_id: string
+        }
+        Update: {
+          amount?: number
+          case_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          currency?: string
+          id?: string
+          invoice_id?: string | null
+          notes?: string | null
+          organization_id?: string
+          reference?: string | null
+          transaction_date?: string
+          transaction_type?: string
+          trust_account_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "trust_transactions_trust_account_id_fkey"
+            columns: ["trust_account_id"]
+            isOneToOne: false
+            referencedRelation: "trust_accounts"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       whatsapp_queue: {
         Row: {
           created_at: string
@@ -4034,6 +4138,10 @@ export type Database = {
       portal_user_can_access_person: {
         Args: { _person_id: string }
         Returns: boolean
+      }
+      recompute_trust_balance: {
+        Args: { _account_id: string }
+        Returns: undefined
       }
       set_org_ai_key: {
         Args: { _org_id: string; _plaintext: string }
