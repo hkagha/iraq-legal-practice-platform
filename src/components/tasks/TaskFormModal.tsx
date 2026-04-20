@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { FormSearchSelect } from '@/components/ui/FormSearchSelect';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { toast } from 'sonner';
@@ -249,14 +250,15 @@ export default function TaskFormModal({ isOpen, onClose, task, onSaved, prefillC
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label>{t('tasks.fields.assignedTo')}</Label>
-              <Select value={assignedTo} onValueChange={setAssignedTo}>
-                <SelectTrigger><SelectValue placeholder={language === 'ar' ? 'اختر...' : 'Select...'} /></SelectTrigger>
-                <SelectContent>
-                  {teamMembers.map(m => (
-                    <SelectItem key={m.id} value={m.id}>{m.first_name} {m.last_name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormSearchSelect
+                value={assignedTo}
+                onChange={setAssignedTo}
+                placeholder={language === 'ar' ? 'اختر...' : 'Select...'}
+                options={teamMembers.map(m => ({
+                  value: m.id,
+                  label: `${m.first_name || ''} ${m.last_name || ''}`.trim() || m.id,
+                }))}
+              />
             </div>
             <div>
               <Label>{t('tasks.fields.status')}</Label>
@@ -300,24 +302,20 @@ export default function TaskFormModal({ isOpen, onClose, task, onSaved, prefillC
               ))}
             </div>
             {linkType === 'case' && (
-              <Select value={caseId} onValueChange={setCaseId}>
-                <SelectTrigger><SelectValue placeholder={language === 'ar' ? 'اختر قضية...' : 'Select case...'} /></SelectTrigger>
-                <SelectContent>
-                  {cases.map(c => (
-                    <SelectItem key={c.id} value={c.id}>{c.case_number} - {c.title}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormSearchSelect
+                value={caseId}
+                onChange={setCaseId}
+                placeholder={language === 'ar' ? 'اختر قضية...' : 'Select case...'}
+                options={cases.map(c => ({ value: c.id, label: c.title, subtitle: c.case_number }))}
+              />
             )}
             {linkType === 'errand' && (
-              <Select value={errandId} onValueChange={setErrandId}>
-                <SelectTrigger><SelectValue placeholder={language === 'ar' ? 'اختر معاملة...' : 'Select errand...'} /></SelectTrigger>
-                <SelectContent>
-                  {errands.map(er => (
-                    <SelectItem key={er.id} value={er.id}>{er.errand_number} - {er.title}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <FormSearchSelect
+                value={errandId}
+                onChange={setErrandId}
+                placeholder={language === 'ar' ? 'اختر معاملة...' : 'Select errand...'}
+                options={errands.map(er => ({ value: er.id, label: er.title, subtitle: er.errand_number }))}
+              />
             )}
           </div>
 
