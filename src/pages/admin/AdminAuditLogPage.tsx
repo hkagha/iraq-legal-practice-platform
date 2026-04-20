@@ -3,6 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Search, ClipboardList } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { HelpButton } from '@/components/ui/HelpButton';
 
 interface AuditEntry {
   id: string;
@@ -94,7 +95,10 @@ export default function AdminAuditLogPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-display-sm text-foreground">{isEN ? 'Audit Log' : 'سجل المراجعة'}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-display-sm text-foreground">{isEN ? 'Audit Log' : 'سجل المراجعة'}</h1>
+          <HelpButton helpKey="admin.audit" />
+        </div>
         <p className="text-body-md text-muted-foreground">{isEN ? 'All administrative actions across the platform' : 'جميع الإجراءات الإدارية عبر المنصة'}</p>
       </div>
 

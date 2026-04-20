@@ -121,6 +121,7 @@ export default function SettingsPage() {
         titleAr="الإعدادات"
         subtitle="Manage your organization, team, and preferences"
         subtitleAr="إدارة مؤسستك وفريقك وتفضيلاتك"
+        helpKey="settings"
         breadcrumbs={[
           { label: 'Dashboard', labelAr: 'لوحة التحكم', href: '/dashboard' },
           { label: 'Settings', labelAr: 'الإعدادات' },

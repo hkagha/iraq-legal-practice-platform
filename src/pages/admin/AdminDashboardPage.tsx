@@ -7,6 +7,7 @@ import {
   TrendingUp, AlertTriangle, CheckCircle, Plus, UserPlus, Database, Megaphone, Activity
 } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, Legend } from 'recharts';
+import { HelpButton } from '@/components/ui/HelpButton';
 
 interface PlatformStats {
   totalOrgs: number;
@@ -231,7 +232,10 @@ export default function AdminDashboardPage() {
 
       {/* Header */}
       <div>
-        <h1 className="text-display-sm text-foreground">{isEN ? 'Platform Overview' : 'نظرة عامة على المنصة'}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-display-sm text-foreground">{isEN ? 'Platform Overview' : 'نظرة عامة على المنصة'}</h1>
+          <HelpButton helpKey="admin.dashboard" />
+        </div>
         <p className="text-body-md text-muted-foreground mt-1">{isEN ? 'Real-time status of the Qanuni platform' : 'الحالة الفورية لمنصة قانوني'}</p>
       </div>
 

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { HelpButton } from '@/components/ui/HelpButton';
 
 export default function AdminAnalyticsPage() {
   const { language } = useLanguage();
@@ -69,7 +70,10 @@ export default function AdminAnalyticsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-display-sm text-foreground">{isEN ? 'Platform Analytics' : 'تحليلات المنصة'}</h1>
+        <div className="flex items-center gap-2">
+          <h1 className="text-display-sm text-foreground">{isEN ? 'Platform Analytics' : 'تحليلات المنصة'}</h1>
+          <HelpButton helpKey="admin.analytics" />
+        </div>
         <p className="text-body-md text-muted-foreground">{isEN ? 'Feature adoption and organization health' : 'اعتماد الميزات وصحة المؤسسات'}</p>
       </div>
 

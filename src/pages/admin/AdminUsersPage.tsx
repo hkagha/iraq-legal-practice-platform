@@ -13,6 +13,7 @@ import ResetPasswordModal from '@/components/admin/ResetPasswordModal';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { SlideOver } from '@/components/ui/SlideOver';
 import { toast } from 'sonner';
+import { HelpButton } from '@/components/ui/HelpButton';
 import { useNavigate } from 'react-router-dom';
 
 interface UserRow {
@@ -116,7 +117,10 @@ export default function AdminUsersPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-display-sm text-foreground">{isEN ? 'All Users' : 'جميع المستخدمين'}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-display-sm text-foreground">{isEN ? 'All Users' : 'جميع المستخدمين'}</h1>
+            <HelpButton helpKey="admin.users" />
+          </div>
           <p className="text-body-md text-muted-foreground">{filtered.length} {isEN ? 'total users' : 'مستخدم'}</p>
         </div>
         <Button onClick={() => setShowCreate(true)} className="bg-accent text-accent-foreground hover:bg-accent/90">

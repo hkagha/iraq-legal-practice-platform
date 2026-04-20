@@ -3,6 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { HelpButton } from '@/components/ui/HelpButton';
 
 export default function AdminSettingsPage() {
   const { language } = useLanguage();
@@ -76,8 +77,9 @@ export default function AdminSettingsPage() {
 
   return (
     <div className="space-y-8">
-      <div>
+      <div className="flex items-center gap-2">
         <h1 className="text-display-sm text-foreground">{isEN ? 'Platform Settings' : 'إعدادات المنصة'}</h1>
+        <HelpButton helpKey="admin.settings" />
       </div>
 
       {/* Plan Limits */}
