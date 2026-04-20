@@ -87,9 +87,7 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
     const caseResults: SearchResult[] = (casesRes.data || []).map(c => ({
       id: c.id, type: 'case', title: language === 'ar' && c.title_ar ? c.title_ar : c.title, subtitle: c.case_number, status: c.status,
     }));
-    const clientResults: SearchResult[] = (clientsRes.data || []).map(c => ({
-      id: c.id, type: 'client', title: c.client_type === 'company' ? (c.company_name || '') : `${c.first_name || ''} ${c.last_name || ''}`.trim(), subtitle: c.email || c.client_type,
-    }));
+    const clientResults: SearchResult[] = [];
     const errandResults: SearchResult[] = (errandsRes.data || []).map(e => ({
       id: e.id, type: 'errand', title: language === 'ar' && e.title_ar ? e.title_ar : e.title, subtitle: e.errand_number, status: e.status,
     }));
