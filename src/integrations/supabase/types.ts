@@ -3460,7 +3460,6 @@ export type Database = {
           assigned_to: string | null
           case_id: string | null
           checklist: Json | null
-          client_id: string | null
           completed_at: string | null
           completed_by: string | null
           created_at: string
@@ -3469,12 +3468,15 @@ export type Database = {
           description_ar: string | null
           due_date: string | null
           due_time: string | null
+          entity_id: string | null
           errand_id: string | null
           estimated_minutes: number | null
           id: string
           is_recurring: boolean | null
           organization_id: string
           parent_task_id: string | null
+          party_type: string | null
+          person_id: string | null
           priority: string
           recurrence_end_date: string | null
           recurrence_pattern: string | null
@@ -3493,7 +3495,6 @@ export type Database = {
           assigned_to?: string | null
           case_id?: string | null
           checklist?: Json | null
-          client_id?: string | null
           completed_at?: string | null
           completed_by?: string | null
           created_at?: string
@@ -3502,12 +3503,15 @@ export type Database = {
           description_ar?: string | null
           due_date?: string | null
           due_time?: string | null
+          entity_id?: string | null
           errand_id?: string | null
           estimated_minutes?: number | null
           id?: string
           is_recurring?: boolean | null
           organization_id: string
           parent_task_id?: string | null
+          party_type?: string | null
+          person_id?: string | null
           priority?: string
           recurrence_end_date?: string | null
           recurrence_pattern?: string | null
@@ -3526,7 +3530,6 @@ export type Database = {
           assigned_to?: string | null
           case_id?: string | null
           checklist?: Json | null
-          client_id?: string | null
           completed_at?: string | null
           completed_by?: string | null
           created_at?: string
@@ -3535,12 +3538,15 @@ export type Database = {
           description_ar?: string | null
           due_date?: string | null
           due_time?: string | null
+          entity_id?: string | null
           errand_id?: string | null
           estimated_minutes?: number | null
           id?: string
           is_recurring?: boolean | null
           organization_id?: string
           parent_task_id?: string | null
+          party_type?: string | null
+          person_id?: string | null
           priority?: string
           recurrence_end_date?: string | null
           recurrence_pattern?: string | null
@@ -3583,6 +3589,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "tasks_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "tasks_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
@@ -3596,6 +3609,13 @@ export type Database = {
             referencedRelation: "tasks"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "tasks_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
         ]
       }
       time_entries: {
@@ -3605,13 +3625,13 @@ export type Database = {
           billing_rate: number | null
           billing_rate_currency: string | null
           case_id: string | null
-          client_id: string | null
           created_at: string
           date: string
           description: string
           description_ar: string | null
           duration_minutes: number
           end_time: string | null
+          entity_id: string | null
           errand_id: string | null
           id: string
           invoice_id: string | null
@@ -3619,6 +3639,8 @@ export type Database = {
           is_billable: boolean
           is_timer_running: boolean | null
           organization_id: string
+          party_type: string | null
+          person_id: string | null
           start_time: string | null
           status: string
           timer_started_at: string | null
@@ -3632,13 +3654,13 @@ export type Database = {
           billing_rate?: number | null
           billing_rate_currency?: string | null
           case_id?: string | null
-          client_id?: string | null
           created_at?: string
           date?: string
           description: string
           description_ar?: string | null
           duration_minutes: number
           end_time?: string | null
+          entity_id?: string | null
           errand_id?: string | null
           id?: string
           invoice_id?: string | null
@@ -3646,6 +3668,8 @@ export type Database = {
           is_billable?: boolean
           is_timer_running?: boolean | null
           organization_id: string
+          party_type?: string | null
+          person_id?: string | null
           start_time?: string | null
           status?: string
           timer_started_at?: string | null
@@ -3659,13 +3683,13 @@ export type Database = {
           billing_rate?: number | null
           billing_rate_currency?: string | null
           case_id?: string | null
-          client_id?: string | null
           created_at?: string
           date?: string
           description?: string
           description_ar?: string | null
           duration_minutes?: number
           end_time?: string | null
+          entity_id?: string | null
           errand_id?: string | null
           id?: string
           invoice_id?: string | null
@@ -3673,6 +3697,8 @@ export type Database = {
           is_billable?: boolean
           is_timer_running?: boolean | null
           organization_id?: string
+          party_type?: string | null
+          person_id?: string | null
           start_time?: string | null
           status?: string
           timer_started_at?: string | null
@@ -3689,10 +3715,24 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "time_entries_entity_id_fkey"
+            columns: ["entity_id"]
+            isOneToOne: false
+            referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "time_entries_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
             referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "time_entries_person_id_fkey"
+            columns: ["person_id"]
+            isOneToOne: false
+            referencedRelation: "persons"
             referencedColumns: ["id"]
           },
           {
@@ -3775,10 +3815,6 @@ export type Database = {
       _ai_key_passphrase: { Args: never; Returns: string }
       client_can_access_document_object: {
         Args: { object_name: string }
-        Returns: boolean
-      }
-      client_can_see_profile: {
-        Args: { _client_user_id: string; _profile_id: string }
         Returns: boolean
       }
       client_mark_invoice_viewed: {
