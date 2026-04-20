@@ -303,7 +303,7 @@ export default function AIConfigSettings() {
                     />
                     <div className="flex items-center gap-3 text-xs">
                       {hasStoredKey ? (
-                        <span className="flex items-center gap-1 text-green-600 dark:text-green-400">
+                        <span className="flex items-center gap-1 text-accent">
                           <CheckCircle2 size={14} /> {language === 'ar' ? 'مفتاح مخزّن ومشفّر' : 'Encrypted key stored'}
                         </span>
                       ) : (
