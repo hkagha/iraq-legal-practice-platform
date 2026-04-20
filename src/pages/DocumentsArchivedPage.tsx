@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,21 +10,21 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { Search, FileText, Sparkles, Archive, Download, MoreVertical } from 'lucide-react';
-import DocumentUploadModal from '@/components/documents/DocumentUploadModal';
+import { Search, Archive, RotateCcw, Trash2, Download, FileText, MoreVertical } from 'lucide-react';
 import DocumentDetailSlideOver from '@/components/documents/DocumentDetailSlideOver';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
 interface DocRow {
   id: string;
   file_name: string;
   title: string | null;
+  file_path: string;
   document_category: string;
   file_size_bytes: number;
   file_type: string;
   created_at: string;
-  is_visible_to_client: boolean;
-  indexing_status: string;
+  updated_at: string;
 }
 
 function fmtSize(b: number) {
@@ -34,30 +33,28 @@ function fmtSize(b: number) {
   return `${(b / 1048576).toFixed(1)} MB`;
 }
 
-export default function DocumentsPage() {
+export default function DocumentsArchivedPage() {
   const { language } = useLanguage();
   const { profile } = useAuth();
-  const navigate = useNavigate();
   const orgId = profile?.organization_id;
   const isAR = language === 'ar';
 
   const [docs, setDocs] = useState<DocRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [uploadOpen, setUploadOpen] = useState(false);
   const [detailId, setDetailId] = useState<string | null>(null);
+  const [confirmDelete, setConfirmDelete] = useState<DocRow | null>(null);
 
   const load = useCallback(async () => {
     if (!orgId) return;
     setLoading(true);
     let q = supabase
       .from('documents')
-      .select('id, file_name, title, document_category, file_size_bytes, file_type, created_at, is_visible_to_client, indexing_status')
+      .select('id, file_name, title, file_path, document_category, file_size_bytes, file_type, created_at, updated_at')
       .eq('organization_id', orgId)
-      .eq('status', 'active')
-      .eq('is_latest_version', true)
-      .order('created_at', { ascending: false })
-      .limit(200);
+      .eq('status', 'archived')
+      .order('updated_at', { ascending: false })
+      .limit(500);
     if (search.trim()) {
       const s = search.trim();
       q = q.or(`file_name.ilike.%${s}%,title.ilike.%${s}%`);
@@ -70,26 +67,25 @@ export default function DocumentsPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  // Realtime refresh on indexing status changes
-  useEffect(() => {
-    if (!orgId) return;
-    const ch = supabase
-      .channel(`docs-list-${orgId}`)
-      .on('postgres_changes', { event: '*', schema: 'public', table: 'documents', filter: `organization_id=eq.${orgId}` }, () => load())
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
-  }, [orgId, load]);
-
-  const handleArchive = async (id: string) => {
-    const { error } = await supabase.from('documents').update({ status: 'archived' } as any).eq('id', id);
+  const handleRestore = async (id: string) => {
+    const { error } = await supabase.from('documents').update({ status: 'active' } as any).eq('id', id);
     if (error) toast.error(error.message);
-    else { toast.success(isAR ? 'تمت الأرشفة' : 'Archived'); load(); }
+    else { toast.success(isAR ? 'تمت الاستعادة' : 'Restored'); load(); }
+  };
+
+  const handleDelete = async () => {
+    if (!confirmDelete) return;
+    // Soft delete + remove storage object
+    const { error } = await supabase.from('documents').update({ status: 'deleted' } as any).eq('id', confirmDelete.id);
+    if (error) { toast.error(error.message); return; }
+    await supabase.storage.from('documents').remove([confirmDelete.file_path]).catch(() => null);
+    toast.success(isAR ? 'تم الحذف نهائياً' : 'Permanently deleted');
+    setConfirmDelete(null);
+    load();
   };
 
   const handleDownload = async (d: DocRow) => {
-    const { data: row } = await supabase.from('documents').select('file_path').eq('id', d.id).single();
-    if (!row?.file_path) return;
-    const { data } = await supabase.storage.from('documents').createSignedUrl(row.file_path, 60);
+    const { data } = await supabase.storage.from('documents').createSignedUrl(d.file_path, 60);
     if (data?.signedUrl) {
       const a = document.createElement('a');
       a.href = data.signedUrl; a.download = d.file_name; a.target = '_blank';
@@ -100,51 +96,42 @@ export default function DocumentsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Documents"
-        titleAr="المستندات"
-        subtitle="All firm documents in one place"
-        subtitleAr="جميع مستندات المكتب في مكان واحد"
+        title="Archived Documents"
+        titleAr="المستندات المؤرشفة"
+        subtitle="Documents you've archived. Restore or delete permanently."
+        subtitleAr="المستندات التي قمت بأرشفتها. استعدها أو احذفها نهائياً."
         helpKey="documents"
-        actionLabel="Upload Document"
-        actionLabelAr="رفع مستند"
-        onAction={() => setUploadOpen(true)}
-        secondaryActions={[
-          {
-            label: 'Smart Archive',
-            labelAr: 'الأرشيف الذكي',
-            icon: Sparkles,
-            onClick: () => navigate('/documents/archive'),
-          },
-          {
-            label: 'Archived',
-            labelAr: 'المؤرشفة',
-            icon: Archive,
-            onClick: () => navigate('/documents/archived'),
-          },
+        breadcrumbs={[
+          { label: 'Dashboard', labelAr: 'لوحة التحكم', href: '/dashboard' },
+          { label: 'Documents', labelAr: 'المستندات', href: '/documents' },
+          { label: 'Archived', labelAr: 'المؤرشفة' },
         ]}
       />
 
       <div className="relative max-w-lg">
         <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
-          placeholder={isAR ? 'ابحث في المستندات...' : 'Search documents…'}
+          placeholder={isAR ? 'ابحث في المؤرشفة...' : 'Search archived…'}
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           className="ps-9 h-10"
         />
       </div>
 
+      <Badge variant="outline" className="gap-1.5">
+        <Archive className="h-3 w-3" />
+        {docs.length} {isAR ? 'مستند مؤرشف' : `archived document${docs.length === 1 ? '' : 's'}`}
+      </Badge>
+
       {loading ? (
         <div className="space-y-2">
-          {[1, 2, 3, 4, 5].map(i => <Skeleton key={i} className="h-16 rounded-md" />)}
+          {[1, 2, 3].map(i => <Skeleton key={i} className="h-16 rounded-md" />)}
         </div>
       ) : docs.length === 0 ? (
         <EmptyState
-          icon={FileText}
-          title={isAR ? 'لا توجد مستندات' : 'No documents yet'}
-          titleAr={isAR ? 'لا توجد مستندات' : 'No documents yet'}
-          actionLabel={isAR ? 'رفع مستند' : 'Upload Document'}
-          onAction={() => setUploadOpen(true)}
+          icon={Archive}
+          title={isAR ? 'لا توجد مستندات مؤرشفة' : 'No archived documents'}
+          titleAr={isAR ? 'لا توجد مستندات مؤرشفة' : 'No archived documents'}
         />
       ) : (
         <div className="border border-border rounded-md overflow-hidden bg-card">
@@ -156,25 +143,9 @@ export default function DocumentsPage() {
               <button onClick={() => setDetailId(d.id)} className="flex items-center gap-3 flex-1 min-w-0 text-start">
                 <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-medium text-foreground truncate">{d.title || d.file_name}</span>
-                    {d.indexing_status === 'done' && (
-                      <Badge variant="outline" className="text-[10px] gap-1 h-5">
-                        <Sparkles className="h-2.5 w-2.5" />{isAR ? 'مفهرس' : 'Indexed'}
-                      </Badge>
-                    )}
-                    {d.indexing_status === 'processing' && (
-                      <Badge variant="outline" className="text-[10px] h-5">{isAR ? 'قيد التحليل' : 'Analyzing'}</Badge>
-                    )}
-                    {d.indexing_status === 'failed' && (
-                      <Badge variant="outline" className="text-[10px] h-5 text-destructive">{isAR ? 'فشل' : 'Failed'}</Badge>
-                    )}
-                    {d.is_visible_to_client && (
-                      <Badge variant="outline" className="text-[10px] h-5">{isAR ? 'مرئي للعميل' : 'Client visible'}</Badge>
-                    )}
-                  </div>
+                  <div className="font-medium text-foreground truncate">{d.title || d.file_name}</div>
                   <div className="text-[11px] text-muted-foreground mt-0.5">
-                    {format(new Date(d.created_at), 'MMM dd, yyyy')} • {fmtSize(d.file_size_bytes)} • {d.file_type?.toUpperCase()}
+                    {isAR ? 'أُرشف' : 'Archived'} {format(new Date(d.updated_at), 'MMM dd, yyyy')} • {fmtSize(d.file_size_bytes)}
                   </div>
                 </div>
               </button>
@@ -183,11 +154,14 @@ export default function DocumentsPage() {
                   <Button variant="ghost" size="icon" className="h-8 w-8"><MoreVertical className="h-4 w-4" /></Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => handleRestore(d.id)}>
+                    <RotateCcw className="h-3.5 w-3.5 me-2" />{isAR ? 'استعادة' : 'Restore'}
+                  </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleDownload(d)}>
                     <Download className="h-3.5 w-3.5 me-2" />{isAR ? 'تحميل' : 'Download'}
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => handleArchive(d.id)}>
-                    <Archive className="h-3.5 w-3.5 me-2" />{isAR ? 'أرشفة' : 'Archive'}
+                  <DropdownMenuItem className="text-destructive" onClick={() => setConfirmDelete(d)}>
+                    <Trash2 className="h-3.5 w-3.5 me-2" />{isAR ? 'حذف نهائي' : 'Delete permanently'}
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -196,17 +170,23 @@ export default function DocumentsPage() {
         </div>
       )}
 
-      <DocumentUploadModal
-        open={uploadOpen}
-        onClose={() => setUploadOpen(false)}
-        onComplete={load}
-      />
-
       <DocumentDetailSlideOver
         documentId={detailId}
         isOpen={!!detailId}
         onClose={() => setDetailId(null)}
         onRefresh={load}
+      />
+
+      <ConfirmDialog
+        open={!!confirmDelete}
+        onOpenChange={(v) => { if (!v) setConfirmDelete(null); }}
+        title={isAR ? 'حذف نهائي؟' : 'Delete permanently?'}
+        description={isAR
+          ? 'سيتم حذف هذا المستند والملف من التخزين بشكل دائم. لا يمكن التراجع.'
+          : 'This document and its stored file will be permanently removed. This cannot be undone.'}
+        confirmLabel={isAR ? 'حذف نهائي' : 'Delete permanently'}
+        variant="destructive"
+        onConfirm={handleDelete}
       />
     </div>
   );
