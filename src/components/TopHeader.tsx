@@ -49,7 +49,7 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
     setSearching(true);
     const pattern = `%${q}%`;
 
-    const [casesRes, clientsRes, errandsRes, docsRes, tasksRes, calEventsRes] = await Promise.all([
+    const [casesRes, errandsRes, docsRes, tasksRes, calEventsRes] = await Promise.all([
       supabase
         .from('cases')
         .select('id, title, title_ar, case_number, status')
@@ -57,16 +57,10 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
         .or(`title.ilike.${pattern},case_number.ilike.${pattern},title_ar.ilike.${pattern}`)
         .limit(5),
       supabase
-        .from('clients')
-        .select('id, first_name, last_name, company_name, client_type, email')
-        .eq('organization_id', profile.organization_id!)
-        .or(`first_name.ilike.${pattern},last_name.ilike.${pattern},company_name.ilike.${pattern},email.ilike.${pattern}`)
-        .limit(5),
-      supabase
         .from('errands')
-        .select('id, title, title_ar, errand_number, status, reference_number')
+        .select('id, title, title_ar, errand_number, status')
         .eq('organization_id', profile.organization_id!)
-        .or(`title.ilike.${pattern},errand_number.ilike.${pattern},title_ar.ilike.${pattern},reference_number.ilike.${pattern}`)
+        .or(`title.ilike.${pattern},errand_number.ilike.${pattern},title_ar.ilike.${pattern}`)
         .limit(5),
       supabase
         .from('documents')
