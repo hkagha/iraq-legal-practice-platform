@@ -94,8 +94,47 @@ export default function CasesPage() {
     return c;
   }, [data]);
 
+  const bulkUpdateStatus = async (newStatus: string) => {
+    if (selected.size === 0) return;
+    setBulkBusy(true);
+    const ids = Array.from(selected);
+    const { error } = await supabase.from('cases').update({ status: newStatus }).in('id', ids);
+    setBulkBusy(false);
+    if (error) {
+      toast({ title: lang === 'ar' ? 'فشل التحديث' : 'Update failed', description: error.message, variant: 'destructive' });
+      return;
+    }
+    toast({ title: lang === 'ar' ? `تم تحديث ${ids.length} قضية` : `${ids.length} cases updated` });
+    setSelected(new Set());
+    qc.invalidateQueries({ queryKey: ['cases'] });
+  };
+
   return (
     <div>
+      <SEO
+        title={lang === 'ar' ? 'القضايا — Qanuni' : 'Cases — Qanuni'}
+        description={lang === 'ar' ? 'إدارة جميع القضايا التي يتولاها مكتبك.' : 'Manage all matters your firm is handling.'}
+      />
+      <BulkActionBar count={selected.size} onClear={() => setSelected(new Set())}>
+        <Select onValueChange={bulkUpdateStatus} disabled={bulkBusy}>
+          <SelectTrigger className="h-9 w-[180px] bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground">
+            <SelectValue placeholder={lang === 'ar' ? 'تغيير الحالة…' : 'Change status…'} />
+          </SelectTrigger>
+          <SelectContent>
+            {STATUSES.filter((s) => s !== 'all').map((s) => (
+              <SelectItem key={s} value={s}>{lang === 'ar' ? statusLabelAr(s) : statusLabelEn(s)}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <button
+          onClick={() => bulkUpdateStatus('closed')}
+          disabled={bulkBusy}
+          className="h-9 px-3 bg-primary-foreground/10 hover:bg-primary-foreground/20 rounded text-body-sm flex items-center gap-1.5 transition-colors"
+        >
+          <Archive className="h-3.5 w-3.5" />
+          {lang === 'ar' ? 'إغلاق' : 'Close'}
+        </button>
+      </BulkActionBar>
       <PageHeader
         title="Cases"
         titleAr="القضايا"
