@@ -289,7 +289,7 @@ export default function ClientDetailPage() {
 
         {partyType === 'entity' && (
           <TabsContent value="reps" className="mt-4">
-            <EntityRepresentativesEditor entityId={id} />
+            <EntityRepresentativesEditor entityId={id} organizationId={profile!.organization_id!} />
           </TabsContent>
         )}
       </Tabs>
