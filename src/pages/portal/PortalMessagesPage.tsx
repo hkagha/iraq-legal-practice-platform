@@ -1,4 +1,5 @@
 import RebuildingStub from '@/components/RebuildingStub';
 export default function PortalMessagesPage() {
-  return <RebuildingStub title="Messages" />;
+  return <RebuildingStub title="Messages" helpKey="portal.messages" />;
 }
+
