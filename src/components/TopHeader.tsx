@@ -146,19 +146,19 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
   const calEventResultsFiltered = results.filter(r => r.type === 'calendarEvent');
 
   return (
-    <header className="h-16 bg-card shadow-xs flex items-center px-4 gap-3 shrink-0 z-10">
+    <header className="h-16 bg-card border-b border-border flex items-center px-6 gap-4 shrink-0 z-10">
       {showMenu && (
         <button
           onClick={onMenuClick}
-          className="lg:hidden h-9 w-9 rounded-button flex items-center justify-center hover:bg-secondary transition-colors"
+          className="lg:hidden h-9 w-9 flex items-center justify-center hover:bg-secondary transition-colors"
         >
           <Menu className="h-5 w-5 text-foreground" />
         </button>
       )}
 
       <div className="flex-1 flex justify-center">
-        <div className="relative w-full max-w-[400px]" ref={searchRef}>
-          <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+        <div className="relative w-full max-w-[460px]" ref={searchRef}>
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" strokeWidth={1.75} />
           <input
             type="text"
             value={searchQuery}
@@ -166,15 +166,15 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
             onFocus={() => { if (results.length > 0) setShowResults(true); }}
             onKeyDown={e => { if (e.key === 'Escape') setShowResults(false); }}
             placeholder={t('search.placeholder')}
-            className="w-full h-10 bg-secondary border border-border rounded-card ps-9 pe-12 text-body-md text-foreground placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary/30 transition-colors"
+            className="w-full h-9 bg-transparent border-0 border-b border-border ps-8 pe-12 text-[13px] text-foreground placeholder:text-muted-foreground/60 focus:outline-none focus:border-accent transition-colors"
           />
-          <kbd className="absolute end-3 top-1/2 -translate-y-1/2 hidden sm:inline-flex h-5 items-center rounded bg-slate-200 px-1.5 text-[11px] font-medium text-slate-500">
+          <kbd className="absolute end-2 top-1/2 -translate-y-1/2 hidden sm:inline-flex h-5 items-center bg-secondary px-1.5 text-[10px] font-medium text-muted-foreground tracking-wider">
             ⌘K
           </kbd>
 
           {/* Search Results Dropdown */}
           {showResults && searchQuery.length >= 2 && (
-            <div className="absolute top-full mt-1 inset-x-0 bg-card border border-border rounded-card shadow-lg z-50 max-h-[360px] overflow-y-auto">
+            <div className="absolute top-full mt-2 inset-x-0 bg-card border border-border shadow-lg z-50 max-h-[360px] overflow-y-auto">
               {results.length === 0 && !searching && (
                 <div className="p-4 text-center text-body-sm text-muted-foreground">
                   {language === 'ar' ? `لم يتم العثور على نتائج لـ '${searchQuery}'` : `No results found for '${searchQuery}'`}
@@ -185,13 +185,13 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
               )}
               {caseResults.length > 0 && (
                 <>
-                  <div className="px-3 py-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">{t('sidebar.cases')}</div>
+                  <div className="px-3 py-2 eyebrow">{t('sidebar.cases')}</div>
                   {caseResults.map(r => (
                     <button key={r.id} onClick={() => handleResultClick(r)} className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 transition-colors text-start">
-                      <Scale size={16} className="text-muted-foreground flex-shrink-0" />
+                      <Scale size={15} className="text-muted-foreground flex-shrink-0" strokeWidth={1.75} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-body-md text-foreground truncate">{r.title}</p>
-                        <p className="text-body-sm text-muted-foreground font-mono">{r.subtitle}</p>
+                        <p className="text-[13px] text-foreground truncate font-medium">{r.title}</p>
+                        <p className="text-[11px] text-muted-foreground tabular">{r.subtitle}</p>
                       </div>
                       {r.status && <StatusBadge status={r.status} type="case" size="sm" />}
                     </button>
@@ -200,13 +200,13 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
               )}
               {errandResults.length > 0 && (
                 <>
-                  <div className="px-3 py-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider border-t border-border">{t('sidebar.errands')}</div>
+                  <div className="px-3 py-2 eyebrow border-t border-border">{t('sidebar.errands')}</div>
                   {errandResults.map(r => (
                     <button key={r.id} onClick={() => handleResultClick(r)} className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 transition-colors text-start">
-                      <FileCheck size={16} className="text-muted-foreground flex-shrink-0" />
+                      <FileCheck size={15} className="text-muted-foreground flex-shrink-0" strokeWidth={1.75} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-body-md text-foreground truncate">{r.title}</p>
-                        <p className="text-body-sm text-muted-foreground font-mono">{r.subtitle}</p>
+                        <p className="text-[13px] text-foreground truncate font-medium">{r.title}</p>
+                        <p className="text-[11px] text-muted-foreground tabular">{r.subtitle}</p>
                       </div>
                       {r.status && <StatusBadge status={r.status} type="errand" size="sm" />}
                     </button>
@@ -215,13 +215,13 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
               )}
               {clientResultsFiltered.length > 0 && (
                 <>
-                  <div className="px-3 py-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider border-t border-border">{t('sidebar.clients')}</div>
+                  <div className="px-3 py-2 eyebrow border-t border-border">{t('sidebar.clients')}</div>
                   {clientResultsFiltered.map(r => (
                     <button key={r.id} onClick={() => handleResultClick(r)} className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 transition-colors text-start">
-                      <UsersIcon size={16} className="text-muted-foreground flex-shrink-0" />
+                      <UsersIcon size={15} className="text-muted-foreground flex-shrink-0" strokeWidth={1.75} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-body-md text-foreground truncate">{r.title}</p>
-                        <p className="text-body-sm text-muted-foreground">{r.subtitle}</p>
+                        <p className="text-[13px] text-foreground truncate font-medium">{r.title}</p>
+                        <p className="text-[11px] text-muted-foreground">{r.subtitle}</p>
                       </div>
                     </button>
                   ))}
@@ -229,13 +229,13 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
               )}
               {docResults.length > 0 && (
                 <>
-                  <div className="px-3 py-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider border-t border-border">{t('sidebar.documents')}</div>
+                  <div className="px-3 py-2 eyebrow border-t border-border">{t('sidebar.documents')}</div>
                   {docResults.map(r => (
                     <button key={r.id} onClick={() => handleResultClick(r)} className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 transition-colors text-start">
-                      <FileCheck size={16} className="text-muted-foreground flex-shrink-0" />
+                      <FileCheck size={15} className="text-muted-foreground flex-shrink-0" strokeWidth={1.75} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-body-md text-foreground truncate">{r.title}</p>
-                        <p className="text-body-sm text-muted-foreground capitalize">{r.subtitle}</p>
+                        <p className="text-[13px] text-foreground truncate font-medium">{r.title}</p>
+                        <p className="text-[11px] text-muted-foreground capitalize">{r.subtitle}</p>
                       </div>
                     </button>
                   ))}
@@ -243,13 +243,13 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
               )}
               {taskResultsFiltered.length > 0 && (
                 <>
-                  <div className="px-3 py-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider border-t border-border">{t('sidebar.tasks')}</div>
+                  <div className="px-3 py-2 eyebrow border-t border-border">{t('sidebar.tasks')}</div>
                   {taskResultsFiltered.map(r => (
                     <button key={r.id} onClick={() => handleResultClick(r)} className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 transition-colors text-start">
-                      <CheckSquare size={16} className="text-muted-foreground flex-shrink-0" />
+                      <CheckSquare size={15} className="text-muted-foreground flex-shrink-0" strokeWidth={1.75} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-body-md text-foreground truncate">{r.title}</p>
-                        <p className="text-body-sm text-muted-foreground">{r.subtitle}</p>
+                        <p className="text-[13px] text-foreground truncate font-medium">{r.title}</p>
+                        <p className="text-[11px] text-muted-foreground">{r.subtitle}</p>
                       </div>
                       {r.status && <StatusBadge status={r.status} type="task" size="sm" />}
                     </button>
@@ -258,13 +258,13 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
               )}
               {calEventResultsFiltered.length > 0 && (
                 <>
-                  <div className="px-3 py-2 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider border-t border-border">{t('sidebar.calendar')}</div>
+                  <div className="px-3 py-2 eyebrow border-t border-border">{t('sidebar.calendar')}</div>
                   {calEventResultsFiltered.map(r => (
                     <button key={r.id} onClick={() => handleResultClick(r)} className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-muted/50 transition-colors text-start">
-                      <Calendar size={16} className="text-muted-foreground flex-shrink-0" />
+                      <Calendar size={15} className="text-muted-foreground flex-shrink-0" strokeWidth={1.75} />
                       <div className="flex-1 min-w-0">
-                        <p className="text-body-md text-foreground truncate">{r.title}</p>
-                        <p className="text-body-sm text-muted-foreground">{r.subtitle}</p>
+                        <p className="text-[13px] text-foreground truncate font-medium">{r.title}</p>
+                        <p className="text-[11px] text-muted-foreground tabular">{r.subtitle}</p>
                       </div>
                     </button>
                   ))}
@@ -275,10 +275,11 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1">
         <button
           onClick={() => setLanguage(language === 'en' ? 'ar' : 'en')}
-          className="h-9 w-9 rounded-button bg-secondary flex items-center justify-center text-[13px] font-semibold text-foreground hover:bg-slate-200 transition-colors"
+          className="h-9 px-3 flex items-center justify-center text-[11px] font-semibold text-foreground/70 hover:text-foreground tracking-widest small-caps transition-colors"
+          title="Toggle language"
         >
           {language === 'en' ? 'AR' : 'EN'}
         </button>
@@ -288,36 +289,36 @@ export default function TopHeader({ onMenuClick, showMenu }: TopHeaderProps) {
         {/* Avatar dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <button className="h-9 w-9 rounded-avatar bg-accent text-accent-foreground flex items-center justify-center text-body-md font-semibold focus:outline-none">
+            <button className="h-9 w-9 bg-primary text-primary-foreground flex items-center justify-center text-[12px] font-semibold tracking-wider focus:outline-none">
               {getInitials() || 'U'}
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-[220px] shadow-lg rounded-card p-1">
-            <DropdownMenuLabel className="px-3 py-2">
+          <DropdownMenuContent align="end" className="w-[240px] shadow-lg p-1 border-border">
+            <DropdownMenuLabel className="px-3 py-3">
               <div className="flex items-center gap-3">
-                <div className="h-8 w-8 rounded-avatar bg-accent text-accent-foreground flex items-center justify-center text-body-sm font-semibold">
+                <div className="h-9 w-9 bg-primary text-primary-foreground flex items-center justify-center text-[12px] font-semibold tracking-wider">
                   {getInitials() || 'U'}
                 </div>
                 <div className="min-w-0">
-                  <p className="text-heading-sm text-foreground truncate">{getFullName()}</p>
-                  <p className="text-body-sm text-muted-foreground truncate">{profile?.email}</p>
-                  <span className="inline-block mt-1 text-body-sm bg-secondary rounded-badge px-2 py-0.5 capitalize">{profile?.role?.replace('_', ' ')}</span>
+                  <p className="text-[13px] font-semibold text-foreground truncate">{getFullName()}</p>
+                  <p className="text-[11px] text-muted-foreground truncate">{profile?.email}</p>
+                  <span className="inline-block mt-1 text-[10px] small-caps text-accent-dark">{profile?.role?.replace('_', ' ')}</span>
                 </div>
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => navigate('/profile')} className="gap-2 cursor-pointer">
+            <DropdownMenuItem onClick={() => navigate('/profile')} className="gap-2 cursor-pointer text-[13px]">
               <User className="h-4 w-4" />
               {language === 'en' ? 'My Profile' : 'ملفي الشخصي'}
             </DropdownMenuItem>
             {isRole('firm_admin') && (
-              <DropdownMenuItem onClick={() => navigate('/settings')} className="gap-2 cursor-pointer">
+              <DropdownMenuItem onClick={() => navigate('/settings')} className="gap-2 cursor-pointer text-[13px]">
                 <Settings className="h-4 w-4" />
                 {t('sidebar.settings')}
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleSignOut} className="gap-2 cursor-pointer text-error focus:text-error">
+            <DropdownMenuItem onClick={handleSignOut} className="gap-2 cursor-pointer text-destructive focus:text-destructive text-[13px]">
               <LogOut className="h-4 w-4" />
               {t('auth.logout')}
             </DropdownMenuItem>
