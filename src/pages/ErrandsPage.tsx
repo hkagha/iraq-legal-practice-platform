@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useQuery } from '@tanstack/react-query';
-import { ClipboardList, Search } from 'lucide-react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { ClipboardList, Search, Archive } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -13,6 +13,11 @@ import SkeletonLoader from '@/components/SkeletonLoader';
 import { PartyChip } from '@/components/parties/PartyChip';
 import { resolveEntityName, resolvePersonName } from '@/lib/parties';
 import { cn } from '@/lib/utils';
+import SEO from '@/components/SEO';
+import BulkActionBar from '@/components/BulkActionBar';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from '@/hooks/use-toast';
 
 const STATUSES = ['all', 'new', 'in_progress', 'awaiting_documents', 'submitted_to_government', 'under_review_by_government', 'additional_requirements', 'approved', 'rejected', 'completed', 'cancelled'] as const;
 type StatusFilter = typeof STATUSES[number];
@@ -37,9 +42,20 @@ export default function ErrandsPage() {
   const { language } = useLanguage();
   const { profile } = useAuth();
   const navigate = useNavigate();
+  const qc = useQueryClient();
   const lang = language as 'en' | 'ar';
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<StatusFilter>('all');
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
+
+  const toggleOne = (id: string) => {
+    setSelected((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id); else next.add(id);
+      return next;
+    });
+  };
 
   const { data, isLoading } = useQuery({
     queryKey: ['errands', profile?.organization_id, search, statusFilter],
