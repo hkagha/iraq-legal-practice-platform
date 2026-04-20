@@ -87,6 +87,8 @@ interface FileEntry {
   error?: string;
   aiCategorizing?: boolean;
   aiSuggested?: boolean;
+  documentId?: string;
+  indexingStatus?: 'pending' | 'processing' | 'done' | 'failed' | 'skipped';
 }
 
 interface DocumentUploadModalProps {
