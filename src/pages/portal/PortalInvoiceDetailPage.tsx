@@ -84,8 +84,8 @@ export default function PortalInvoiceDetailPage() {
 
   const balance = Number(invoice.total_amount) - Number(invoice.amount_paid);
   const isPaid = balance <= 0;
-  const lineItems = (invoice.invoice_line_items ?? []).sort((a: any, b: any) => (a.sort_order ?? 0) - (b.sort_order ?? 0));
-  const payments = invoice.payments ?? [];
+  const lineItems = (invoice as any).line_items ?? [];
+  const payments = (invoice as any).payments ?? [];
 
   return (
     <div className="max-w-[1000px] mx-auto p-4 md:p-6 space-y-5">
