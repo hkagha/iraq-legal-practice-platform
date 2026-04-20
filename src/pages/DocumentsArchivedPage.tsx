@@ -178,14 +178,15 @@ export default function DocumentsArchivedPage() {
       />
 
       <ConfirmDialog
-        open={!!confirmDelete}
-        onOpenChange={(v) => { if (!v) setConfirmDelete(null); }}
-        title={isAR ? 'حذف نهائي؟' : 'Delete permanently?'}
-        description={isAR
-          ? 'سيتم حذف هذا المستند والملف من التخزين بشكل دائم. لا يمكن التراجع.'
-          : 'This document and its stored file will be permanently removed. This cannot be undone.'}
-        confirmLabel={isAR ? 'حذف نهائي' : 'Delete permanently'}
-        variant="destructive"
+        isOpen={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        title="Delete permanently?"
+        titleAr="حذف نهائي؟"
+        message="This document and its stored file will be permanently removed. This cannot be undone."
+        messageAr="سيتم حذف هذا المستند والملف من التخزين بشكل دائم. لا يمكن التراجع."
+        confirmLabel="Delete permanently"
+        confirmLabelAr="حذف نهائي"
+        type="danger"
         onConfirm={handleDelete}
       />
     </div>
