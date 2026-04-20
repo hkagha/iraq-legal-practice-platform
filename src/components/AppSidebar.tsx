@@ -18,6 +18,7 @@ const mainNavItems = [
   { key: 'cases', path: '/cases', icon: Scale },
   { key: 'errands', path: '/errands', icon: FileCheck },
   { key: 'documents', path: '/documents', icon: FileText },
+  { key: 'archive', path: '/documents/archive', icon: Sparkles },
   { key: 'timeTracking', path: '/time-tracking', icon: Clock },
   { key: 'billing', path: '/billing', icon: Receipt },
   { key: 'tasks', path: '/tasks', icon: CheckSquare },
