@@ -21,13 +21,11 @@ export default function AdminLoginPage() {
 
     if (profile.role === 'super_admin') {
       navigate('/admin/dashboard', { replace: true });
+    } else if (profile.role === 'client') {
+      navigate('/portal/dashboard', { replace: true });
     } else {
-      // Not a super admin — reject and sign out
-      setError(language === 'en'
-        ? 'Access denied. This login is for platform administrators only.'
-        : 'تم رفض الوصول. هذا التسجيل لمديري المنصة فقط.');
-      signOut();
-      setLoading(false);
+      // Firm staff (firm_admin, lawyer, paralegal) — send to main app instead of blocking
+      navigate('/dashboard', { replace: true });
     }
   }, [user, profile, navigate, signOut, language]);
 
