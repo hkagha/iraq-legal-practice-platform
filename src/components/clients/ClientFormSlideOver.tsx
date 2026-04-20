@@ -725,9 +725,10 @@ export default function ClientFormSlideOver({ isOpen, onClose, onSaved, editClie
                   </FormField>
                   <div className="grid grid-cols-3 gap-4">
                     <FormField label={t('clients.fields.city')}>
-                      <FormInput
+                      <CitySelect
                         value={form.city}
-                        onChange={e => updateField('city', e.target.value)}
+                        onChange={v => updateField('city', v)}
+                        governorateCode={findGovernorate(form.governorate)?.code}
                       />
                     </FormField>
                     <FormField label={t('clients.fields.governorate')} required error={errors.governorate}>
