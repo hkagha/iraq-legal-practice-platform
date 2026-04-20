@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 import CreateOrganizationModal from '@/components/admin/CreateOrganizationModal';
 import EditOrganizationModal from '@/components/admin/EditOrganizationModal';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
+import { HelpButton } from '@/components/ui/HelpButton';
 
 interface OrgWithStats {
   id: string; name: string; name_ar: string; subscription_tier: string; subscription_status: string;
@@ -107,7 +108,10 @@ export default function AdminOrganizationsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-display-sm text-foreground">{isEN ? 'Organizations' : 'المؤسسات'}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-display-sm text-foreground">{isEN ? 'Organizations' : 'المؤسسات'}</h1>
+            <HelpButton helpKey="admin.organizations" />
+          </div>
           <p className="text-body-md text-muted-foreground">{filtered.length} {isEN ? 'organizations' : 'مؤسسة'}</p>
         </div>
         <Button onClick={() => setShowCreate(true)} className="bg-accent text-accent-foreground hover:bg-accent/90">
