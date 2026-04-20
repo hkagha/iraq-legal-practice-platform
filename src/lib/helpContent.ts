@@ -635,6 +635,109 @@ export const helpContent: Record<string, HelpEntry> = {
       },
     }],
   },
+
+  'reports.hub': {
+    title: { en: 'Reports', ar: 'التقارير' },
+    intro: {
+      en: 'Centralized analytics for your firm — financial, operational, and people-focused.',
+      ar: 'تحليلات مركزية لمكتبك — مالية وتشغيلية ومتعلقة بالأفراد.',
+    },
+    sections: [
+      {
+        heading: { en: 'Categories', ar: 'الفئات' },
+        body: {
+          en: '• Financial — revenue, aged receivables, summary.\n• Operations — case analytics, errand analytics, firm performance.\n• People — Employee 360, time utilization.\n• Clients — client analytics.',
+          ar: '• مالية — الإيرادات، الذمم المتقادمة، الملخص.\n• العمليات — تحليلات القضايا والمعاملات، أداء المكتب.\n• الأفراد — موظف ٣٦٠، استغلال الوقت.\n• العملاء — تحليلات العملاء.',
+        },
+      },
+      {
+        heading: { en: 'Common controls', ar: 'أدوات مشتركة' },
+        body: {
+          en: 'Each report supports a date-range filter, CSV/Excel export, and print-friendly view.',
+          ar: 'كل تقرير يدعم تصفية نطاق التاريخ، تصدير CSV/Excel، وعرضاً قابلاً للطباعة.',
+        },
+      },
+    ],
+  },
+
+  'reports.financial-summary': {
+    title: { en: 'Financial summary', ar: 'الملخص المالي' },
+    intro: { en: 'Top-line view of revenue, payments, and outstanding balances.', ar: 'عرض شامل للإيرادات والمدفوعات والأرصدة المستحقة.' },
+    sections: [{ heading: { en: 'Tip', ar: 'نصيحة' }, body: { en: 'Compare quarter-over-quarter using the date selector. Export to Excel for board reports.', ar: 'قارن من ربع لربع باستخدام محدد التاريخ. صدِّر إلى Excel لتقارير المجلس.' } }],
+  },
+
+  'reports.billing-aging': {
+    title: { en: 'Billing aging', ar: 'تقادم الفواتير' },
+    intro: { en: 'Outstanding invoices grouped by how overdue they are: 0–30, 31–60, 61–90, 90+ days.', ar: 'الفواتير المستحقة مصنفة حسب مدى التأخر: ٠–٣٠، ٣١–٦٠، ٦١–٩٠، ٩٠+ يوماً.' },
+    sections: [{ heading: { en: 'How to use', ar: 'كيفية الاستخدام' }, body: { en: 'Focus on the 60+ day buckets first — they\'re the highest collection risk. Use Write Off for invoices unlikely to be paid.', ar: 'ركِّز على فئات ٦٠+ يوماً أولاً — هي الأعلى خطراً. استخدم "شطب" للفواتير غير المرجح تحصيلها.' } }],
+  },
+
+  'reports.case-analytics': {
+    title: { en: 'Case analytics', ar: 'تحليلات القضايا' },
+    intro: { en: 'Win rate, average duration, case mix by type, and outcomes by lawyer.', ar: 'معدل النجاح، متوسط المدة، توزيع القضايا حسب النوع، والنتائج حسب المحامي.' },
+    sections: [{ heading: { en: 'Win rate', ar: 'معدل النجاح' }, body: { en: 'Calculated as won cases ÷ (won + lost). Settled cases are excluded from the denominator.', ar: 'يُحسب كقضايا مكسوبة ÷ (مكسوبة + خاسرة). القضايا المسوَّاة مُستثناة من المقام.' } }],
+  },
+
+  'reports.client-analytics': {
+    title: { en: 'Client analytics', ar: 'تحليلات العملاء' },
+    intro: { en: 'Top clients by revenue, retention, and case volume.', ar: 'أعلى العملاء حسب الإيرادات، الاحتفاظ، وحجم القضايا.' },
+    sections: [{ heading: { en: 'Use case', ar: 'حالة الاستخدام' }, body: { en: 'Identify which clients drive most revenue and which are at risk of churn (no new matters in 6+ months).', ar: 'حدد العملاء الذين يحققون معظم الإيرادات وأولئك المعرضين للإلغاء (لا قضايا جديدة منذ ٦+ أشهر).' } }],
+  },
+
+  'reports.errand-analytics': {
+    title: { en: 'Errand analytics', ar: 'تحليلات المعاملات' },
+    intro: { en: 'Throughput, average completion time, and overdue counts by errand type.', ar: 'الإنتاجية، متوسط وقت الإنجاز، وأعداد المتأخرات حسب نوع المعاملة.' },
+    sections: [{ heading: { en: 'Reading the chart', ar: 'قراءة الرسم' }, body: { en: 'Bars show errand volume; the line overlays average days-to-complete. Spikes often signal a bottleneck step.', ar: 'الأعمدة تُظهر حجم المعاملات؛ الخط يُظهر متوسط أيام الإنجاز. الارتفاعات تشير غالباً إلى عنق زجاجة.' } }],
+  },
+
+  'reports.employee-360': {
+    title: { en: 'Employee 360', ar: 'موظف ٣٦٠' },
+    intro: { en: 'A complete view of one team member: hours, cases, tasks, billings, and outcomes.', ar: 'عرض شامل لعضو واحد من الفريق: الساعات، القضايا، المهام، الفواتير، والنتائج.' },
+    sections: [{ heading: { en: 'Pick an employee', ar: 'اختر موظفاً' }, body: { en: 'Use the dropdown at the top to switch members. The date range filter applies to all metrics on the page.', ar: 'استخدم القائمة المنسدلة للتبديل بين الأعضاء. تصفية النطاق تُطبَّق على كل المقاييس.' } }],
+  },
+
+  'reports.time-utilization': {
+    title: { en: 'Time utilization', ar: 'استغلال الوقت' },
+    intro: { en: 'Billable vs. non-billable hours per person, with utilization rate against an 8-hour workday.', ar: 'الساعات القابلة للفوترة مقابل غير القابلة لكل شخص، مع معدل الاستغلال مقارنة بيوم عمل ٨ ساعات.' },
+    sections: [{ heading: { en: 'Healthy targets', ar: 'الأهداف الصحية' }, body: { en: 'A typical target is 60–70%. Below 50% may indicate idle capacity; above 85% may indicate burnout risk.', ar: 'هدف نموذجي ٦٠–٧٠٪. أقل من ٥٠٪ قد يشير إلى طاقة عاطلة؛ أكثر من ٨٥٪ قد يشير لخطر الإرهاق.' } }],
+  },
+
+  'reports.firm-performance': {
+    title: { en: 'Firm performance', ar: 'أداء المكتب' },
+    intro: { en: 'KPIs across cases, errands, billing, and team productivity in one dashboard.', ar: 'مؤشرات الأداء عبر القضايا والمعاملات والفواتير وإنتاجية الفريق في لوحة واحدة.' },
+    sections: [{ heading: { en: 'Best used', ar: 'الأفضل لـ' }, body: { en: 'For monthly partner reviews and end-of-year planning. Export the full report as a printable PDF.', ar: 'لمراجعات الشركاء الشهرية والتخطيط نهاية السنة. صدِّر التقرير كـ PDF قابل للطباعة.' } }],
+  },
+
+  'activity-feed': {
+    title: { en: 'Activity feed', ar: 'سجل النشاط' },
+    intro: { en: 'Real-time stream of everything happening in your firm: case updates, document uploads, payments, and more.', ar: 'تدفق فوري لكل ما يحدث في مكتبك: تحديثات القضايا، رفع المستندات، المدفوعات، والمزيد.' },
+    sections: [{ heading: { en: 'Filter', ar: 'التصفية' }, body: { en: 'Filter by user, entity type, or action to focus on what matters to you.', ar: 'صفِّ حسب المستخدم، نوع الكيان، أو الإجراء للتركيز على ما يهمك.' } }],
+  },
+
+  'notifications': {
+    title: { en: 'Notifications', ar: 'الإشعارات' },
+    intro: { en: 'All alerts: hearing reminders, task assignments, mentions, invoice events, and announcements.', ar: 'كل التنبيهات: تذكيرات الجلسات، تعيين المهام، الإشارات، أحداث الفواتير، والإعلانات.' },
+    sections: [{ heading: { en: 'Manage', ar: 'إدارة' }, body: { en: '• Click to mark read.\n• Use bulk actions to mark all read or delete.\n• Configure delivery channels in Settings → Notifications.', ar: '• اضغط للتعليم كمقروء.\n• استخدم الإجراءات الجماعية.\n• اضبط القنوات في الإعدادات → الإشعارات.' } }],
+  },
+
+  'ai.legal-research': {
+    title: { en: 'AI legal research', ar: 'البحث القانوني الذكي' },
+    intro: { en: 'Ask legal questions in natural language and get sourced answers grounded in Iraqi law.', ar: 'اطرح أسئلة قانونية بلغة طبيعية واحصل على إجابات موثَّقة مبنية على القانون العراقي.' },
+    sections: [{ heading: { en: 'Ask well', ar: 'كيف تسأل' }, body: { en: '• Be specific (cite article numbers if known).\n• State the legal context (criminal, civil, commercial).\n• Always verify cited sources before relying on them in court.', ar: '• كن محدداً (اذكر أرقام المواد إن عرفتها).\n• حدد السياق القانوني.\n• تحقق من المصادر قبل الاعتماد عليها في المحكمة.' } }],
+    tips: [{ en: 'AI is an assistant, not a substitute for professional legal judgment.', ar: 'الذكاء الاصطناعي مساعد، لا بديل عن الحكم القانوني المهني.' }],
+  },
+
+  'ai.document-draft': {
+    title: { en: 'AI document drafting', ar: 'صياغة المستندات بالذكاء الاصطناعي' },
+    intro: { en: 'Generate first drafts of contracts, motions, letters, and other legal documents.', ar: 'أنشئ مسودات أولى للعقود، اللوائح، الرسائل، وغيرها من المستندات القانونية.' },
+    sections: [{ heading: { en: 'Workflow', ar: 'سير العمل' }, body: { en: '1. Pick a template or describe what you need.\n2. Provide key facts (parties, dates, amounts).\n3. Choose language.\n4. Generate, then edit and polish before use.', ar: '١. اختر قالباً أو صف ما تحتاج.\n٢. زوِّد الحقائق الأساسية.\n٣. اختر اللغة.\n٤. أنشئ، ثم عدِّل قبل الاستخدام.' } }],
+  },
+
+  'ai.translate': {
+    title: { en: 'AI translation', ar: 'الترجمة الذكية' },
+    intro: { en: 'Translate legal text between Arabic and English with terminology awareness.', ar: 'ترجم النصوص القانونية بين العربية والإنجليزية مع مراعاة المصطلحات.' },
+    sections: [{ heading: { en: 'Best practices', ar: 'أفضل الممارسات' }, body: { en: 'Paste full clauses for context (not single words). Always have a bilingual lawyer review before filing.', ar: 'الصق فقرات كاملة للسياق. اعرض الترجمة على محامٍ ثنائي اللغة قبل الإيداع.' } }],
+  },
 };
 
 export function getHelp(key: string): HelpEntry | null {
