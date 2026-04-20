@@ -8,7 +8,7 @@ import { cn } from '@/lib/utils';
 import {
   LayoutDashboard, Scale, FileCheck, Users, Calendar, CheckSquare,
   FileText, Clock, Receipt, BarChart3, MessageSquare, Sparkles,
-  UserCog, Settings, ChevronLeft, ChevronRight, Activity, Bell, Archive
+  UserCog, Settings, ChevronLeft, ChevronRight, Activity, Bell, Archive, ShieldCheck
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
@@ -34,6 +34,7 @@ const aiNavItems = [
 ];
 
 const secondaryNavItems = [
+  { key: 'conflictChecker', path: '/conflict-checker', icon: ShieldCheck },
   { key: 'activity', path: '/activity', icon: Activity },
   { key: 'notifications', path: '/notifications', icon: Bell },
 ];
