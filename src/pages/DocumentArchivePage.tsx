@@ -52,6 +52,8 @@ export default function DocumentArchivePage() {
   const [uploadOpen, setUploadOpen] = useState(false);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [reindexing, setReindexing] = useState(false);
+  const [backfilling, setBackfilling] = useState(false);
+  const [backfillProgress, setBackfillProgress] = useState<{ done: number; total: number } | null>(null);
   const [counts, setCounts] = useState({ total: 0, indexed: 0, pending: 0, failed: 0 });
 
   const load = useCallback(async () => {
@@ -162,6 +164,47 @@ export default function DocumentArchivePage() {
     setReindexing(false);
   };
 
+  const handleBackfillAll = async () => {
+    if (!orgId) return;
+    if (!confirm(language === 'ar'
+      ? 'سيتم تحليل وفهرسة جميع المستندات التي لم تتم فهرستها بعد. قد يستغرق ذلك بعض الوقت ويستهلك رصيد الذكاء الاصطناعي. المتابعة؟'
+      : 'This will index every document that has not been analyzed yet. It may take a while and consume AI credits. Continue?')) return;
+
+    setBackfilling(true);
+    try {
+      const { data, error } = await supabase.from('documents')
+        .select('id')
+        .eq('organization_id', orgId)
+        .eq('status', 'active')
+        .in('indexing_status', ['pending', 'failed']);
+      if (error) throw error;
+      const list = data || [];
+      if (!list.length) {
+        toast.info(language === 'ar' ? 'كل المستندات مفهرسة بالفعل' : 'All documents are already indexed');
+        return;
+      }
+      setBackfillProgress({ done: 0, total: list.length });
+      toast.info(language === 'ar' ? `بدء فهرسة ${list.length} مستند` : `Indexing ${list.length} document(s)…`);
+
+      // Process in parallel batches of 5 to avoid hammering the function
+      const BATCH = 5;
+      let done = 0;
+      for (let i = 0; i < list.length; i += BATCH) {
+        const slice = list.slice(i, i + BATCH);
+        await Promise.all(slice.map(d => reindexDocument(d.id).catch(() => null)));
+        done += slice.length;
+        setBackfillProgress({ done, total: list.length });
+      }
+      await Promise.all([load(), loadCounts()]);
+      toast.success(language === 'ar' ? `اكتملت فهرسة ${done} مستند` : `Indexed ${done} document(s)`);
+    } catch (e: any) {
+      toast.error(e?.message || 'Backfill failed');
+    } finally {
+      setBackfilling(false);
+      setTimeout(() => setBackfillProgress(null), 3000);
+    }
+  };
+
   const fmtSize = (b: number) => b < 1024 ? `${b} B` : b < 1048576 ? `${(b/1024).toFixed(1)} KB` : `${(b/1048576).toFixed(1)} MB`;
 
   return (
@@ -179,13 +222,41 @@ export default function DocumentArchivePage() {
         actionLabel="Upload Document"
         actionLabelAr="رفع مستند"
         onAction={() => setUploadOpen(true)}
-        secondaryActions={[{
-          label: reindexing ? 'Indexing…' : 'Re-index pending',
-          labelAr: reindexing ? 'جارِ الفهرسة...' : 'إعادة فهرسة المعلق',
-          icon: reindexing ? RefreshCw : Sparkles,
-          onClick: handleReindexPending,
-        }]}
+        secondaryActions={[
+          {
+            label: reindexing ? 'Indexing…' : 'Re-index pending',
+            labelAr: reindexing ? 'جارِ الفهرسة...' : 'إعادة فهرسة المعلق',
+            icon: reindexing ? RefreshCw : Sparkles,
+            onClick: handleReindexPending,
+          },
+          {
+            label: backfilling ? 'Backfilling…' : 'Backfill all',
+            labelAr: backfilling ? 'جارِ التحليل...' : 'فهرسة الكل',
+            icon: backfilling ? RefreshCw : Sparkles,
+            onClick: handleBackfillAll,
+          },
+        ]}
       />
+
+      {backfillProgress && (
+        <div className="bg-accent/10 border border-accent/30 rounded-md px-4 py-3">
+          <div className="flex items-center justify-between text-body-sm mb-1.5">
+            <span className="font-medium text-accent inline-flex items-center gap-2">
+              <Sparkles className="h-3.5 w-3.5" />
+              {language === 'ar' ? 'فهرسة الأرشيف بالذكاء الاصطناعي' : 'AI archive backfill'}
+            </span>
+            <span className="tabular-nums text-muted-foreground">
+              {backfillProgress.done} / {backfillProgress.total}
+            </span>
+          </div>
+          <div className="h-1.5 bg-background rounded-full overflow-hidden">
+            <div
+              className="h-full bg-accent transition-all"
+              style={{ width: `${(backfillProgress.done / backfillProgress.total) * 100}%` }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Stats strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">

@@ -87,6 +87,8 @@ interface FileEntry {
   error?: string;
   aiCategorizing?: boolean;
   aiSuggested?: boolean;
+  documentId?: string;
+  indexingStatus?: 'pending' | 'processing' | 'done' | 'failed' | 'skipped';
 }
 
 interface DocumentUploadModalProps {
@@ -131,6 +133,33 @@ export default function DocumentUploadModal({
       }));
     });
   }, [open, profile?.organization_id, language]);
+
+  // Subscribe to indexing status updates for uploaded documents in this session
+  useEffect(() => {
+    const orgId = profile?.organization_id;
+    if (!open || !orgId) return;
+    const trackedIds = files.map(f => f.documentId).filter(Boolean) as string[];
+    if (trackedIds.length === 0) return;
+
+    const channel = supabase
+      .channel(`upload-modal-indexing-${orgId}`)
+      .on(
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'documents', filter: `organization_id=eq.${orgId}` },
+        (payload: any) => {
+          const updated = payload.new;
+          if (!updated?.id || !trackedIds.includes(updated.id)) return;
+          setFiles(prev => prev.map(f =>
+            f.documentId === updated.id
+              ? { ...f, indexingStatus: updated.indexing_status }
+              : f
+          ));
+        }
+      )
+      .subscribe();
+
+    return () => { supabase.removeChannel(channel); };
+  }, [open, profile?.organization_id, files.map(f => f.documentId).filter(Boolean).join(',')]);
 
   const addFiles = useCallback((newFiles: FileList | File[]) => {
     const entries: FileEntry[] = [];
@@ -290,7 +319,7 @@ export default function DocumentUploadModal({
           } as any);
         }
 
-        updateFile(entry.id, { progress: 100, status: 'done' });
+        updateFile(entry.id, { progress: 100, status: 'done', documentId: newDoc?.id, indexingStatus: 'pending' });
         successCount++;
         // Fire-and-forget AI indexing in the background
         if (newDoc?.id) triggerDocumentIndexing(newDoc.id);
@@ -306,8 +335,10 @@ export default function DocumentUploadModal({
 
     setIsUploading(false);
     if (successCount > 0) {
-      toast.success(language === 'ar' ? `تم رفع ${successCount} مستند بنجاح` : `${successCount} document(s) uploaded successfully`);
-      setTimeout(() => { onComplete(); onClose(); setFiles([]); }, 500);
+      toast.success(language === 'ar'
+        ? `تم رفع ${successCount} مستند — جارِ الفهرسة بالذكاء الاصطناعي`
+        : `${successCount} document(s) uploaded — AI is indexing in the background`);
+      onComplete();
     }
   };
 
@@ -376,10 +407,32 @@ export default function DocumentUploadModal({
                   <div className="space-y-1">
                     <Progress value={entry.progress} className="h-1" />
                     <p className="text-body-sm text-muted-foreground">
-                      {entry.status === 'uploading' ? `${entry.progress}%` : (language === 'ar' ? '✓ اكتمل' : '✓ Complete')}
+                      {entry.status === 'uploading' ? `${entry.progress}%` : (language === 'ar' ? '✓ تم الرفع' : '✓ Uploaded')}
                     </p>
                   </div>
                 )}
+
+                {/* Live AI indexing status */}
+                {entry.status === 'done' && entry.documentId && (
+                  <div className="flex items-center gap-2 text-body-sm pt-1 border-t border-border/50">
+                    {(!entry.indexingStatus || entry.indexingStatus === 'pending') && (
+                      <><Loader2 size={12} className="animate-spin text-accent" /><span className="text-muted-foreground">{language === 'ar' ? 'في انتظار فهرسة الذكاء الاصطناعي...' : 'Waiting for AI indexing…'}</span></>
+                    )}
+                    {entry.indexingStatus === 'processing' && (
+                      <><Sparkles size={12} className="text-accent animate-pulse" /><span className="text-accent">{language === 'ar' ? 'جارِ تحليل وفهرسة المستند...' : 'AI analyzing & indexing…'}</span></>
+                    )}
+                    {entry.indexingStatus === 'done' && (
+                      <><Check size={12} className="text-success" /><span className="text-success">{language === 'ar' ? 'تمت الفهرسة بالذكاء الاصطناعي' : 'Indexed by AI — searchable now'}</span></>
+                    )}
+                    {entry.indexingStatus === 'failed' && (
+                      <><AlertCircle size={12} className="text-destructive" /><span className="text-destructive">{language === 'ar' ? 'فشلت الفهرسة — يمكنك إعادة المحاولة من التفاصيل' : 'Indexing failed — retry from details'}</span></>
+                    )}
+                    {entry.indexingStatus === 'skipped' && (
+                      <><span className="text-muted-foreground">{language === 'ar' ? 'لم تتم الفهرسة' : 'Not indexed'}</span></>
+                    )}
+                  </div>
+                )}
+
                 {entry.status === 'error' && <p className="text-body-sm text-destructive">{entry.error}</p>}
 
                 {/* Form fields (only when pending) */}
@@ -537,11 +590,19 @@ export default function DocumentUploadModal({
         </div>
 
         <DialogFooter className="px-6 py-4 border-t border-border flex-shrink-0">
-          <Button variant="outline" onClick={() => { onClose(); setFiles([]); }} disabled={isUploading}>{t('common.cancel')}</Button>
-          <Button onClick={handleUpload} disabled={!canUpload} className="bg-accent text-accent-foreground hover:bg-accent/90">
-            {isUploading ? <><Loader2 size={14} className="animate-spin me-1.5" />{language === 'ar' ? 'جاري الرفع...' : 'Uploading...'}</> :
-              `${language === 'ar' ? 'رفع' : 'Upload'} ${files.filter(f => f.status === 'pending').length} ${language === 'ar' ? 'ملفات' : 'file(s)'}`}
-          </Button>
+          {files.some(f => f.status === 'done') && !files.some(f => f.status === 'pending') ? (
+            <Button onClick={() => { onComplete(); onClose(); setFiles([]); }} className="bg-accent text-accent-foreground hover:bg-accent/90">
+              {language === 'ar' ? 'تم' : 'Done'}
+            </Button>
+          ) : (
+            <>
+              <Button variant="outline" onClick={() => { onClose(); setFiles([]); }} disabled={isUploading}>{t('common.cancel')}</Button>
+              <Button onClick={handleUpload} disabled={!canUpload} className="bg-accent text-accent-foreground hover:bg-accent/90">
+                {isUploading ? <><Loader2 size={14} className="animate-spin me-1.5" />{language === 'ar' ? 'جاري الرفع...' : 'Uploading...'}</> :
+                  `${language === 'ar' ? 'رفع' : 'Upload'} ${files.filter(f => f.status === 'pending').length} ${language === 'ar' ? 'ملفات' : 'file(s)'}`}
+              </Button>
+            </>
+          )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
