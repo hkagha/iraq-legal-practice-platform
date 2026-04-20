@@ -207,4 +207,9 @@ const StaffLoginPage = forwardRef<HTMLDivElement>((_props, _ref) => {
       </div>
     </div>
   );
-}
+});
+
+StaffLoginPage.displayName = 'StaffLoginPage';
+
+export default StaffLoginPage;
+
