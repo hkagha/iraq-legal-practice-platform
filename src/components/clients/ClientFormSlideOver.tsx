@@ -843,7 +843,7 @@ export default function ClientFormSlideOver({ isOpen, onClose, onSaved, editClie
                               <FormInput type="email" value={contactForm.email} onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))} />
                             </FormField>
                             <FormField label={t('clients.fields.phone')}>
-                              <FormInput type="tel" value={contactForm.phone} onChange={e => setContactForm(f => ({ ...f, phone: e.target.value }))} />
+                              <PhoneInput value={contactForm.phone} onChange={v => setContactForm(f => ({ ...f, phone: v }))} />
                             </FormField>
                           </div>
                           <div className="grid grid-cols-2 gap-3">
