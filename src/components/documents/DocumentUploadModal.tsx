@@ -308,8 +308,10 @@ export default function DocumentUploadModal({
 
     setIsUploading(false);
     if (successCount > 0) {
-      toast.success(language === 'ar' ? `تم رفع ${successCount} مستند بنجاح` : `${successCount} document(s) uploaded successfully`);
-      setTimeout(() => { onComplete(); onClose(); setFiles([]); }, 500);
+      toast.success(language === 'ar'
+        ? `تم رفع ${successCount} مستند — جارِ الفهرسة بالذكاء الاصطناعي`
+        : `${successCount} document(s) uploaded — AI is indexing in the background`);
+      onComplete();
     }
   };
 
