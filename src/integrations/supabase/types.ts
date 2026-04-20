@@ -2686,6 +2686,50 @@ export type Database = {
           },
         ]
       }
+      organization_secrets: {
+        Row: {
+          ai_api_key_encrypted: string | null
+          bank_account_number: string | null
+          bank_iban: string | null
+          bank_swift_code: string | null
+          created_at: string | null
+          id: string
+          organization_id: string
+          tax_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          ai_api_key_encrypted?: string | null
+          bank_account_number?: string | null
+          bank_iban?: string | null
+          bank_swift_code?: string | null
+          created_at?: string | null
+          id?: string
+          organization_id: string
+          tax_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          ai_api_key_encrypted?: string | null
+          bank_account_number?: string | null
+          bank_iban?: string | null
+          bank_swift_code?: string | null
+          created_at?: string | null
+          id?: string
+          organization_id?: string
+          tax_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "organization_secrets_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: true
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       organizations: {
         Row: {
           address: string | null
