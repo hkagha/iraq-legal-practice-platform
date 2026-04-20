@@ -12,6 +12,8 @@ import { toast } from 'sonner';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { CitySelect } from '@/components/ui/CitySelect';
 import { findGovernorate, IRAQ_GOVERNORATE_LEGACY_NAMES } from '@/lib/referenceData';
+import { GovernorateSelect } from '@/components/ui/GovernorateSelect';
+import { CountrySelect } from '@/components/ui/CountrySelect';
 
 const governorates = IRAQ_GOVERNORATE_LEGACY_NAMES;
 
@@ -140,17 +142,16 @@ export default function GeneralSettings() {
           />
         </FormField>
         <FormField label={t('settings.org.governorate')}>
-          <FormSelect
+          <GovernorateSelect
             value={form.governorate}
-            onValueChange={v => update('governorate', v)}
-            options={governorates.map(g => ({ value: g, label: language === 'ar' ? t(`clients.governorates.${g}`) : g }))}
+            onChange={v => update('governorate', v)}
           />
         </FormField>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormField label={t('settings.org.country')}>
-          <FormInput value={language === 'ar' ? 'العراق' : 'Iraq'} disabled />
+          <CountrySelect value="IQ" onChange={() => {}} disabled />
         </FormField>
         <FormField label={t('settings.org.website')}>
           <FormInput value={form.website} onChange={e => update('website', e.target.value)} placeholder="https://" />

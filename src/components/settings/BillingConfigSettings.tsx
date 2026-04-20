@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Save, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { CurrencySelect } from '@/components/ui/CurrencySelect';
 
 const allDays = [
   { value: 'sunday', en: 'Sunday', ar: 'الأحد' },
