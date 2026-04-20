@@ -9,6 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { FormSearchSelect } from '@/components/ui/FormSearchSelect';
+import { CurrencySelect } from '@/components/ui/CurrencySelect';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { toast } from '@/hooks/use-toast';
@@ -234,22 +236,28 @@ export default function InvoiceFormPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label>{t('billing.invoice.client')} *</Label>
-              <Select value={clientId} onValueChange={setClientId}>
-                <SelectTrigger className="mt-1"><SelectValue placeholder={language === 'ar' ? 'اختر العميل' : 'Select client'} /></SelectTrigger>
-                <SelectContent>
-                  {clients.map(c => <SelectItem key={c.id} value={c.id}>{getClientName(c)}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <div className="mt-1">
+                <FormSearchSelect
+                  value={clientId}
+                  onChange={setClientId}
+                  placeholder={language === 'ar' ? 'اختر العميل' : 'Select client'}
+                  options={clients.map(c => ({ value: c.id, label: getClientName(c) }))}
+                />
+              </div>
             </div>
             <div>
               <Label>{t('billing.invoice.caseOptional')}</Label>
-              <Select value={caseId} onValueChange={setCaseId}>
-                <SelectTrigger className="mt-1"><SelectValue placeholder={language === 'ar' ? 'اختر القضية' : 'Select case'} /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">{language === 'ar' ? 'بدون' : 'None'}</SelectItem>
-                  {cases.map(c => <SelectItem key={c.id} value={c.id}>{c.case_number} - {c.title}</SelectItem>)}
-                </SelectContent>
-              </Select>
+              <div className="mt-1">
+                <FormSearchSelect
+                  value={caseId}
+                  onChange={(v) => setCaseId(v === 'none' ? '' : v)}
+                  placeholder={language === 'ar' ? 'اختر القضية' : 'Select case'}
+                  options={[
+                    { value: 'none', label: language === 'ar' ? 'بدون' : 'None' },
+                    ...cases.map(c => ({ value: c.id, label: c.title, subtitle: c.case_number })),
+                  ]}
+                />
+              </div>
             </div>
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -277,13 +285,9 @@ export default function InvoiceFormPage() {
             </div>
             <div>
               <Label>{t('billing.invoice.currency')}</Label>
-              <Select value={currency} onValueChange={setCurrency}>
-                <SelectTrigger className="mt-1"><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="IQD">IQD</SelectItem>
-                  <SelectItem value="USD">USD</SelectItem>
-                </SelectContent>
-              </Select>
+              <div className="mt-1">
+                <CurrencySelect value={currency} onChange={setCurrency} />
+              </div>
             </div>
           </div>
         </div>
