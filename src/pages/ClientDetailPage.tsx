@@ -27,7 +27,7 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { StatusBadge } from '@/components/ui/StatusBadge';
 import PersonFormSlideOver from '@/components/parties/PersonFormSlideOver';
 import EntityFormSlideOver from '@/components/parties/EntityFormSlideOver';
-import EntityRepresentativesEditor from '@/components/parties/EntityRepresentativesEditor';
+import { EntityRepresentativesEditor } from '@/components/parties/EntityRepresentativesEditor';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import { cn } from '@/lib/utils';
 
@@ -335,7 +335,7 @@ function DetailRow({
   label,
   value,
 }: {
-  icon?: React.ComponentType<{ size?: number; className?: string }>;
+  icon?: React.ElementType;
   label: string;
   value?: string | null;
 }) {
