@@ -222,13 +222,41 @@ export default function DocumentArchivePage() {
         actionLabel="Upload Document"
         actionLabelAr="رفع مستند"
         onAction={() => setUploadOpen(true)}
-        secondaryActions={[{
-          label: reindexing ? 'Indexing…' : 'Re-index pending',
-          labelAr: reindexing ? 'جارِ الفهرسة...' : 'إعادة فهرسة المعلق',
-          icon: reindexing ? RefreshCw : Sparkles,
-          onClick: handleReindexPending,
-        }]}
+        secondaryActions={[
+          {
+            label: reindexing ? 'Indexing…' : 'Re-index pending',
+            labelAr: reindexing ? 'جارِ الفهرسة...' : 'إعادة فهرسة المعلق',
+            icon: reindexing ? RefreshCw : Sparkles,
+            onClick: handleReindexPending,
+          },
+          {
+            label: backfilling ? 'Backfilling…' : 'Backfill all',
+            labelAr: backfilling ? 'جارِ التحليل...' : 'فهرسة الكل',
+            icon: backfilling ? RefreshCw : Sparkles,
+            onClick: handleBackfillAll,
+          },
+        ]}
       />
+
+      {backfillProgress && (
+        <div className="bg-accent/10 border border-accent/30 rounded-md px-4 py-3">
+          <div className="flex items-center justify-between text-body-sm mb-1.5">
+            <span className="font-medium text-accent inline-flex items-center gap-2">
+              <Sparkles className="h-3.5 w-3.5" />
+              {language === 'ar' ? 'فهرسة الأرشيف بالذكاء الاصطناعي' : 'AI archive backfill'}
+            </span>
+            <span className="tabular-nums text-muted-foreground">
+              {backfillProgress.done} / {backfillProgress.total}
+            </span>
+          </div>
+          <div className="h-1.5 bg-background rounded-full overflow-hidden">
+            <div
+              className="h-full bg-accent transition-all"
+              style={{ width: `${(backfillProgress.done / backfillProgress.total) * 100}%` }}
+            />
+          </div>
+        </div>
+      )}
 
       {/* Stats strip */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
