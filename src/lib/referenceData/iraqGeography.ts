@@ -214,3 +214,26 @@ export function getAllIraqiCities() {
     g.cities.map(c => ({ ...c, governorate: g.code, governorateName: g.name, governorateNameAr: g.nameAr }))
   );
 }
+
+/**
+ * Look up a governorate by either short code, English name, or Arabic name.
+ * Matching is loose (case-insensitive, ignores hyphens / spaces / "Al-" prefixes)
+ * to bridge legacy display strings stored in the DB (e.g. "Al-Qadisiyyah",
+ * "Salah al-Din", "Baghdad") with the canonical short codes used here.
+ */
+export function findGovernorate(input?: string | null): IraqGovernorate | undefined {
+  if (!input) return undefined;
+  const norm = (s: string) =>
+    s.toLowerCase().replace(/[\s\-_]/g, '').replace(/^al/, '');
+  const target = norm(input);
+  return IRAQ_GOVERNORATES.find(g =>
+    norm(g.code) === target || norm(g.name) === target || g.nameAr === input
+  );
+}
+
+/** All Iraqi governorate display options keyed by their legacy English name (DB value). */
+export const IRAQ_GOVERNORATE_LEGACY_NAMES = [
+  'Baghdad', 'Basra', 'Maysan', 'Dhi Qar', 'Wasit', 'Babil', 'Karbala', 'Najaf',
+  'Al-Qadisiyyah', 'Al-Muthanna', 'Diyala', 'Salah al-Din', 'Kirkuk', 'Nineveh',
+  'Erbil', 'Duhok', 'Sulaymaniyah', 'Al-Anbar',
+] as const;
