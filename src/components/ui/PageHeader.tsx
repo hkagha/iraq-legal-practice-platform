@@ -5,6 +5,7 @@ import { Plus } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import type { LucideIcon } from 'lucide-react';
+import { HelpButton } from '@/components/ui/HelpButton';
 
 interface BreadcrumbItem {
   label: string;
@@ -31,9 +32,11 @@ interface PageHeaderProps {
   breadcrumbs?: BreadcrumbItem[];
   eyebrow?: string;
   eyebrowAr?: string;
+  /** Key into helpContent registry — when set, a (?) help button appears next to the title. */
+  helpKey?: string;
 }
 
-export function PageHeader({ title, titleAr, subtitle, subtitleAr, actionLabel, actionLabelAr, onAction, secondaryActions, breadcrumbs, eyebrow, eyebrowAr }: PageHeaderProps) {
+export function PageHeader({ title, titleAr, subtitle, subtitleAr, actionLabel, actionLabelAr, onAction, secondaryActions, breadcrumbs, eyebrow, eyebrowAr, helpKey }: PageHeaderProps) {
   const { language, isRTL } = useLanguage();
   const sep = isRTL ? '\u00a0\\\u00a0' : '\u00a0/\u00a0';
 
@@ -62,7 +65,10 @@ export function PageHeader({ title, titleAr, subtitle, subtitleAr, actionLabel, 
           {(eyebrow || eyebrowAr) && (
             <p className="eyebrow mb-2">{language === 'ar' ? eyebrowAr : eyebrow}</p>
           )}
-          <h1 className="text-display-lg text-foreground">{language === 'ar' ? titleAr : title}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-display-lg text-foreground">{language === 'ar' ? titleAr : title}</h1>
+            {helpKey && <HelpButton helpKey={helpKey} />}
+          </div>
           {(subtitle || subtitleAr) && (
             <p className="text-body-md text-muted-foreground mt-2 max-w-2xl">
               {language === 'ar' ? subtitleAr : subtitle}
