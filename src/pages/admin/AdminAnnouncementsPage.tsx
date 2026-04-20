@@ -5,6 +5,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Megaphone, Plus } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { toast } from 'sonner';
+import { HelpButton } from '@/components/ui/HelpButton';
 
 interface Announcement {
   id: string;
@@ -81,7 +82,10 @@ export default function AdminAnnouncementsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-display-sm text-foreground">{isEN ? 'Announcements' : 'الإعلانات'}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-display-sm text-foreground">{isEN ? 'Announcements' : 'الإعلانات'}</h1>
+            <HelpButton helpKey="admin.announcements" />
+          </div>
           <p className="text-body-md text-muted-foreground">{isEN ? 'Send platform-wide notifications' : 'إرسال إشعارات على مستوى المنصة'}</p>
         </div>
         <button onClick={() => setShowModal(true)} className="h-10 px-4 rounded-lg bg-accent text-accent-foreground font-medium text-body-md flex items-center gap-2 hover:bg-accent-dark transition-colors">

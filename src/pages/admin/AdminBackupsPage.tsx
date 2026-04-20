@@ -12,6 +12,7 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import CreateBackupModal from '@/components/admin/CreateBackupModal';
 import ScheduleBackupModal from '@/components/admin/ScheduleBackupModal';
 import BackupDetailSlideOver from '@/components/admin/BackupDetailSlideOver';
+import { HelpButton } from '@/components/ui/HelpButton';
 import {
   Database, Calendar, Clock, HardDrive, Plus, Download, Eye, Trash2,
   RotateCcw, MoreHorizontal, Play, Pause, AlertTriangle, CheckCircle, XCircle
@@ -295,7 +296,10 @@ export default function AdminBackupsPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-heading-xl text-foreground">{language === 'ar' ? 'النسخ الاحتياطي والتصدير' : 'Backup & Export'}</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-heading-xl text-foreground">{language === 'ar' ? 'النسخ الاحتياطي والتصدير' : 'Backup & Export'}</h1>
+            <HelpButton helpKey="admin.backups" />
+          </div>
           <p className="text-body-md text-muted-foreground mt-1">
             {language === 'ar' ? 'إدارة النسخ الاحتياطية والتصدير واستعادة البيانات' : 'Manage system backups, exports, and data recovery'}
           </p>
