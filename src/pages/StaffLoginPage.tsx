@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Eye, EyeOff, Scale, FileText, BarChart3, Loader2, ArrowLeft } from 'lucide-react';
 
-export default function StaffLoginPage() {
+const StaffLoginPage = forwardRef<HTMLDivElement>((_props, _ref) => {
   const { t, language, setLanguage } = useLanguage();
   const { signIn, profile, user } = useAuth();
   const navigate = useNavigate();
