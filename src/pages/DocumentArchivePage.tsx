@@ -167,27 +167,23 @@ export default function DocumentArchivePage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title={language === 'ar' ? 'أرشيف المستندات الذكي' : 'Smart Document Archive'}
-        subtitle={language === 'ar'
-          ? 'بحث متقدم في كامل أرشيف المكتب باستخدام الذكاء الاصطناعي'
-          : 'AI-powered search across your entire firm archive'}
+        title="Smart Document Archive"
+        titleAr="أرشيف المستندات الذكي"
+        subtitle="AI-powered search across your entire firm archive"
+        subtitleAr="بحث متقدم في كامل أرشيف المكتب باستخدام الذكاء الاصطناعي"
         breadcrumbs={[
           { label: 'Dashboard', labelAr: 'لوحة التحكم', href: '/dashboard' },
           { label: 'Documents', labelAr: 'المستندات', href: '/documents' },
           { label: 'Archive', labelAr: 'الأرشيف' },
         ]}
-        primaryAction={{
-          label: language === 'ar' ? 'رفع مستند' : 'Upload Document',
-          icon: Upload,
-          onClick: () => setUploadOpen(true),
-        }}
+        actionLabel="Upload Document"
+        actionLabelAr="رفع مستند"
+        onAction={() => setUploadOpen(true)}
         secondaryActions={[{
-          label: reindexing
-            ? (language === 'ar' ? 'جارِ الفهرسة...' : 'Indexing…')
-            : (language === 'ar' ? 'إعادة فهرسة المعلق' : 'Re-index pending'),
+          label: reindexing ? 'Indexing…' : 'Re-index pending',
+          labelAr: reindexing ? 'جارِ الفهرسة...' : 'إعادة فهرسة المعلق',
           icon: reindexing ? RefreshCw : Sparkles,
           onClick: handleReindexPending,
-          disabled: reindexing,
         }]}
       />
 
