@@ -7,6 +7,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import ClientFormSlideOver from '@/components/clients/ClientFormSlideOver';
+import { HelpButton } from '@/components/ui/HelpButton';
 
 export default function DashboardHeader() {
   const { t, language } = useLanguage();
@@ -25,9 +26,12 @@ export default function DashboardHeader() {
     <>
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
         <div>
-          <h1 className="text-display-lg text-foreground">
-            {t('dashboard.welcomeMessage', { name: firstName })}
-          </h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-display-lg text-foreground">
+              {t('dashboard.welcomeMessage', { name: firstName })}
+            </h1>
+            <HelpButton helpKey="dashboard" />
+          </div>
           <p className="text-body-md text-muted-foreground mt-1">{dateStr}</p>
         </div>
 

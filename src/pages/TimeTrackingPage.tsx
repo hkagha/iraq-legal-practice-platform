@@ -190,6 +190,7 @@ export default function TimeTrackingPage() {
         actionLabel="Log Time"
         actionLabelAr="تسجيل وقت"
         onAction={() => { setEditEntry(null); setPrefillCaseId(undefined); setPrefillErrandId(undefined); setShowLogModal(true); }}
+        helpKey="time-tracking"
         breadcrumbs={[
           { label: 'Dashboard', labelAr: 'لوحة التحكم', href: '/dashboard' },
           { label: 'Time Tracking', labelAr: 'تتبع الوقت' },
