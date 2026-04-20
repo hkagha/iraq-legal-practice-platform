@@ -21,6 +21,10 @@ import {
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { PhoneInput } from '@/components/ui/PhoneInput';
+import { CitySelect } from '@/components/ui/CitySelect';
+import { CountrySelect } from '@/components/ui/CountrySelect';
+import { findGovernorate } from '@/lib/referenceData';
 
 const GOVERNORATES = [
   'Baghdad', 'Basra', 'Maysan', 'Dhi Qar', 'Wasit', 'Babil', 'Karbala', 'Najaf',
@@ -162,7 +166,7 @@ export default function ClientFormSlideOver({ isOpen, onClose, onSaved, editClie
         company_type: c.company_type || '', company_registration_number: c.company_registration_number || '',
         industry: c.industry || '', tax_id: c.tax_id || '',
         email: c.email || '',
-        phone: c.phone ? c.phone.replace(/^\+964/, '') : '',
+        phone: c.phone || '',
         secondary_phone: c.secondary_phone || '', whatsapp_number: c.whatsapp_number || '',
         address: c.address || '', address_ar: c.address_ar || '',
         city: c.city || '', governorate: c.governorate || 'Baghdad',
@@ -230,7 +234,7 @@ export default function ClientFormSlideOver({ isOpen, onClose, onSaved, editClie
       const payload: Record<string, any> = {
         client_type: form.client_type,
         email: form.email || null,
-        phone: form.phone ? `+964${form.phone.replace(/^\+964/, '')}` : null,
+        phone: form.phone || null,
         secondary_phone: form.secondary_phone || null,
         whatsapp_number: form.whatsapp_number || null,
         address: form.address || null, address_ar: form.address_ar || null,
@@ -667,34 +671,25 @@ export default function ClientFormSlideOver({ isOpen, onClose, onSaved, editClie
                       />
                     </FormField>
                     <FormField label={t('clients.fields.phone')} required error={errors.phone}>
-                      <div className="flex">
-                        <div className="flex items-center px-3 bg-muted border border-border border-e-0 rounded-s-input text-body-sm text-muted-foreground flex-shrink-0">
-                          +964
-                        </div>
-                        <FormInput
-                          type="tel"
-                          value={form.phone}
-                          onChange={e => updateField('phone', e.target.value)}
-                          placeholder={t('clients.form.phonePlaceholder')}
-                          error={!!errors.phone}
-                          className="rounded-s-none"
-                        />
-                      </div>
+                      <PhoneInput
+                        value={form.phone}
+                        onChange={v => updateField('phone', v)}
+                        error={!!errors.phone}
+                        placeholder={t('clients.form.phonePlaceholder')}
+                      />
                     </FormField>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <FormField label={t('clients.fields.secondaryPhone')}>
-                      <FormInput
-                        type="tel"
+                      <PhoneInput
                         value={form.secondary_phone}
-                        onChange={e => updateField('secondary_phone', e.target.value)}
+                        onChange={v => updateField('secondary_phone', v)}
                       />
                     </FormField>
                     <FormField label={t('clients.fields.whatsapp')} helperText={t('clients.form.whatsappHelper')}>
-                      <FormInput
-                        type="tel"
+                      <PhoneInput
                         value={form.whatsapp_number}
-                        onChange={e => updateField('whatsapp_number', e.target.value)}
+                        onChange={v => updateField('whatsapp_number', v)}
                       />
                     </FormField>
                   </div>
@@ -730,9 +725,10 @@ export default function ClientFormSlideOver({ isOpen, onClose, onSaved, editClie
                   </FormField>
                   <div className="grid grid-cols-3 gap-4">
                     <FormField label={t('clients.fields.city')}>
-                      <FormInput
+                      <CitySelect
                         value={form.city}
-                        onChange={e => updateField('city', e.target.value)}
+                        onChange={v => updateField('city', v)}
+                        governorateCode={findGovernorate(form.governorate)?.code}
                       />
                     </FormField>
                     <FormField label={t('clients.fields.governorate')} required error={errors.governorate}>
@@ -847,7 +843,7 @@ export default function ClientFormSlideOver({ isOpen, onClose, onSaved, editClie
                               <FormInput type="email" value={contactForm.email} onChange={e => setContactForm(f => ({ ...f, email: e.target.value }))} />
                             </FormField>
                             <FormField label={t('clients.fields.phone')}>
-                              <FormInput type="tel" value={contactForm.phone} onChange={e => setContactForm(f => ({ ...f, phone: e.target.value }))} />
+                              <PhoneInput value={contactForm.phone} onChange={v => setContactForm(f => ({ ...f, phone: v }))} />
                             </FormField>
                           </div>
                           <div className="grid grid-cols-2 gap-3">

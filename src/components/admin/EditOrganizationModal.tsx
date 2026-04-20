@@ -11,8 +11,10 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-
-const GOVERNORATES = ['Baghdad','Basra','Nineveh','Erbil','Sulaymaniyah','Duhok','Kirkuk','Diyala','Anbar','Babylon','Karbala','Najaf','Wasit','Maysan','Dhi Qar','Muthanna','Qadisiyyah','Saladin'];
+import { PhoneInput } from '@/components/ui/PhoneInput';
+import { CitySelect } from '@/components/ui/CitySelect';
+import { FormSearchSelect } from '@/components/ui/FormSearchSelect';
+import { IRAQ_GOVERNORATE_LEGACY_NAMES, findGovernorate } from '@/lib/referenceData';
 
 interface Props { open: boolean; orgId: string; onClose: () => void; onSuccess: () => void; }
 
@@ -75,13 +77,24 @@ export default function EditOrganizationModal({ open, orgId, onClose, onSuccess 
             <FormField label={isEN ? 'Max Users' : 'الحد الأقصى للمستخدمين'}><FormInput type="number" value={form.max_users || 10} onChange={e => set('max_users', parseInt(e.target.value))} /></FormField>
             <FormField label={isEN ? 'Max Storage (MB)' : 'أقصى تخزين (ميغابايت)'}><FormInput type="number" value={form.max_storage_mb || 1024} onChange={e => set('max_storage_mb', parseInt(e.target.value))} /></FormField>
           </div>
-          <FormField label={isEN ? 'Phone' : 'الهاتف'}><FormInput value={form.phone || ''} onChange={e => set('phone', e.target.value)} /></FormField>
+          <FormField label={isEN ? 'Phone' : 'الهاتف'}><PhoneInput value={form.phone || ''} onChange={v => set('phone', v)} /></FormField>
           <FormField label={isEN ? 'Email' : 'البريد'}><FormInput value={form.email || ''} onChange={e => set('email', e.target.value)} /></FormField>
           <FormField label={isEN ? 'Website' : 'الموقع'}><FormInput value={form.website || ''} onChange={e => set('website', e.target.value)} /></FormField>
           <div className="grid grid-cols-2 gap-3">
-            <FormField label={isEN ? 'City' : 'المدينة'}><FormInput value={form.city || ''} onChange={e => set('city', e.target.value)} /></FormField>
             <FormField label={isEN ? 'Governorate' : 'المحافظة'}>
-              <FormSelect value={form.governorate || ''} onValueChange={v => set('governorate', v)} options={GOVERNORATES.map(g => ({ value: g, label: g }))} />
+              <FormSearchSelect
+                value={form.governorate || undefined}
+                onChange={v => set('governorate', v)}
+                options={IRAQ_GOVERNORATE_LEGACY_NAMES.map(g => ({ value: g, label: g }))}
+                placeholder={isEN ? 'Select governorate' : 'اختر المحافظة'}
+              />
+            </FormField>
+            <FormField label={isEN ? 'City' : 'المدينة'}>
+              <CitySelect
+                value={form.city}
+                onChange={v => set('city', v)}
+                governorateCode={findGovernorate(form.governorate)?.code}
+              />
             </FormField>
           </div>
           <div className="flex items-center justify-between bg-muted/50 rounded-lg p-3">

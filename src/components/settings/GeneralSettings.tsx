@@ -9,12 +9,11 @@ import { FormSelect } from '@/components/ui/FormSelect';
 import { Button } from '@/components/ui/button';
 import { Save, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { PhoneInput } from '@/components/ui/PhoneInput';
+import { CitySelect } from '@/components/ui/CitySelect';
+import { findGovernorate, IRAQ_GOVERNORATE_LEGACY_NAMES } from '@/lib/referenceData';
 
-const governorates = [
-  'Baghdad', 'Basra', 'Maysan', 'Dhi Qar', 'Wasit', 'Babil', 'Karbala', 'Najaf',
-  'Al-Qadisiyyah', 'Al-Muthanna', 'Diyala', 'Salah al-Din', 'Kirkuk', 'Nineveh',
-  'Erbil', 'Duhok', 'Sulaymaniyah', 'Al-Anbar',
-];
+const governorates = IRAQ_GOVERNORATE_LEGACY_NAMES;
 
 const orgTypes = [
   { value: 'law_firm', label: 'Law Firm', labelAr: 'مكتب محاماة' },
@@ -121,7 +120,7 @@ export default function GeneralSettings() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormField label={t('settings.org.phone')}>
-          <FormInput value={form.phone} onChange={e => update('phone', e.target.value)} placeholder="+964" />
+          <PhoneInput value={form.phone} onChange={v => update('phone', v)} />
         </FormField>
         <FormField label={t('settings.org.email')}>
           <FormInput type="email" value={form.email} onChange={e => update('email', e.target.value)} />
@@ -134,7 +133,11 @@ export default function GeneralSettings() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <FormField label={t('settings.org.city')}>
-          <FormInput value={form.city} onChange={e => update('city', e.target.value)} />
+          <CitySelect
+            value={form.city}
+            onChange={v => update('city', v)}
+            governorateCode={findGovernorate(form.governorate)?.code}
+          />
         </FormField>
         <FormField label={t('settings.org.governorate')}>
           <FormSelect

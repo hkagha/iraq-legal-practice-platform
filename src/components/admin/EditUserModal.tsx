@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 
 const ROLES = ['super_admin', 'firm_admin', 'lawyer', 'paralegal', 'secretary', 'accountant', 'client'];
 
@@ -86,7 +87,7 @@ export default function EditUserModal({ open, userId, onClose, onSuccess }: Prop
             <FormField label={isEN ? 'First Name (Arabic)' : 'الاسم الأول (عربي)'}><FormInput value={form.first_name_ar || ''} onChange={e => set('first_name_ar', e.target.value)} dir="rtl" /></FormField>
             <FormField label={isEN ? 'Last Name (Arabic)' : 'الاسم الأخير (عربي)'}><FormInput value={form.last_name_ar || ''} onChange={e => set('last_name_ar', e.target.value)} dir="rtl" /></FormField>
           </div>
-          <FormField label={isEN ? 'Phone' : 'الهاتف'}><FormInput value={form.phone || ''} onChange={e => set('phone', e.target.value)} /></FormField>
+          <FormField label={isEN ? 'Phone' : 'الهاتف'}><PhoneInput value={form.phone || ''} onChange={v => set('phone', v)} /></FormField>
           <FormField label={isEN ? 'Organization' : 'المؤسسة'}>
             <FormSelect value={form.organization_id || ''} onValueChange={v => set('organization_id', v)} options={orgs} />
           </FormField>

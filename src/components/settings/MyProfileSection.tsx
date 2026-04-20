@@ -8,6 +8,7 @@ import { FormField } from '@/components/ui/FormField';
 import { FormInput } from '@/components/ui/FormInput';
 import { FormTextarea } from '@/components/ui/FormTextarea';
 import { Camera, User } from 'lucide-react';
+import { PhoneInput } from '@/components/ui/PhoneInput';
 
 export default function MyProfileSection() {
   const { profile, organization, user, updateProfile } = useAuth();
@@ -126,12 +127,12 @@ export default function MyProfileSection() {
             <FormInput value={profile?.email || ''} disabled />
           </FormField>
           <FormField label={language === 'ar' ? 'الهاتف' : 'Phone'}>
-            <FormInput value={form.phone} onChange={handleChange('phone')} placeholder="+964 7XX XXX XXXX" />
+            <PhoneInput value={form.phone} onChange={v => setForm(prev => ({ ...prev, phone: v }))} />
           </FormField>
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <FormField label={language === 'ar' ? 'رقم الواتساب' : 'WhatsApp Number'}>
-            <FormInput value={form.whatsapp_number} onChange={handleChange('whatsapp_number')} placeholder="+964 7XX XXX XXXX" />
+            <PhoneInput value={form.whatsapp_number} onChange={v => setForm(prev => ({ ...prev, whatsapp_number: v }))} />
           </FormField>
           {isLawyer && (
             <FormField label={language === 'ar' ? 'رقم نقابة المحامين' : 'Bar Number'}>
