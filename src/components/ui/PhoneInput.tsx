@@ -114,7 +114,7 @@ export function PhoneInput({
   return (
     <div
       className={cn(
-        'flex items-stretch w-full rounded-input border border-slate-300 bg-card transition-colors focus-within:ring-2 focus-within:ring-accent focus-within:border-accent',
+        'flex items-stretch w-full rounded-input border border-input bg-card transition-colors focus-within:ring-2 focus-within:ring-accent focus-within:border-accent',
         error && 'border-destructive focus-within:ring-destructive',
         disabled && 'opacity-70 cursor-not-allowed'
       )}
@@ -127,7 +127,7 @@ export function PhoneInput({
           disabled={disabled || countryLocked}
           onClick={() => setOpen(o => !o)}
           className={cn(
-            'h-11 inline-flex items-center gap-1.5 px-3 text-body-sm text-foreground border-e border-slate-300',
+            'h-11 inline-flex items-center gap-1.5 px-3 text-body-sm text-foreground border-e border-input',
             'hover:bg-muted/50 transition-colors rounded-s-input',
             (disabled || countryLocked) && 'cursor-not-allowed hover:bg-transparent'
           )}
