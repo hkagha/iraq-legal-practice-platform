@@ -119,7 +119,7 @@ export default function PortalDashboardPage() {
                     <div className="text-body-sm font-medium truncate">{isEN ? c.title : (c.title_ar || c.title)}</div>
                     <div className="text-caption text-muted-foreground font-mono">{c.case_number}</div>
                   </div>
-                  <StatusBadge status={c.status} />
+                  <StatusBadge status={c.status} type="case" />
                 </Link>
               ))}
             </div>
@@ -145,7 +145,7 @@ export default function PortalDashboardPage() {
                   <div className="text-body-sm font-medium truncate">{isEN ? e.title : (e.title_ar || e.title)}</div>
                   <div className="text-caption text-muted-foreground">{e.completed_steps}/{e.total_steps} {isEN ? 'steps' : 'خطوات'}</div>
                 </div>
-                <StatusBadge status={e.status} />
+                <StatusBadge status={e.status} type="errand" />
               </Link>
             ))}
           </div>

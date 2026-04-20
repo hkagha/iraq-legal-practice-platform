@@ -81,7 +81,7 @@ export default function PortalErrandsPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 mb-1">
                         <span className="text-body-sm font-mono text-muted-foreground">{e.errand_number}</span>
-                        <StatusBadge status={e.status} />
+                        <StatusBadge status={e.status} type="errand" />
                       </div>
                       <div className="text-body font-medium truncate text-foreground">
                         {isEN ? e.title : (e.title_ar || e.title)}
