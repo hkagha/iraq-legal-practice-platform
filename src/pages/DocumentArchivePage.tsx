@@ -52,6 +52,8 @@ export default function DocumentArchivePage() {
   const [uploadOpen, setUploadOpen] = useState(false);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [reindexing, setReindexing] = useState(false);
+  const [backfilling, setBackfilling] = useState(false);
+  const [backfillProgress, setBackfillProgress] = useState<{ done: number; total: number } | null>(null);
   const [counts, setCounts] = useState({ total: 0, indexed: 0, pending: 0, failed: 0 });
 
   const load = useCallback(async () => {
