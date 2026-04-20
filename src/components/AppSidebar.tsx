@@ -150,31 +150,31 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
       <NavLink
         to={item.path}
         onClick={onClose}
-        className={`
-          flex items-center gap-3 h-11 rounded-button mx-2 transition-colors relative
-          ${collapsed ? 'justify-center px-0' : 'px-3'}
-          ${isActive
-            ? 'bg-[rgba(201,168,76,0.15)] text-white'
-            : 'text-white/70 hover:bg-white/5 hover:text-white/90'
-          }
-        `}
-      >
-        {isActive && (
-          <div className={`absolute ${isRTL ? 'right-0 rounded-l-sm' : 'left-0 rounded-r-sm'} top-1.5 bottom-1.5 w-[3px] bg-accent`} />
+        className={cn(
+          'group relative flex items-center gap-3 h-10 mx-3 px-3 transition-colors',
+          collapsed ? 'justify-center px-0 mx-2' : '',
+          isActive
+            ? 'bg-primary text-primary-foreground'
+            : 'text-foreground/70 hover:bg-secondary hover:text-foreground',
         )}
+      >
         <div className="relative">
-          <Icon className="h-5 w-5 shrink-0" />
+          <Icon className="h-[18px] w-[18px] shrink-0" strokeWidth={1.75} />
           {showDot && !showCount && (
-            <span className={cn('absolute -top-1 -end-1 h-2 w-2 rounded-full', item.key === 'timeTracking' ? 'bg-[#EF4444] animate-pulse' : 'bg-[#EF4444]')} />
+            <span className={cn('absolute -top-1 -end-1 h-1.5 w-1.5 rounded-full', item.key === 'timeTracking' ? 'bg-destructive animate-pulse' : 'bg-destructive')} />
           )}
         </div>
         {!collapsed && (
-          <span className="text-body-md font-medium truncate flex-1">{label}</span>
+          <span className="text-[13px] font-medium truncate flex-1 tracking-tight">{label}</span>
         )}
         {!collapsed && showCount && (
           <span className={cn(
-            'text-[11px] font-semibold rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1',
-            item.key === 'documents' ? 'bg-accent text-accent-foreground' : item.key === 'calendar' ? 'bg-accent text-accent-foreground' : 'bg-destructive text-destructive-foreground',
+            'text-[10px] font-bold tabular min-w-[18px] h-[18px] flex items-center justify-center px-1',
+            isActive
+              ? 'bg-accent text-accent-foreground'
+              : item.key === 'documents' || item.key === 'calendar'
+                ? 'bg-accent text-accent-foreground'
+                : 'bg-destructive text-destructive-foreground',
           )}>
             {countValue}
           </span>
@@ -196,57 +196,58 @@ export default function AppSidebar({ collapsed, onToggle, onClose }: AppSidebarP
     return <div key={item.key}>{link}</div>;
   };
 
-  const divider = (
-    <div className="mx-4 my-2 h-px bg-white/10" />
+  const sectionLabel = (text: string) => (
+    !collapsed ? (
+      <div className="px-6 mt-6 mb-2 eyebrow">{text}</div>
+    ) : (
+      <div className="mx-4 my-3 h-px bg-border" />
+    )
   );
 
   return (
     <div
-      className={`
-        flex flex-col h-full bg-primary text-white transition-all duration-200
-        ${collapsed ? 'w-[72px]' : 'w-[260px]'}
-      `}
+      className={cn(
+        'flex flex-col h-full bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-all duration-200',
+        collapsed ? 'w-[72px]' : 'w-[260px]',
+      )}
     >
-      <div className="h-16 flex items-center border-b border-white/10 px-4 shrink-0">
-        <div className={`flex flex-col ${collapsed ? 'items-center w-full' : ''}`}>
-          <span className="text-[22px] font-bold text-white leading-tight">
-            {collapsed ? 'Q' : 'Qanuni'}
+      <div className="h-16 flex items-center border-b border-sidebar-border px-6 shrink-0">
+        <div className={cn('flex flex-col', collapsed && 'items-center w-full')}>
+          <span className="font-display text-[22px] font-semibold text-foreground leading-none tracking-tight">
+            {collapsed ? 'Q' : 'QANUNI'}
           </span>
           {!collapsed && (
-            <span className="text-body-sm text-white/50">
-              {language === 'en' ? 'قانوني' : 'Qanuni'}
+            <span className="text-[10px] mt-1 small-caps text-muted-foreground">
+              {language === 'en' ? 'Legal Practice' : 'الممارسة القانونية'}
             </span>
           )}
         </div>
       </div>
 
-      <nav className="flex-1 overflow-y-auto py-3 space-y-0.5">
-        {mainNavItems.map(renderNavItem)}
-        {divider}
-        {!collapsed && (
-          <div className="mx-4 mb-1 text-[10px] font-semibold text-white/40 uppercase tracking-wider">
-            {language === 'ar' ? 'أدوات ذكية' : 'AI Tools'}
-          </div>
-        )}
-        {aiNavItems.map(renderNavItem)}
-        {divider}
-        {secondaryNavItems.map(renderNavItem)}
-        {divider}
-        {bottomNavItems.map(renderNavItem)}
+      <nav className="flex-1 overflow-y-auto py-3">
+        {sectionLabel(language === 'ar' ? 'الممارسة' : 'Practice')}
+        <div className="space-y-0.5">{mainNavItems.map(renderNavItem)}</div>
+
+        {sectionLabel(language === 'ar' ? 'أدوات ذكية' : 'Intelligence')}
+        <div className="space-y-0.5">{aiNavItems.map(renderNavItem)}</div>
+
+        {sectionLabel(language === 'ar' ? 'النظام' : 'System')}
+        <div className="space-y-0.5">{secondaryNavItems.map(renderNavItem)}</div>
+        <div className="space-y-0.5 mt-0.5">{bottomNavItems.map(renderNavItem)}</div>
       </nav>
 
-      <div className="shrink-0 border-t border-white/10 h-16 flex items-center justify-between px-3">
+      <div className="shrink-0 border-t border-sidebar-border h-14 flex items-center justify-between px-4">
         {!collapsed && (
-          <span className="text-body-sm text-white/50 truncate">
+          <span className="text-[11px] small-caps text-muted-foreground truncate">
             Al-Rashid Law Firm
           </span>
         )}
         <button
           onClick={onToggle}
-          className="h-7 w-7 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors shrink-0"
+          className="h-7 w-7 hover:bg-secondary flex items-center justify-center transition-colors shrink-0"
           title={collapsed ? t('sidebar.expand') : t('sidebar.collapse')}
         >
-          <CollapseIcon className="h-4 w-4 text-white/70" />
+          <CollapseIcon className="h-3.5 w-3.5 text-muted-foreground" />
         </button>
       </div>
     </div>
