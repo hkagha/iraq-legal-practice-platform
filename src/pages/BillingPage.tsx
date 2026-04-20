@@ -80,12 +80,13 @@ export default function BillingPage() {
       if (!search) return true;
       const q = search.toLowerCase();
       if (inv.invoice_number.toLowerCase().includes(q)) return true;
+      const lang = isEN ? 'en' : 'ar';
       const partyName = inv.party_type === 'person'
-        ? resolvePersonName(inv.person as any, language)
-        : resolveEntityName(inv.entity as any, language);
+        ? resolvePersonName(inv.person as any, lang)
+        : resolveEntityName(inv.entity as any, lang);
       return partyName.toLowerCase().includes(q);
     });
-  }, [invoices, search, status, language]);
+  }, [invoices, search, status, isEN]);
 
   if (isLoading) return <PageLoader />;
 
@@ -161,9 +162,10 @@ export default function BillingPage() {
             <tbody>
               {filtered.map((inv: any) => {
                 const balance = Number(inv.total_amount) - Number(inv.amount_paid);
+                const lang = isEN ? 'en' : 'ar';
                 const partyName = inv.party_type === 'person'
-                  ? resolvePersonName(inv.person, language)
-                  : resolveEntityName(inv.entity, language);
+                  ? resolvePersonName(inv.person, lang)
+                  : resolveEntityName(inv.entity, lang);
                 return (
                   <tr key={inv.id} className="border-t hover:bg-muted/20 cursor-pointer" onClick={() => navigate(`/billing/${inv.id}`)}>
                     <td className="px-4 py-3 font-mono text-xs">
