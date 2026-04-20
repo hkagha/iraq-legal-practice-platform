@@ -260,10 +260,13 @@ export default function AIConfigSettings() {
                 <FormField label={language === 'ar' ? 'النموذج' : 'Model'}>
                   {modelOptions.length > 0 && !useCustomModel ? (
                     <div className="space-y-2">
-                      <FormSelect value={model} onChange={e => setModel(e.target.value)} disabled={!isAdmin}>
-                        <option value="">{language === 'ar' ? 'اختر نموذجاً...' : 'Select a model...'}</option>
-                        {modelOptions.map(m => <option key={m.value} value={m.value}>{m.label}</option>)}
-                      </FormSelect>
+                      <FormSelect
+                        value={model}
+                        onValueChange={setModel}
+                        disabled={!isAdmin}
+                        placeholder={language === 'ar' ? 'اختر نموذجاً...' : 'Select a model...'}
+                        options={modelOptions}
+                      />
                       <button type="button" className="text-xs text-accent hover:underline" onClick={() => setUseCustomModel(true)}>
                         {language === 'ar' ? 'استخدم اسم نموذج مخصص' : 'Use a custom model name'}
                       </button>
