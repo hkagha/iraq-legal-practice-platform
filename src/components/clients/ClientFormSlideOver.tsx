@@ -234,7 +234,7 @@ export default function ClientFormSlideOver({ isOpen, onClose, onSaved, editClie
       const payload: Record<string, any> = {
         client_type: form.client_type,
         email: form.email || null,
-        phone: form.phone ? `+964${form.phone.replace(/^\+964/, '')}` : null,
+        phone: form.phone || null,
         secondary_phone: form.secondary_phone || null,
         whatsapp_number: form.whatsapp_number || null,
         address: form.address || null, address_ar: form.address_ar || null,
