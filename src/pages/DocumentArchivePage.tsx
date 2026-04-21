@@ -422,7 +422,14 @@ export default function DocumentArchivePage() {
         </main>
       </div>
 
-      <DocumentUploadModal open={uploadOpen} onClose={() => setUploadOpen(false)} onComplete={() => { load(); loadCounts(); }} />
+      <DocumentUploadModal
+        open={uploadOpen}
+        onClose={() => setUploadOpen(false)}
+        onComplete={() => { load(); loadCounts(); }}
+        visibilityScopeOverride="shared_library"
+        titleOverride="Upload to Smart Archive"
+        titleOverrideAr="رفع إلى الأرشيف الذكي"
+      />
       <DocumentDetailSlideOver
         documentId={detailId}
         isOpen={!!detailId}
