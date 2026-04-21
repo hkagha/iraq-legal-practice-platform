@@ -305,13 +305,99 @@ export default function CaseFormPage() {
           </div>
         </section>
 
-        {/* Parties (only after creation) */}
-        {isEdit && profile?.organization_id && (
-          <section className="space-y-4">
+        {/* Parties */}
+        <section className="space-y-4">
+          <div>
             <h2 className="text-heading-md text-foreground">{lang === 'ar' ? 'الأطراف' : 'Parties'}</h2>
+            <p className="text-body-sm text-muted-foreground mt-1">
+              {lang === 'ar'
+                ? 'أضف الموكل والأطراف الأخرى المرتبطة بالقضية.'
+                : 'Add the client and other parties related to this case.'}
+            </p>
+          </div>
+
+          {isEdit && profile?.organization_id ? (
             <CasePartiesEditor caseId={id!} organizationId={profile.organization_id} />
-          </section>
-        )}
+          ) : (
+            <div className="space-y-4">
+              {/* Existing draft parties */}
+              <div className="border border-border rounded-card overflow-hidden">
+                {draftParties.length === 0 ? (
+                  <div className="p-6 text-center text-muted-foreground text-body-sm">
+                    {lang === 'ar' ? 'لا أطراف مضافة بعد' : 'No parties added yet'}
+                  </div>
+                ) : (
+                  <div className="divide-y divide-border">
+                    {draftParties.map((p, idx) => (
+                      <div key={idx} className="flex items-center gap-3 p-3">
+                        <div className="flex-1 min-w-0">
+                          <PartyChip
+                            partyType={p.ref.partyType}
+                            displayName={p.ref.displayName}
+                            showTypeBadge
+                          />
+                        </div>
+                        <div className="w-[160px] shrink-0">
+                          <FormSelect
+                            value={p.role}
+                            onValueChange={(v) => setDraftPartyRole(idx, v)}
+                            options={roleOptions}
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setDraftPrimary(idx)}
+                          className={`p-2 rounded-button ${p.is_primary ? 'text-accent' : 'text-muted-foreground hover:text-foreground'}`}
+                          title={lang === 'ar' ? 'الطرف الأساسي' : 'Set primary'}
+                        >
+                          <Star size={16} fill={p.is_primary ? 'currentColor' : 'none'} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeDraftParty(idx)}
+                          className="p-2 rounded-button text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Add party form */}
+              <div className="border border-border rounded-card p-3 space-y-3 bg-muted/20">
+                <p className="text-label text-muted-foreground">
+                  {lang === 'ar' ? 'إضافة طرف' : 'Add party'}
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-[1fr_180px_auto] gap-2">
+                  <PartySelector
+                    value={draftRef}
+                    onChange={setDraftRef}
+                    onCreatePerson={() => setShowPerson(true)}
+                    onCreateEntity={() => setShowEntity(true)}
+                  />
+                  <FormSelect value={draftRole} onValueChange={setDraftRole} options={roleOptions} />
+                  <Button onClick={addDraftParty} disabled={!draftRef}>
+                    <Plus size={14} />
+                    {lang === 'ar' ? 'إضافة' : 'Add'}
+                  </Button>
+                </div>
+              </div>
+
+              <PersonFormSlideOver
+                isOpen={showPerson}
+                onClose={() => setShowPerson(false)}
+                onSaved={(ref) => setDraftRef(ref)}
+              />
+              <EntityFormSlideOver
+                isOpen={showEntity}
+                onClose={() => setShowEntity(false)}
+                onSaved={(ref) => setDraftRef(ref)}
+              />
+            </div>
+          )}
+        </section>
 
         {/* Footer actions */}
         <div className="flex items-center justify-between pt-6 border-t border-border">
