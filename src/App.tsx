@@ -81,6 +81,7 @@ const PortalCaseDetailPage = React.lazy(() => import('@/pages/portal/PortalCaseD
 const PortalErrandsPage = React.lazy(() => import('@/pages/portal/PortalErrandsPage'));
 const PortalErrandDetailPage = React.lazy(() => import('@/pages/portal/PortalErrandDetailPage'));
 const PortalDocumentsPage = React.lazy(() => import('@/pages/portal/PortalDocumentsPage'));
+const PortalDocumentDetailPage = React.lazy(() => import('@/pages/portal/PortalDocumentDetailPage'));
 const PortalMessagesPage = React.lazy(() => import('@/pages/portal/PortalMessagesPage'));
 const PortalInvoicesPage = React.lazy(() => import('@/pages/portal/PortalInvoicesPage'));
 const PortalInvoiceDetailPage = React.lazy(() => import('@/pages/portal/PortalInvoiceDetailPage'));
@@ -180,6 +181,7 @@ const App = () => (
                   <Route path="errands" element={<PortalErrandsPage />} />
                   <Route path="errands/:id" element={<PortalErrandDetailPage />} />
                   <Route path="documents" element={<PortalDocumentsPage />} />
+                  <Route path="documents/:id" element={<PortalDocumentDetailPage />} />
                   <Route path="messages" element={<PortalMessagesPage />} />
                   <Route path="invoices" element={<PortalInvoicesPage />} />
                   <Route path="invoices/:id" element={<PortalInvoiceDetailPage />} />
