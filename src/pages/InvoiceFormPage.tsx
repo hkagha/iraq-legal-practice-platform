@@ -122,6 +122,24 @@ export default function InvoiceFormPage() {
     enabled: !!party,
   });
 
+  const allowedCaseIds = useMemo(
+    () => new Set((cases ?? []).map((c: any) => c.id)),
+    [cases],
+  );
+
+  useEffect(() => {
+    if (!party) {
+      if (caseId) setCaseId('');
+      return;
+    }
+
+    if (!cases) return;
+
+    if (caseId && !allowedCaseIds.has(caseId)) {
+      setCaseId('');
+    }
+  }, [party, cases, caseId, allowedCaseIds]);
+
   const subtotal = useMemo(
     () => items.reduce((s, li) => s + (Number(li.quantity) || 0) * (Number(li.unit_price) || 0), 0),
     [items],
@@ -142,6 +160,10 @@ export default function InvoiceFormPage() {
   const save = async (sendNow: boolean) => {
     if (!party) {
       toast.error(t('billing.messages.clientRequired'));
+      return;
+    }
+    if (caseId && !allowedCaseIds.has(caseId)) {
+      toast.error(isEN ? 'Select a case for the chosen client' : 'اختر قضية تابعة للعميل المحدد');
       return;
     }
     if (items.length === 0 || items.every(li => !li.description.trim())) {
@@ -229,11 +251,19 @@ export default function InvoiceFormPage() {
               <Label>{t('billing.invoice.client')} *</Label>
               <PartySelector value={party} onChange={setParty} />
             </div>
-            {(cases?.length ?? 0) > 0 && (
+            {party && (
               <div>
                 <Label>{t('billing.invoice.caseOptional')}</Label>
                 <Select value={caseId || 'none'} onValueChange={(v) => setCaseId(v === 'none' ? '' : v)}>
-                  <SelectTrigger><SelectValue placeholder={isEN ? 'Select case' : 'اختر القضية'} /></SelectTrigger>
+                  <SelectTrigger>
+                    <SelectValue
+                      placeholder={
+                        (cases?.length ?? 0) > 0
+                          ? (isEN ? 'Select case' : 'اختر القضية')
+                          : (isEN ? 'No cases for this client' : 'لا توجد قضايا لهذا العميل')
+                      }
+                    />
+                  </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">{isEN ? 'No case' : 'بدون قضية'}</SelectItem>
                     {cases!.map((c: any) => (
