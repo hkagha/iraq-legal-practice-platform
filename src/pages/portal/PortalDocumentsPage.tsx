@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
-import { FileText, Search, Download, Calendar } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { FileText, Search, Download, Calendar, MessageSquare } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Input } from '@/components/ui/input';
@@ -96,24 +97,32 @@ export default function PortalDocumentsPage() {
           {filtered.map((d) => {
             const displayName = isEN ? (d.title || d.file_name) : (d.title_ar || d.title || d.file_name_ar || d.file_name);
             return (
-              <Card key={d.id} className="p-4 flex items-center gap-4">
-                <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
-                  <FileText className="h-5 w-5 text-accent" />
-                </div>
-                <div className="flex-1 min-w-0">
-                  <h3 className="font-medium text-foreground truncate">{displayName}</h3>
-                  <div className="flex items-center gap-3 mt-1 text-body-xs text-muted-foreground">
-                    <span>{formatBytes(d.file_size_bytes)}</span>
-                    <span className="uppercase">{d.file_type}</span>
-                    <span className="flex items-center gap-1">
-                      <Calendar className="h-3 w-3" />
-                      {new Date(d.created_at).toLocaleDateString(isEN ? 'en-GB' : 'ar-IQ')}
-                    </span>
+              <Card key={d.id} className="p-4 flex items-center gap-4 hover:border-accent/50 transition-colors">
+                <Link to={`/portal/documents/${d.id}`} className="flex items-center gap-4 flex-1 min-w-0">
+                  <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center shrink-0">
+                    <FileText className="h-5 w-5 text-accent" />
                   </div>
-                </div>
+                  <div className="flex-1 min-w-0">
+                    <h3 className="font-medium text-foreground truncate">{displayName}</h3>
+                    <div className="flex items-center gap-3 mt-1 text-body-xs text-muted-foreground">
+                      <span>{formatBytes(d.file_size_bytes)}</span>
+                      <span className="uppercase">{d.file_type}</span>
+                      <span className="flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
+                        {new Date(d.created_at).toLocaleDateString(isEN ? 'en-GB' : 'ar-IQ')}
+                      </span>
+                    </div>
+                  </div>
+                </Link>
+                <Button asChild size="sm" variant="ghost" className="shrink-0">
+                  <Link to={`/portal/documents/${d.id}`}>
+                    <MessageSquare className="h-4 w-4" />
+                    <span className="hidden sm:inline ms-2">{isEN ? 'Open' : 'فتح'}</span>
+                  </Link>
+                </Button>
                 <Button size="sm" variant="outline" onClick={() => handleDownload(d.file_path, displayName)}>
                   <Download className="h-4 w-4" />
-                  <span className="hidden sm:inline ml-2">{isEN ? 'Download' : 'تحميل'}</span>
+                  <span className="hidden sm:inline ms-2">{isEN ? 'Download' : 'تحميل'}</span>
                 </Button>
               </Card>
             );
