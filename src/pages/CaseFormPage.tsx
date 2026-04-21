@@ -183,8 +183,31 @@ export default function CaseFormPage() {
         payload.case_number = 'PENDING';
         const { data, error } = await supabase.from('cases').insert(payload).select('id').single();
         if (error) throw error;
+        const newCaseId = data!.id;
+
+        // Persist draft parties collected on the form
+        if (draftParties.length > 0) {
+          const partyRows = draftParties.map((p) => ({
+            case_id: newCaseId,
+            organization_id: profile.organization_id!,
+            party_type: p.ref.partyType,
+            person_id: p.ref.personId || null,
+            entity_id: p.ref.entityId || null,
+            role: p.role,
+            is_primary: p.is_primary,
+          }));
+          const { error: pErr } = await supabase.from('case_parties').insert(partyRows);
+          if (pErr) {
+            toast.error(
+              (lang === 'ar'
+                ? 'تم إنشاء القضية لكن فشل حفظ بعض الأطراف: '
+                : 'Case created but failed to save some parties: ') + pErr.message,
+            );
+          }
+        }
+
         toast.success(lang === 'ar' ? 'تم إنشاء القضية' : 'Case created');
-        navigate(`/cases/${data!.id}/edit`);
+        navigate(`/cases/${newCaseId}`);
       }
     } catch (e: any) {
       toast.error(e?.message || 'Failed to save');
