@@ -9,6 +9,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { PageLoader } from '@/components/ui/PageLoader';
+import { downloadDocumentById } from '@/lib/documentAccess';
 import { toast } from '@/hooks/use-toast';
 
 function formatBytes(bytes: number) {
@@ -49,16 +50,12 @@ export default function PortalDocumentsPage() {
     );
   });
 
-  const handleDownload = async (filePath: string, displayName: string) => {
-    const { data, error } = await supabase.storage.from('documents').createSignedUrl(filePath, 60);
-    if (error || !data?.signedUrl) {
+  const handleDownload = async (documentId: string, displayName: string) => {
+    try {
+      await downloadDocumentById(documentId, displayName);
+    } catch {
       toast({ title: isEN ? 'Download failed' : 'فشل التحميل', variant: 'destructive' });
-      return;
     }
-    const a = document.createElement('a');
-    a.href = data.signedUrl;
-    a.download = displayName;
-    a.click();
   };
 
   if (isLoading) return <PageLoader />;
@@ -120,7 +117,7 @@ export default function PortalDocumentsPage() {
                     <span className="hidden sm:inline ms-2">{isEN ? 'Open' : 'فتح'}</span>
                   </Link>
                 </Button>
-                <Button size="sm" variant="outline" onClick={() => handleDownload(d.file_path, displayName)}>
+                <Button size="sm" variant="outline" onClick={() => handleDownload(d.id, displayName)}>
                   <Download className="h-4 w-4" />
                   <span className="hidden sm:inline ms-2">{isEN ? 'Download' : 'تحميل'}</span>
                 </Button>

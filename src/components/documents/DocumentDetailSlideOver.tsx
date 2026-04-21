@@ -20,6 +20,7 @@ import AIContractReview from '@/components/ai/AIContractReview';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import DocumentCommentsTab from '@/components/documents/DocumentCommentsTab';
 import DocumentAIIndexPanel from '@/components/documents/DocumentAIIndexPanel';
+import { downloadDocumentById, getDocumentSignedUrl } from '@/lib/documentAccess';
 
 const FILE_TYPE_ICONS: Record<string, { icon: typeof FileText; color: string }> = {
   pdf: { icon: FileType, color: '#EF4444' },
@@ -62,22 +63,23 @@ export default function DocumentDetailSlideOver({ documentId, isOpen, onClose, o
     const fetchDoc = async () => {
       const { data } = await supabase
         .from('documents')
-        .select(`*, uploader:profiles!documents_uploaded_by_fkey(id,first_name,last_name,first_name_ar,last_name_ar,avatar_url), client:clients(id,first_name,last_name,company_name,client_type,first_name_ar,last_name_ar,company_name_ar), case:cases(id,case_number,title,title_ar), errand:errands(id,errand_number,title,title_ar)`)
+        .select(`*, uploader:profiles!documents_uploaded_by_fkey(id,first_name,last_name,first_name_ar,last_name_ar,avatar_url), person:persons(id,first_name,last_name,first_name_ar,last_name_ar), entity:entities(id,company_name,company_name_ar), case:cases(id,case_number,title,title_ar), errand:errands(id,errand_number,title,title_ar)`)
         .eq('id', documentId).single();
       if (data) {
         setDoc(data);
-        // Get signed URL for preview
-        const { data: urlData } = await supabase.storage.from('documents').createSignedUrl(data.file_path, 300);
-        if (urlData) {
-          setPreviewUrl(urlData.signedUrl);
+        try {
+          const signedUrl = await getDocumentSignedUrl(data.id);
+          setPreviewUrl(signedUrl);
           // Try to fetch text content for AI review
           if (['txt', 'text'].includes(data.file_type?.toLowerCase())) {
             try {
-              const resp = await fetch(urlData.signedUrl);
+              const resp = await fetch(signedUrl);
               const text = await resp.text();
               setDocTextContent(text);
             } catch {}
           }
+        } catch {
+          setPreviewUrl(null);
         }
         // Get versions
         if (data.parent_document_id || data.version > 1) {
@@ -97,15 +99,9 @@ export default function DocumentDetailSlideOver({ documentId, isOpen, onClose, o
 
   const handleDownload = async () => {
     if (!doc) return;
-    const { data } = await supabase.storage.from('documents').createSignedUrl(doc.file_path, 60);
-    if (data?.signedUrl) {
-      const a = document.createElement('a');
-      a.href = data.signedUrl; a.download = doc.file_name; a.target = '_blank';
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-      toast.success(t('documents.messages.downloadStarted'));
-      // Log
-      await supabase.from('document_activities').insert({ document_id: doc.id, organization_id: doc.organization_id, actor_id: profile?.id, activity_type: 'downloaded', title: `Downloaded: ${doc.file_name}`, title_ar: `تم تحميل: ${doc.file_name}` } as any);
-    }
+    await downloadDocumentById(doc.id, doc.file_name);
+    toast.success(t('documents.messages.downloadStarted'));
+    await supabase.from('document_activities').insert({ document_id: doc.id, organization_id: doc.organization_id, actor_id: profile?.id, activity_type: 'downloaded', title: `Downloaded: ${doc.file_name}`, title_ar: `تم تحميل: ${doc.file_name}` } as any);
   };
 
   const toggleVisibility = async () => {
@@ -147,9 +143,10 @@ export default function DocumentDetailSlideOver({ documentId, isOpen, onClose, o
   const displayName = language === 'ar' ? (doc.title_ar || doc.title || doc.file_name) : (doc.title || doc.file_name);
   const uploaderName = doc.uploader ? (language === 'ar' && doc.uploader.first_name_ar ? `${doc.uploader.first_name_ar} ${doc.uploader.last_name_ar || ''}` : `${doc.uploader.first_name} ${doc.uploader.last_name}`) : '—';
 
-  const getClientName = (c: any) => {
-    if (!c) return null;
-    return c.client_type === 'company' ? (language === 'ar' && c.company_name_ar ? c.company_name_ar : c.company_name) : (language === 'ar' && c.first_name_ar ? `${c.first_name_ar} ${c.last_name_ar || ''}` : `${c.first_name || ''} ${c.last_name || ''}`).trim();
+  const getPartyName = () => {
+    if (doc.entity) return language === 'ar' && doc.entity.company_name_ar ? doc.entity.company_name_ar : doc.entity.company_name;
+    if (doc.person) return language === 'ar' && doc.person.first_name_ar ? `${doc.person.first_name_ar} ${doc.person.last_name_ar || ''}`.trim() : `${doc.person.first_name || ''} ${doc.person.last_name || ''}`.trim();
+    return null;
   };
 
   return (
@@ -246,13 +243,13 @@ export default function DocumentDetailSlideOver({ documentId, isOpen, onClose, o
           </div>
 
           {/* Linked entities */}
-          {(doc.client || doc.case || doc.errand) && (
+          {(doc.person || doc.entity || doc.case || doc.errand) && (
             <div className="border-t border-border pt-4">
               <h4 className="text-heading-sm font-semibold mb-3">{language === 'ar' ? 'مرتبط بـ' : 'Linked To'}</h4>
               <div className="space-y-2">
-                {doc.client && (
-                  <button onClick={() => navigate(`/clients/${doc.client.id}`)} className="flex items-center gap-2 text-accent hover:underline text-body-md">
-                    <User size={14} /> {getClientName(doc.client)}
+                {(doc.person || doc.entity) && (
+                  <button onClick={() => navigate(`/clients/${doc.person?.id || doc.entity?.id}?type=${doc.person ? 'person' : 'entity'}`)} className="flex items-center gap-2 text-accent hover:underline text-body-md">
+                    <User size={14} /> {getPartyName()}
                   </button>
                 )}
                 {doc.case && (

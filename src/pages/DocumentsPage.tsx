@@ -20,6 +20,7 @@ import DocumentDetailSlideOver from '@/components/documents/DocumentDetailSlideO
 import DocumentTemplatesView from '@/components/documents/DocumentTemplatesView';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { HelpButton } from '@/components/ui/HelpButton';
+import { downloadDocumentById } from '@/lib/documentAccess';
 
 const DocumentArchivePage = lazy(() => import('@/pages/DocumentArchivePage'));
 const DocumentsArchivedPage = lazy(() => import('@/pages/DocumentsArchivedPage'));
@@ -178,14 +179,7 @@ function WorkingDocumentsTab({ orgId, isAR }: { orgId: string | null | undefined
   };
 
   const handleDownload = async (d: DocRow) => {
-    const { data: row } = await supabase.from('documents').select('file_path').eq('id', d.id).single();
-    if (!row?.file_path) return;
-    const { data } = await supabase.storage.from('documents').createSignedUrl(row.file_path, 60);
-    if (data?.signedUrl) {
-      const a = document.createElement('a');
-      a.href = data.signedUrl; a.download = d.file_name; a.target = '_blank';
-      document.body.appendChild(a); a.click(); document.body.removeChild(a);
-    }
+    await downloadDocumentById(d.id, d.file_name);
   };
 
   return (
