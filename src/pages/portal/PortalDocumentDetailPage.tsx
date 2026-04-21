@@ -15,6 +15,7 @@ import { PageLoader } from '@/components/ui/PageLoader';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import DocumentCommentsTab from '@/components/documents/DocumentCommentsTab';
+import { downloadDocumentById, getDocumentSignedUrl } from '@/lib/documentAccess';
 
 const FILE_ICONS: Record<string, { icon: typeof FileText; color: string }> = {
   pdf: { icon: FileType, color: '#EF4444' },
@@ -73,11 +74,15 @@ export default function PortalDocumentDetailPage() {
     if (!doc?.file_path) return;
     let cancelled = false;
     (async () => {
-      const { data } = await supabase.storage.from('documents').createSignedUrl(doc.file_path, 600);
-      if (!cancelled) setPreviewUrl(data?.signedUrl ?? null);
+      try {
+        const signedUrl = await getDocumentSignedUrl(doc.id);
+        if (!cancelled) setPreviewUrl(signedUrl);
+      } catch {
+        if (!cancelled) setPreviewUrl(null);
+      }
     })();
     return () => { cancelled = true; };
-  }, [doc?.file_path]);
+  }, [doc?.id, doc?.file_path]);
 
   const ext = (doc?.file_type || '').toLowerCase();
   const iconCfg = FILE_ICONS[ext] || { icon: FileText, color: '#64748B' };
@@ -93,17 +98,12 @@ export default function PortalDocumentDetailPage() {
   }, [doc, isEN]);
 
   const handleDownload = async () => {
-    if (!doc?.file_path) return;
-    const { data, error } = await supabase.storage.from('documents').createSignedUrl(doc.file_path, 60);
-    if (error || !data?.signedUrl) {
+    if (!doc?.id) return;
+    try {
+      await downloadDocumentById(doc.id, doc.file_name);
+    } catch {
       toast.error(isEN ? 'Download failed' : 'فشل التحميل');
-      return;
     }
-    const a = document.createElement('a');
-    a.href = data.signedUrl;
-    a.download = doc.file_name;
-    a.target = '_blank';
-    document.body.appendChild(a); a.click(); document.body.removeChild(a);
   };
 
   const handlePickFile = (e: React.ChangeEvent<HTMLInputElement>) => {
