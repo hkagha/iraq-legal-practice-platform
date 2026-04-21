@@ -57,6 +57,48 @@ export default function CaseFormPage() {
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
 
+  // Draft parties (only used when creating a new case)
+  const [draftParties, setDraftParties] = useState<DraftParty[]>([]);
+  const [draftRef, setDraftRef] = useState<PartyRef | null>(null);
+  const [draftRole, setDraftRole] = useState<string>('client');
+  const [showPerson, setShowPerson] = useState(false);
+  const [showEntity, setShowEntity] = useState(false);
+
+  const roleOptions = CASE_PARTY_ROLES.map((r) => ({
+    value: r,
+    label: roleLabel(r, lang),
+  }));
+
+  const addDraftParty = () => {
+    if (!draftRef) return;
+    const exists = draftParties.some(
+      (p) =>
+        p.ref.partyType === draftRef.partyType &&
+        ((p.ref.personId && p.ref.personId === draftRef.personId) ||
+          (p.ref.entityId && p.ref.entityId === draftRef.entityId)),
+    );
+    if (exists) {
+      toast.error(lang === 'ar' ? 'هذا الطرف مضاف بالفعل' : 'Party already added');
+      return;
+    }
+    setDraftParties((prev) => [
+      ...prev,
+      { ref: draftRef, role: draftRole, is_primary: prev.length === 0 },
+    ]);
+    setDraftRef(null);
+    setDraftRole('client');
+  };
+
+  const removeDraftParty = (idx: number) => {
+    setDraftParties((prev) => prev.filter((_, i) => i !== idx));
+  };
+  const setDraftPrimary = (idx: number) => {
+    setDraftParties((prev) => prev.map((p, i) => ({ ...p, is_primary: i === idx })));
+  };
+  const setDraftPartyRole = (idx: number, role: string) => {
+    setDraftParties((prev) => prev.map((p, i) => (i === idx ? { ...p, role } : p)));
+  };
+
   const [form, setForm] = useState({
     title: '',
     title_ar: '',
