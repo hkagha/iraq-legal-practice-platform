@@ -1,20 +1,28 @@
-import { useEffect, useState, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState, useCallback, lazy, Suspense } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { PageHeader } from '@/components/ui/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { EmptyState } from '@/components/ui/EmptyState';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { Search, FileText, Sparkles, Archive, Download, MoreVertical } from 'lucide-react';
+import {
+  Search, FileText, Sparkles, Archive, Download, MoreVertical,
+  Upload, Files, FileStack, Library,
+} from 'lucide-react';
 import DocumentUploadModal from '@/components/documents/DocumentUploadModal';
 import DocumentDetailSlideOver from '@/components/documents/DocumentDetailSlideOver';
+import DocumentTemplatesView from '@/components/documents/DocumentTemplatesView';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { HelpButton } from '@/components/ui/HelpButton';
+
+const DocumentArchivePage = lazy(() => import('@/pages/DocumentArchivePage'));
+const DocumentsArchivedPage = lazy(() => import('@/pages/DocumentsArchivedPage'));
 
 interface DocRow {
   id: string;
@@ -34,13 +42,95 @@ function fmtSize(b: number) {
   return `${(b / 1048576).toFixed(1)} MB`;
 }
 
+type TabKey = 'working' | 'templates' | 'archive' | 'archived';
+
 export default function DocumentsPage() {
   const { language } = useLanguage();
   const { profile } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
   const orgId = profile?.organization_id;
   const isAR = language === 'ar';
 
+  const initialTab = (searchParams.get('tab') as TabKey) || 'working';
+  const [tab, setTab] = useState<TabKey>(
+    ['working', 'templates', 'archive', 'archived'].includes(initialTab) ? initialTab : 'working'
+  );
+
+  const handleTabChange = (next: string) => {
+    setTab(next as TabKey);
+    const sp = new URLSearchParams(searchParams);
+    sp.set('tab', next);
+    setSearchParams(sp, { replace: true });
+  };
+
+  return (
+    <div className="space-y-6">
+      {/* Page-level title (compact, since each tab has its own header/toolbar) */}
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-display-md font-display text-foreground tracking-tight">
+            {isAR ? 'المستندات' : 'Documents'}
+          </h1>
+          <p className="text-body-md text-muted-foreground mt-1.5">
+            {isAR
+              ? 'مساحة موحّدة لمستندات المكتب: العمل اليومي، القوالب، والأرشيف الذكي'
+              : 'One unified workspace for day-to-day documents, templates, and your AI-indexed firm archive'}
+          </p>
+        </div>
+        <HelpButton helpKey="documents" />
+      </div>
+
+      <Tabs value={tab} onValueChange={handleTabChange} className="space-y-6">
+        <TabsList className="bg-card border border-border h-auto p-1">
+          <TabsTrigger value="working" className="gap-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
+            <Files className="h-3.5 w-3.5" />
+            {isAR ? 'العمل اليومي' : 'Working'}
+          </TabsTrigger>
+          <TabsTrigger value="templates" className="gap-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
+            <FileStack className="h-3.5 w-3.5" />
+            {isAR ? 'القوالب' : 'Templates'}
+          </TabsTrigger>
+          <TabsTrigger value="archive" className="gap-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
+            <Library className="h-3.5 w-3.5" />
+            {isAR ? 'الأرشيف الذكي' : 'Smart Archive'}
+            <Sparkles className="h-3 w-3 opacity-70" />
+          </TabsTrigger>
+          <TabsTrigger value="archived" className="gap-2 data-[state=active]:bg-accent data-[state=active]:text-accent-foreground">
+            <Archive className="h-3.5 w-3.5" />
+            {isAR ? 'المؤرشفة' : 'Archived'}
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="working" className="mt-0">
+          <WorkingDocumentsTab orgId={orgId} isAR={isAR} />
+        </TabsContent>
+
+        <TabsContent value="templates" className="mt-0">
+          <DocumentTemplatesView onDocumentSaved={() => { /* no-op; templates view manages its own state */ }} />
+        </TabsContent>
+
+        <TabsContent value="archive" className="mt-0">
+          <Suspense fallback={<div className="space-y-3">{[1,2,3].map(i => <Skeleton key={i} className="h-28 rounded-md" />)}</div>}>
+            <DocumentArchivePage />
+          </Suspense>
+        </TabsContent>
+
+        <TabsContent value="archived" className="mt-0">
+          <Suspense fallback={<div className="space-y-3">{[1,2,3].map(i => <Skeleton key={i} className="h-28 rounded-md" />)}</div>}>
+            <DocumentsArchivedPage />
+          </Suspense>
+        </TabsContent>
+      </Tabs>
+    </div>
+  );
+}
+
+/* ============================================================
+ * Working Documents tab — internal day-to-day documents.
+ * Excludes archive imports (visibility_scope='shared_library').
+ * ============================================================ */
+function WorkingDocumentsTab({ orgId, isAR }: { orgId: string | null | undefined; isAR: boolean }) {
   const [docs, setDocs] = useState<DocRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -52,14 +142,15 @@ export default function DocumentsPage() {
     setLoading(true);
     let q = supabase
       .from('documents')
-      .select('id, file_name, title, document_category, file_size_bytes, file_type, created_at, is_visible_to_client, indexing_status')
+      .select('id, file_name, title, document_category, file_size_bytes, file_type, created_at, is_visible_to_client, indexing_status, visibility_scope')
       .eq('organization_id', orgId)
       .eq('status', 'active')
       .eq('is_latest_version', true)
+      .neq('visibility_scope', 'shared_library')
       .order('created_at', { ascending: false })
       .limit(200);
     if (search.trim()) {
-      const s = search.trim();
+      const s = search.trim().replace(/[%_]/g, (m) => `\\${m}`);
       q = q.or(`file_name.ilike.%${s}%,title.ilike.%${s}%`);
     }
     const { data, error } = await q;
@@ -70,11 +161,11 @@ export default function DocumentsPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  // Realtime refresh on indexing status changes
+  // Realtime refresh on indexing/status changes
   useEffect(() => {
     if (!orgId) return;
     const ch = supabase
-      .channel(`docs-list-${orgId}`)
+      .channel(`docs-working-${orgId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'documents', filter: `organization_id=eq.${orgId}` }, () => load())
       .subscribe();
     return () => { supabase.removeChannel(ch); };
@@ -98,40 +189,24 @@ export default function DocumentsPage() {
   };
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Documents"
-        titleAr="المستندات"
-        subtitle="All firm documents in one place"
-        subtitleAr="جميع مستندات المكتب في مكان واحد"
-        helpKey="documents"
-        actionLabel="Upload Document"
-        actionLabelAr="رفع مستند"
-        onAction={() => setUploadOpen(true)}
-        secondaryActions={[
-          {
-            label: 'Smart Archive',
-            labelAr: 'الأرشيف الذكي',
-            icon: Sparkles,
-            onClick: () => navigate('/documents/archive'),
-          },
-          {
-            label: 'Archived',
-            labelAr: 'المؤرشفة',
-            icon: Archive,
-            onClick: () => navigate('/documents/archived'),
-          },
-        ]}
-      />
-
-      <div className="relative max-w-lg">
-        <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-        <Input
-          placeholder={isAR ? 'ابحث في المستندات...' : 'Search documents…'}
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="ps-9 h-10"
-        />
+    <div className="space-y-5">
+      <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+        <div className="relative flex-1 max-w-lg">
+          <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Input
+            placeholder={isAR ? 'ابحث في المستندات...' : 'Search working documents…'}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="ps-9 h-10"
+          />
+        </div>
+        <Button
+          onClick={() => setUploadOpen(true)}
+          className="bg-accent text-accent-foreground hover:bg-accent/90"
+        >
+          <Upload className="h-3.5 w-3.5 me-1.5" />
+          {isAR ? 'رفع مستند' : 'Upload Document'}
+        </Button>
       </div>
 
       {loading ? (
@@ -141,8 +216,10 @@ export default function DocumentsPage() {
       ) : docs.length === 0 ? (
         <EmptyState
           icon={FileText}
-          title={isAR ? 'لا توجد مستندات' : 'No documents yet'}
-          titleAr={isAR ? 'لا توجد مستندات' : 'No documents yet'}
+          title={isAR ? 'لا توجد مستندات' : 'No working documents yet'}
+          titleAr={isAR ? 'لا توجد مستندات' : 'No working documents yet'}
+          subtitle={isAR ? 'مستنداتك الداخلية وملفات القضايا والمعاملات تظهر هنا' : 'Your internal, case, and errand documents appear here'}
+          subtitleAr={isAR ? 'مستنداتك الداخلية وملفات القضايا والمعاملات تظهر هنا' : 'Your internal, case, and errand documents appear here'}
           actionLabel={isAR ? 'رفع مستند' : 'Upload Document'}
           onAction={() => setUploadOpen(true)}
         />
