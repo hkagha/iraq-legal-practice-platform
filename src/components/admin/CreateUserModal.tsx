@@ -15,9 +15,16 @@ import { PhoneInput } from '@/components/ui/PhoneInput';
 
 const ROLES = ['firm_admin', 'lawyer', 'paralegal', 'secretary', 'accountant', 'client'];
 
-interface Props { open: boolean; onClose: () => void; onSuccess: () => void; preselectedOrgId?: string; }
+interface Props {
+  open: boolean;
+  onClose: () => void;
+  onSuccess: () => void;
+  preselectedOrgId?: string;
+  preselectedPersonId?: string;
+  defaultRole?: string;
+}
 
-export default function CreateUserModal({ open, onClose, onSuccess, preselectedOrgId }: Props) {
+export default function CreateUserModal({ open, onClose, onSuccess, preselectedOrgId, preselectedPersonId, defaultRole = 'lawyer' }: Props) {
   const { language } = useLanguage();
   const { user } = useAuth();
   const isEN = language === 'en';
@@ -26,9 +33,9 @@ export default function CreateUserModal({ open, onClose, onSuccess, preselectedO
   const [lastName, setLastName] = useState('');
   const [phone, setPhone] = useState('');
   const [orgId, setOrgId] = useState(preselectedOrgId || '');
-  const [role, setRole] = useState('lawyer');
+  const [role, setRole] = useState(defaultRole);
   const [password, setPassword] = useState('');
-  const [personId, setPersonId] = useState('');
+  const [personId, setPersonId] = useState(preselectedPersonId || '');
   const [saving, setSaving] = useState(false);
   const [orgs, setOrgs] = useState<{ value: string; label: string }[]>([]);
   const [people, setPeople] = useState<{ value: string; label: string }[]>([]);
@@ -46,7 +53,9 @@ export default function CreateUserModal({ open, onClose, onSuccess, preselectedO
       });
 
     if (preselectedOrgId) setOrgId(preselectedOrgId);
-  }, [open, preselectedOrgId]);
+    if (defaultRole) setRole(defaultRole);
+    if (preselectedPersonId) setPersonId(preselectedPersonId);
+  }, [open, preselectedOrgId, preselectedPersonId, defaultRole]);
 
   useEffect(() => {
     if (!open || !orgId) {
@@ -80,9 +89,9 @@ export default function CreateUserModal({ open, onClose, onSuccess, preselectedO
     setLastName('');
     setPhone('');
     setOrgId(preselectedOrgId || '');
-    setRole('lawyer');
+    setRole(defaultRole);
     setPassword('');
-    setPersonId('');
+    setPersonId(preselectedPersonId || '');
   };
 
   const isClientRole = role === 'client';
