@@ -14,6 +14,7 @@ import { FormTextarea } from '@/components/ui/FormTextarea';
 import { FormSelect } from '@/components/ui/FormSelect';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { GovernorateSelect } from '@/components/ui/GovernorateSelect';
+import { CountrySelect } from '@/components/ui/CountrySelect';
 import type { EntityRow, PartyRef } from '@/types/parties';
 import { resolveEntityName } from '@/lib/parties';
 
@@ -28,6 +29,7 @@ const Schema = z.object({
   email: z.string().email().optional().or(z.literal('')).nullable(),
   phone: z.string().optional().nullable(),
   website: z.string().optional().nullable(),
+  country: z.string().optional().nullable(),
   governorate: z.string().optional().nullable(),
   city: z.string().optional().nullable(),
   city_ar: z.string().optional().nullable(),
@@ -60,7 +62,7 @@ export default function EntityFormSlideOver({ isOpen, onClose, entity, onSaved }
     defaultValues: {
       company_name: '', company_name_ar: '', company_type: '', company_registration_number: '',
       tax_id: '', industry: '', industry_ar: '', email: '', phone: '', website: '',
-      governorate: '', city: '', city_ar: '', address: '', address_ar: '',
+      country: 'IQ', governorate: '', city: '', city_ar: '', address: '', address_ar: '',
       payment_terms_days: 30, preferred_currency: 'IQD', notes: '', notes_ar: '',
     },
   });
@@ -79,6 +81,7 @@ export default function EntityFormSlideOver({ isOpen, onClose, entity, onSaved }
         email: entity.email || '',
         phone: entity.phone || '',
         website: entity.website || '',
+        country: entity.country || 'IQ',
         governorate: entity.governorate || '',
         city: entity.city || '',
         city_ar: entity.city_ar || '',
@@ -201,9 +204,14 @@ export default function EntityFormSlideOver({ isOpen, onClose, entity, onSaved }
           </Field>
         </div>
 
-        <Field label="Governorate" labelAr="المحافظة">
-          <GovernorateSelect value={watch('governorate') || ''} onChange={(v) => setValue('governorate', v)} />
-        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Country" labelAr="الدولة">
+            <CountrySelect value={watch('country') || 'IQ'} onChange={(v) => setValue('country', v)} />
+          </Field>
+          <Field label="Governorate" labelAr="المحافظة">
+            <GovernorateSelect value={watch('governorate') || ''} onChange={(v) => setValue('governorate', v)} />
+          </Field>
+        </div>
         <div className="grid grid-cols-2 gap-3">
           <Field label="City" labelAr="المدينة">
             <FormInput {...register('city')} dir="ltr" />
