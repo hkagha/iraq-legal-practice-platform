@@ -14,6 +14,7 @@ import { FormTextarea } from '@/components/ui/FormTextarea';
 import { FormSelect } from '@/components/ui/FormSelect';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { GovernorateSelect } from '@/components/ui/GovernorateSelect';
+import { CountrySelect } from '@/components/ui/CountrySelect';
 import type { PersonRow, PartyRef } from '@/types/parties';
 import { resolvePersonName } from '@/lib/parties';
 
@@ -27,6 +28,8 @@ const Schema = z.object({
   whatsapp_number: z.string().optional().nullable(),
   national_id_number: z.string().optional().nullable(),
   gender: z.string().optional().nullable(),
+  nationality: z.string().optional().nullable(),
+  country: z.string().optional().nullable(),
   governorate: z.string().optional().nullable(),
   city: z.string().optional().nullable(),
   city_ar: z.string().optional().nullable(),
@@ -58,7 +61,8 @@ export default function PersonFormSlideOver({ isOpen, onClose, person, onSaved }
     defaultValues: {
       first_name: '', first_name_ar: '', last_name: '', last_name_ar: '',
       email: '', phone: '', whatsapp_number: '', national_id_number: '',
-      gender: '', governorate: '', city: '', city_ar: '', address: '', address_ar: '',
+      gender: '', nationality: 'IQ', country: 'IQ',
+      governorate: '', city: '', city_ar: '', address: '', address_ar: '',
       notes: '', notes_ar: '',
     },
   });
@@ -76,6 +80,8 @@ export default function PersonFormSlideOver({ isOpen, onClose, person, onSaved }
           whatsapp_number: person.whatsapp_number || '',
           national_id_number: person.national_id_number || '',
           gender: person.gender || '',
+          nationality: person.nationality || 'IQ',
+          country: person.country || 'IQ',
           governorate: person.governorate || '',
           city: person.city || '',
           city_ar: person.city_ar || '',
@@ -195,6 +201,14 @@ export default function PersonFormSlideOver({ isOpen, onClose, person, onSaved }
         </Field>
 
         {/* Address */}
+        <div className="grid grid-cols-2 gap-3">
+          <Field label="Country" labelAr="الدولة">
+            <CountrySelect value={watch('country') || 'IQ'} onChange={(v) => setValue('country', v)} />
+          </Field>
+          <Field label="Nationality" labelAr="الجنسية">
+            <CountrySelect value={watch('nationality') || 'IQ'} onChange={(v) => setValue('nationality', v)} />
+          </Field>
+        </div>
         <Field label="Governorate" labelAr="المحافظة">
           <GovernorateSelect value={watch('governorate') || ''} onChange={(v) => setValue('governorate', v)} />
         </Field>
