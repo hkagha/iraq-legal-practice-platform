@@ -22,6 +22,11 @@ interface Props {
   errandId?: string;
   /** Optional pre-link to a client (person) */
   clientId?: string;
+  /** Override the visibility_scope. Defaults: case_specific if caseId, internal otherwise. */
+  visibilityScopeOverride?: 'internal' | 'shared_library' | 'case_specific';
+  /** Custom modal title (e.g., "Upload to Archive") */
+  titleOverride?: string;
+  titleOverrideAr?: string;
 }
 
 const MAX_FILE_BYTES = 50 * 1024 * 1024; // 50 MB
@@ -40,7 +45,7 @@ function inferCategoryFromName(name: string): string {
   return 'other';
 }
 
-export default function DocumentUploadModal({ open, onClose, onComplete, caseId, errandId, clientId }: Props) {
+export default function DocumentUploadModal({ open, onClose, onComplete, caseId, errandId, clientId, visibilityScopeOverride, titleOverride, titleOverrideAr }: Props) {
   const { profile } = useAuth();
   const { language } = useLanguage();
   const isAR = language === 'ar';
@@ -119,7 +124,8 @@ export default function DocumentUploadModal({ open, onClose, onComplete, caseId,
           title: files.length === 1 && title.trim() ? title.trim() : null,
           description: files.length === 1 && description.trim() ? description.trim() : null,
           document_category: inferCategoryFromName(file.name),
-          visibility_scope: caseId ? 'case_specific' : 'internal',
+          visibility_scope: visibilityScopeOverride
+            ?? (caseId ? 'case_specific' : 'internal'),
           is_visible_to_client: canShareWithClient ? visibleToClient : false,
           status: 'active',
           version: 1,
@@ -177,7 +183,11 @@ export default function DocumentUploadModal({ open, onClose, onComplete, caseId,
     <Dialog open={open} onOpenChange={(v) => { if (!v) handleClose(); }}>
       <DialogContent className="max-w-lg">
         <DialogHeader>
-          <DialogTitle>{isAR ? 'رفع مستند' : 'Upload Document'}</DialogTitle>
+          <DialogTitle>
+            {isAR
+              ? (titleOverrideAr || 'رفع مستند')
+              : (titleOverride || 'Upload Document')}
+          </DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4">
