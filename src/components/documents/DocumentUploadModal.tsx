@@ -281,9 +281,13 @@ export default function DocumentUploadModal({ open, onClose, onComplete, caseId,
             </div>
           ) : (
             <div className="border-t border-border pt-3 text-[11px] text-muted-foreground">
-              {isAR
-                ? 'مستندات الأرشيف العام للشركة تكون داخلية دائمًا. لمشاركتها مع عميل، ارفعها من داخل قضية أو ملف عميل.'
-                : 'Firm archive documents are always internal. To share with a client, upload from within a case or client file.'}
+              {visibilityScopeOverride === 'shared_library'
+                ? (isAR
+                    ? 'سيُحفظ هذا المستند ضمن أرشيف المكتب الذكي ليكون قابلاً للفهرسة والبحث لاحقًا.'
+                    : 'This document will be stored in the firm archive for AI indexing and future retrieval.')
+                : (isAR
+                    ? 'المستندات غير المرتبطة بقضية أو عميل تبقى داخلية. لمشاركتها مع عميل، ارفعها من داخل قضية أو ملف عميل.'
+                    : 'Documents not linked to a case or client remain internal. To share with a client, upload from within a case or client file.')}
             </div>
           )}
 

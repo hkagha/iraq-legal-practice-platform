@@ -64,6 +64,8 @@ export default function DocumentArchivePage() {
       .select('id, file_name, title, ai_doc_type, ai_summary, ai_people, ai_organizations, ai_places, ai_tags, ai_dates, ai_language, indexing_status, indexing_error, created_at, file_size_bytes, file_type')
       .eq('organization_id', orgId)
       .eq('status', 'active')
+      .eq('visibility_scope', 'shared_library')
+      .eq('is_latest_version', true)
       .order('created_at', { ascending: false })
       .limit(500);
 
@@ -93,12 +95,15 @@ export default function DocumentArchivePage() {
   const loadCounts = useCallback(async () => {
     if (!orgId) return;
     const base = supabase.from('documents').select('*', { count: 'exact', head: true })
-      .eq('organization_id', orgId).eq('status', 'active');
+      .eq('organization_id', orgId)
+      .eq('status', 'active')
+      .eq('visibility_scope', 'shared_library')
+      .eq('is_latest_version', true);
     const [total, indexed, pending, failed] = await Promise.all([
       base,
-      supabase.from('documents').select('*', { count: 'exact', head: true }).eq('organization_id', orgId).eq('status', 'active').eq('indexing_status', 'done'),
-      supabase.from('documents').select('*', { count: 'exact', head: true }).eq('organization_id', orgId).eq('status', 'active').in('indexing_status', ['pending', 'processing']),
-      supabase.from('documents').select('*', { count: 'exact', head: true }).eq('organization_id', orgId).eq('status', 'active').eq('indexing_status', 'failed'),
+      supabase.from('documents').select('*', { count: 'exact', head: true }).eq('organization_id', orgId).eq('status', 'active').eq('visibility_scope', 'shared_library').eq('is_latest_version', true).eq('indexing_status', 'done'),
+      supabase.from('documents').select('*', { count: 'exact', head: true }).eq('organization_id', orgId).eq('status', 'active').eq('visibility_scope', 'shared_library').eq('is_latest_version', true).in('indexing_status', ['pending', 'processing']),
+      supabase.from('documents').select('*', { count: 'exact', head: true }).eq('organization_id', orgId).eq('status', 'active').eq('visibility_scope', 'shared_library').eq('is_latest_version', true).eq('indexing_status', 'failed'),
     ]);
     setCounts({
       total: total.count || 0,
@@ -149,6 +154,7 @@ export default function DocumentArchivePage() {
     setReindexing(true);
     const { data } = await supabase.from('documents')
       .select('id').eq('organization_id', orgId).eq('status', 'active')
+      .eq('visibility_scope', 'shared_library').eq('is_latest_version', true)
       .in('indexing_status', ['pending', 'failed']).limit(20);
     const list = data || [];
     if (!list.length) {
@@ -176,6 +182,8 @@ export default function DocumentArchivePage() {
         .select('id')
         .eq('organization_id', orgId)
         .eq('status', 'active')
+        .eq('visibility_scope', 'shared_library')
+        .eq('is_latest_version', true)
         .in('indexing_status', ['pending', 'failed']);
       if (error) throw error;
       const list = data || [];
