@@ -8,6 +8,7 @@ import {
   Calendar,
   CreditCard,
   FileText,
+  KeyRound,
   Mail,
   MapPin,
   Phone,
@@ -28,6 +29,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import PersonFormSlideOver from '@/components/parties/PersonFormSlideOver';
 import EntityFormSlideOver from '@/components/parties/EntityFormSlideOver';
 import { EntityRepresentativesEditor } from '@/components/parties/EntityRepresentativesEditor';
+import CreateUserModal from '@/components/admin/CreateUserModal';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import { cn } from '@/lib/utils';
 
@@ -45,6 +47,7 @@ export default function ClientDetailPage() {
   const initialType = (params.get('type') as PartyType) || 'person';
   const [partyType, setPartyType] = useState<PartyType>(initialType);
   const [editOpen, setEditOpen] = useState(false);
+  const [createLoginPersonId, setCreateLoginPersonId] = useState<string | null>(null);
 
   const personQuery = usePerson(partyType === 'person' ? id : undefined);
   const entityQuery = useEntity(partyType === 'entity' ? id : undefined);
@@ -134,6 +137,17 @@ export default function ClientDetailPage() {
           <Pencil size={14} />
           {language === 'ar' ? 'تعديل' : 'Edit'}
         </Button>
+        {(partyType === 'person' || partyType === 'entity') && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCreateLoginPersonId(partyType === 'person' ? id : null)}
+            disabled={partyType === 'entity'}
+          >
+            <KeyRound size={14} />
+            {language === 'ar' ? 'إنشاء دخول للعميل' : 'Create Client Login'}
+          </Button>
+        )}
       </div>
 
       {/* Header card */}
@@ -289,10 +303,23 @@ export default function ClientDetailPage() {
 
         {partyType === 'entity' && (
           <TabsContent value="reps" className="mt-4">
-            <EntityRepresentativesEditor entityId={id} organizationId={profile!.organization_id!} />
+            <EntityRepresentativesEditor
+              entityId={id}
+              organizationId={profile!.organization_id!}
+              onCreatePortalLogin={setCreateLoginPersonId}
+            />
           </TabsContent>
         )}
       </Tabs>
+
+      <CreateUserModal
+        open={!!createLoginPersonId}
+        onClose={() => setCreateLoginPersonId(null)}
+        onSuccess={() => setCreateLoginPersonId(null)}
+        preselectedOrgId={profile?.organization_id || undefined}
+        preselectedPersonId={createLoginPersonId || undefined}
+        defaultRole="client"
+      />
 
       {/* Edit slide-overs */}
       {partyType === 'person' && (

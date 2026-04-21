@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { FormInput } from '@/components/ui/FormInput';
-import { Plus, Star, Trash2 } from 'lucide-react';
+import { KeyRound, Plus, Star, Trash2 } from 'lucide-react';
 import { PartySelector } from './PartySelector';
 import { PartyChip } from './PartyChip';
 import { resolvePersonName } from '@/lib/parties';
@@ -15,13 +15,14 @@ import PersonFormSlideOver from './PersonFormSlideOver';
 interface Props {
   entityId: string;
   organizationId: string;
+  onCreatePortalLogin?: (personId: string) => void;
 }
 
 interface PopulatedRep extends EntityRepresentativeRow {
   person: PersonRow | null;
 }
 
-export function EntityRepresentativesEditor({ entityId, organizationId }: Props) {
+export function EntityRepresentativesEditor({ entityId, organizationId, onCreatePortalLogin }: Props) {
   const { language } = useLanguage();
   const [rows, setRows] = useState<PopulatedRep[]>([]);
   const [loading, setLoading] = useState(true);
@@ -114,14 +115,26 @@ export function EntityRepresentativesEditor({ entityId, organizationId }: Props)
                     </p>
                   )}
                 </div>
-                <button
-                  type="button"
-                  onClick={() => handleSetPrimary(r.id)}
-                  className={`p-2 rounded-button ${r.is_primary ? 'text-accent' : 'text-muted-foreground hover:text-foreground'}`}
-                  title={language === 'ar' ? 'الممثل الأساسي' : 'Set primary'}
-                >
-                  <Star size={16} fill={r.is_primary ? 'currentColor' : 'none'} />
-                </button>
+                <div className="flex items-center gap-1">
+                  {onCreatePortalLogin && (
+                    <button
+                      type="button"
+                      onClick={() => onCreatePortalLogin(r.person_id)}
+                      className="p-2 rounded-button text-muted-foreground hover:text-accent"
+                      title={language === 'ar' ? 'إنشاء دخول للبوابة' : 'Create portal login'}
+                    >
+                      <KeyRound size={16} />
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => handleSetPrimary(r.id)}
+                    className={`p-2 rounded-button ${r.is_primary ? 'text-accent' : 'text-muted-foreground hover:text-foreground'}`}
+                    title={language === 'ar' ? 'الممثل الأساسي' : 'Set primary'}
+                  >
+                    <Star size={16} fill={r.is_primary ? 'currentColor' : 'none'} />
+                  </button>
+                </div>
                 <button
                   type="button"
                   onClick={() => handleRemove(r.id)}
