@@ -13,7 +13,33 @@ import { FormTextarea } from '@/components/ui/FormTextarea';
 import { FormSelect } from '@/components/ui/FormSelect';
 import { FormDatePicker } from '@/components/ui/FormDatePicker';
 import { CasePartiesEditor } from '@/components/parties/CasePartiesEditor';
+import { PartySelector } from '@/components/parties/PartySelector';
+import { PartyChip } from '@/components/parties/PartyChip';
 import { PageLoader } from '@/components/ui/PageLoader';
+import { CASE_PARTY_ROLES, type PartyRef } from '@/types/parties';
+import PersonFormSlideOver from '@/components/parties/PersonFormSlideOver';
+import EntityFormSlideOver from '@/components/parties/EntityFormSlideOver';
+import { Star, Trash2, Plus } from 'lucide-react';
+
+interface DraftParty {
+  ref: PartyRef;
+  role: string;
+  is_primary: boolean;
+}
+
+function roleLabel(r: string, lang: 'en' | 'ar'): string {
+  const map: Record<string, [string, string]> = {
+    client: ['Client', 'موكل'],
+    opposing_party: ['Opposing party', 'الطرف الآخر'],
+    co_counsel: ['Co-counsel', 'محامٍ مشارك'],
+    witness: ['Witness', 'شاهد'],
+    expert: ['Expert', 'خبير'],
+    third_party: ['Third party', 'طرف ثالث'],
+    plaintiff: ['Plaintiff', 'مدّعٍ'],
+    defendant: ['Defendant', 'مدّعى عليه'],
+  };
+  return (map[r]?.[lang === 'ar' ? 1 : 0]) || r;
+}
 
 const CASE_TYPES = ['civil', 'criminal', 'commercial', 'family', 'labor', 'administrative', 'real_estate', 'other'];
 const STATUSES = ['intake', 'active', 'pending_hearing', 'pending_judgment', 'on_hold', 'won', 'lost', 'settled', 'closed'];
