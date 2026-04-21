@@ -13,7 +13,33 @@ import { FormTextarea } from '@/components/ui/FormTextarea';
 import { FormSelect } from '@/components/ui/FormSelect';
 import { FormDatePicker } from '@/components/ui/FormDatePicker';
 import { CasePartiesEditor } from '@/components/parties/CasePartiesEditor';
+import { PartySelector } from '@/components/parties/PartySelector';
+import { PartyChip } from '@/components/parties/PartyChip';
 import { PageLoader } from '@/components/ui/PageLoader';
+import { CASE_PARTY_ROLES, type PartyRef } from '@/types/parties';
+import PersonFormSlideOver from '@/components/parties/PersonFormSlideOver';
+import EntityFormSlideOver from '@/components/parties/EntityFormSlideOver';
+import { Star, Trash2, Plus } from 'lucide-react';
+
+interface DraftParty {
+  ref: PartyRef;
+  role: string;
+  is_primary: boolean;
+}
+
+function roleLabel(r: string, lang: 'en' | 'ar'): string {
+  const map: Record<string, [string, string]> = {
+    client: ['Client', 'موكل'],
+    opposing_party: ['Opposing party', 'الطرف الآخر'],
+    co_counsel: ['Co-counsel', 'محامٍ مشارك'],
+    witness: ['Witness', 'شاهد'],
+    expert: ['Expert', 'خبير'],
+    third_party: ['Third party', 'طرف ثالث'],
+    plaintiff: ['Plaintiff', 'مدّعٍ'],
+    defendant: ['Defendant', 'مدّعى عليه'],
+  };
+  return (map[r]?.[lang === 'ar' ? 1 : 0]) || r;
+}
 
 const CASE_TYPES = ['civil', 'criminal', 'commercial', 'family', 'labor', 'administrative', 'real_estate', 'other'];
 const STATUSES = ['intake', 'active', 'pending_hearing', 'pending_judgment', 'on_hold', 'won', 'lost', 'settled', 'closed'];
@@ -30,6 +56,48 @@ export default function CaseFormPage() {
 
   const [loading, setLoading] = useState(isEdit);
   const [saving, setSaving] = useState(false);
+
+  // Draft parties (only used when creating a new case)
+  const [draftParties, setDraftParties] = useState<DraftParty[]>([]);
+  const [draftRef, setDraftRef] = useState<PartyRef | null>(null);
+  const [draftRole, setDraftRole] = useState<string>('client');
+  const [showPerson, setShowPerson] = useState(false);
+  const [showEntity, setShowEntity] = useState(false);
+
+  const roleOptions = CASE_PARTY_ROLES.map((r) => ({
+    value: r,
+    label: roleLabel(r, lang),
+  }));
+
+  const addDraftParty = () => {
+    if (!draftRef) return;
+    const exists = draftParties.some(
+      (p) =>
+        p.ref.partyType === draftRef.partyType &&
+        ((p.ref.personId && p.ref.personId === draftRef.personId) ||
+          (p.ref.entityId && p.ref.entityId === draftRef.entityId)),
+    );
+    if (exists) {
+      toast.error(lang === 'ar' ? 'هذا الطرف مضاف بالفعل' : 'Party already added');
+      return;
+    }
+    setDraftParties((prev) => [
+      ...prev,
+      { ref: draftRef, role: draftRole, is_primary: prev.length === 0 },
+    ]);
+    setDraftRef(null);
+    setDraftRole('client');
+  };
+
+  const removeDraftParty = (idx: number) => {
+    setDraftParties((prev) => prev.filter((_, i) => i !== idx));
+  };
+  const setDraftPrimary = (idx: number) => {
+    setDraftParties((prev) => prev.map((p, i) => ({ ...p, is_primary: i === idx })));
+  };
+  const setDraftPartyRole = (idx: number, role: string) => {
+    setDraftParties((prev) => prev.map((p, i) => (i === idx ? { ...p, role } : p)));
+  };
 
   const [form, setForm] = useState({
     title: '',
@@ -115,8 +183,31 @@ export default function CaseFormPage() {
         payload.case_number = 'PENDING';
         const { data, error } = await supabase.from('cases').insert(payload).select('id').single();
         if (error) throw error;
+        const newCaseId = data!.id;
+
+        // Persist draft parties collected on the form
+        if (draftParties.length > 0) {
+          const partyRows = draftParties.map((p) => ({
+            case_id: newCaseId,
+            organization_id: profile.organization_id!,
+            party_type: p.ref.partyType,
+            person_id: p.ref.personId || null,
+            entity_id: p.ref.entityId || null,
+            role: p.role,
+            is_primary: p.is_primary,
+          }));
+          const { error: pErr } = await supabase.from('case_parties').insert(partyRows);
+          if (pErr) {
+            toast.error(
+              (lang === 'ar'
+                ? 'تم إنشاء القضية لكن فشل حفظ بعض الأطراف: '
+                : 'Case created but failed to save some parties: ') + pErr.message,
+            );
+          }
+        }
+
         toast.success(lang === 'ar' ? 'تم إنشاء القضية' : 'Case created');
-        navigate(`/cases/${data!.id}/edit`);
+        navigate(`/cases/${newCaseId}`);
       }
     } catch (e: any) {
       toast.error(e?.message || 'Failed to save');
@@ -214,13 +305,99 @@ export default function CaseFormPage() {
           </div>
         </section>
 
-        {/* Parties (only after creation) */}
-        {isEdit && profile?.organization_id && (
-          <section className="space-y-4">
+        {/* Parties */}
+        <section className="space-y-4">
+          <div>
             <h2 className="text-heading-md text-foreground">{lang === 'ar' ? 'الأطراف' : 'Parties'}</h2>
+            <p className="text-body-sm text-muted-foreground mt-1">
+              {lang === 'ar'
+                ? 'أضف الموكل والأطراف الأخرى المرتبطة بالقضية.'
+                : 'Add the client and other parties related to this case.'}
+            </p>
+          </div>
+
+          {isEdit && profile?.organization_id ? (
             <CasePartiesEditor caseId={id!} organizationId={profile.organization_id} />
-          </section>
-        )}
+          ) : (
+            <div className="space-y-4">
+              {/* Existing draft parties */}
+              <div className="border border-border rounded-card overflow-hidden">
+                {draftParties.length === 0 ? (
+                  <div className="p-6 text-center text-muted-foreground text-body-sm">
+                    {lang === 'ar' ? 'لا أطراف مضافة بعد' : 'No parties added yet'}
+                  </div>
+                ) : (
+                  <div className="divide-y divide-border">
+                    {draftParties.map((p, idx) => (
+                      <div key={idx} className="flex items-center gap-3 p-3">
+                        <div className="flex-1 min-w-0">
+                          <PartyChip
+                            partyType={p.ref.partyType}
+                            displayName={p.ref.displayName}
+                            showTypeBadge
+                          />
+                        </div>
+                        <div className="w-[160px] shrink-0">
+                          <FormSelect
+                            value={p.role}
+                            onValueChange={(v) => setDraftPartyRole(idx, v)}
+                            options={roleOptions}
+                          />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setDraftPrimary(idx)}
+                          className={`p-2 rounded-button ${p.is_primary ? 'text-accent' : 'text-muted-foreground hover:text-foreground'}`}
+                          title={lang === 'ar' ? 'الطرف الأساسي' : 'Set primary'}
+                        >
+                          <Star size={16} fill={p.is_primary ? 'currentColor' : 'none'} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => removeDraftParty(idx)}
+                          className="p-2 rounded-button text-muted-foreground hover:text-destructive"
+                        >
+                          <Trash2 size={16} />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Add party form */}
+              <div className="border border-border rounded-card p-3 space-y-3 bg-muted/20">
+                <p className="text-label text-muted-foreground">
+                  {lang === 'ar' ? 'إضافة طرف' : 'Add party'}
+                </p>
+                <div className="grid grid-cols-1 md:grid-cols-[1fr_180px_auto] gap-2">
+                  <PartySelector
+                    value={draftRef}
+                    onChange={setDraftRef}
+                    onCreatePerson={() => setShowPerson(true)}
+                    onCreateEntity={() => setShowEntity(true)}
+                  />
+                  <FormSelect value={draftRole} onValueChange={setDraftRole} options={roleOptions} />
+                  <Button onClick={addDraftParty} disabled={!draftRef}>
+                    <Plus size={14} />
+                    {lang === 'ar' ? 'إضافة' : 'Add'}
+                  </Button>
+                </div>
+              </div>
+
+              <PersonFormSlideOver
+                isOpen={showPerson}
+                onClose={() => setShowPerson(false)}
+                onSaved={(ref) => setDraftRef(ref)}
+              />
+              <EntityFormSlideOver
+                isOpen={showEntity}
+                onClose={() => setShowEntity(false)}
+                onSaved={(ref) => setDraftRef(ref)}
+              />
+            </div>
+          )}
+        </section>
 
         {/* Footer actions */}
         <div className="flex items-center justify-between pt-6 border-t border-border">
