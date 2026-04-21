@@ -266,7 +266,7 @@ export default function InvoiceFormPage() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="none">{isEN ? 'No case' : 'بدون قضية'}</SelectItem>
-                    {cases!.map((c: any) => (
+                    {(cases ?? []).map((c: any) => (
                       <SelectItem key={c.id} value={c.id}>{c.case_number} — {isEN ? c.title : (c.title_ar || c.title)}</SelectItem>
                     ))}
                   </SelectContent>
