@@ -27,22 +27,46 @@ export default function EditUserModal({ open, userId, onClose, onSuccess }: Prop
   const [originalOrg, setOriginalOrg] = useState<string | null>(null);
   const [originalRole, setOriginalRole] = useState<string>('');
   const [orgs, setOrgs] = useState<{ value: string; label: string }[]>([]);
+  const [resetHistory, setResetHistory] = useState<any[]>([]);
 
   useEffect(() => {
     if (!open || !userId) return;
     Promise.all([
       supabase.from('profiles').select('*').eq('id', userId).single(),
       supabase.from('organizations').select('id, name').order('name'),
-    ]).then(([{ data: profile }, { data: orgData }]) => {
+      supabase
+        .from('admin_audit_log')
+        .select('id, action, created_at, admin_id, details')
+        .eq('target_type', 'user')
+        .eq('target_id', userId)
+        .in('action', ['user_password_reset', 'user_password_changed', 'user_created'])
+        .order('created_at', { ascending: false })
+        .limit(5),
+    ]).then(async ([{ data: profile }, { data: orgData }, { data: auditData }]) => {
       if (profile) {
         setForm(profile);
         setOriginalOrg(profile.organization_id);
         setOriginalRole(profile.role);
       }
       setOrgs((orgData || []).map((o: any) => ({ value: o.id, label: o.name })));
+
+      const adminIds = Array.from(new Set((auditData || []).map((a: any) => a.admin_id).filter(Boolean)));
+      const adminMap: Record<string, string> = {};
+      if (adminIds.length) {
+        const { data: admins } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name, email')
+          .in('id', adminIds);
+        (admins || []).forEach((a: any) => {
+          adminMap[a.id] = `${a.first_name || ''} ${a.last_name || ''}`.trim() || a.email;
+        });
+      }
+      setResetHistory(
+        (auditData || []).map((a: any) => ({ ...a, admin_name: adminMap[a.admin_id] || (isEN ? 'Unknown' : 'غير معروف') }))
+      );
       setLoading(false);
     });
-  }, [open, userId]);
+  }, [open, userId, isEN]);
 
   const set = (key: string, val: any) => setForm((f: any) => ({ ...f, [key]: val }));
 
