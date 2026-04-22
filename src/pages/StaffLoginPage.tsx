@@ -40,7 +40,11 @@ const StaffLoginPage = forwardRef<HTMLDivElement>((_props, _ref) => {
     setLoading(false);
 
     if (result.error) {
-      setError(t('auth.invalidCredentials'));
+      setError(
+        language === 'en'
+          ? 'Invalid email or password. If your password was recently reset by an administrator, use "Forgot password?" below to set a new one.'
+          : 'البريد الإلكتروني أو كلمة المرور غير صحيحة. إذا قام المسؤول بإعادة تعيين كلمة المرور مؤخراً، استخدم "نسيت كلمة المرور؟" أدناه لتعيين كلمة جديدة.'
+      );
     }
   };
 
