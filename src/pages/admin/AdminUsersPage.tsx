@@ -21,6 +21,8 @@ interface UserRow {
   first_name_ar: string | null; last_name_ar: string | null;
   role: string; is_active: boolean; organization_id: string | null;
   last_active_at: string | null; created_at: string; org_name?: string;
+  password_set_by_admin?: boolean | null;
+  password_last_changed_at?: string | null;
 }
 
 export default function AdminUsersPage() {
@@ -170,7 +172,22 @@ export default function AdminUsersPage() {
                         <span className="font-medium text-foreground">{u.first_name} {u.last_name}</span>
                       </div>
                     </td>
-                    <td className="p-3 text-muted-foreground">{u.email}</td>
+                    <td className="p-3 text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <span>{u.email}</span>
+                        {u.password_set_by_admin && (
+                          <span
+                            title={isEN
+                              ? 'Password was set by an administrator. User may need to use Forgot Password to log in.'
+                              : 'تم تعيين كلمة المرور من قبل المسؤول. قد يحتاج المستخدم إلى استخدام "نسيت كلمة المرور" لتسجيل الدخول.'}
+                            className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full bg-warning/10 text-warning text-[10px] font-medium whitespace-nowrap"
+                          >
+                            <KeyRound className="h-2.5 w-2.5" />
+                            {isEN ? 'Admin pwd' : 'كلمة مسؤول'}
+                          </span>
+                        )}
+                      </div>
+                    </td>
                     <td className="p-3">
                       {u.organization_id ? (
                         <button onClick={() => navigate(`/admin/organizations/${u.organization_id}`)} className="text-primary hover:underline">{u.org_name}</button>
