@@ -60,7 +60,9 @@ export default function TasksPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
-  const [assignedFilter, setAssignedFilter] = useState('my');
+  // Default to 'all' so newly-created tasks (which may not be assigned to the
+  // creator) are visible. Users can switch to 'my' if they only want their own.
+  const [assignedFilter, setAssignedFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [linkedFilter, setLinkedFilter] = useState('all');
   const [sortBy, setSortBy] = useState('due_date');
