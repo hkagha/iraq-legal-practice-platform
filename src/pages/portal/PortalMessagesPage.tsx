@@ -4,6 +4,7 @@ import { MessageSquare, Send } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePortalOrg } from '@/contexts/PortalOrgContext';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -26,36 +27,17 @@ interface ClientMessage {
 export default function PortalMessagesPage() {
   const { language } = useLanguage();
   const { user } = useAuth();
+  const { activeOrg } = usePortalOrg();
   const queryClient = useQueryClient();
   const isEN = language === 'en';
   const [draft, setDraft] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
 
-  // Get the portal user's primary link to determine party_type/person_id and org
-  const { data: link } = useQuery({
-    queryKey: ['portal-user-primary-link', user?.id],
-    enabled: !!user?.id,
-    queryFn: async () => {
-      const { data: pu, error: e1 } = await supabase
-        .from('portal_users')
-        .select('id, last_selected_org_id')
-        .eq('auth_user_id', user!.id)
-        .maybeSingle();
-      if (e1) throw e1;
-      if (!pu) return null;
-
-      const { data: links, error: e2 } = await supabase
-        .from('portal_user_links')
-        .select('person_id, organization_id')
-        .eq('portal_user_id', pu.id)
-        .eq('is_active', true);
-      if (e2) throw e2;
-      if (!links || links.length === 0) return null;
-
-      const chosen = links.find((l) => l.organization_id === pu.last_selected_org_id) ?? links[0];
-      return chosen;
-    },
-  });
+  // The active firm and the person record for that firm comes from PortalOrgContext.
+  // No need to look it up again here — keeps "switch org" instant and consistent.
+  const link = activeOrg
+    ? { person_id: activeOrg.person_id, organization_id: activeOrg.id }
+    : null;
 
   const { data: messages, isLoading } = useQuery({
     queryKey: ['portal-messages', link?.person_id, link?.organization_id],

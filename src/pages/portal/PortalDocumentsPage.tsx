@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { FileText, Search, Download, Calendar, MessageSquare } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePortalOrg } from '@/contexts/PortalOrgContext';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -22,15 +23,19 @@ function formatBytes(bytes: number) {
 
 export default function PortalDocumentsPage() {
   const { language, isRTL } = useLanguage();
+  const { activeOrg } = usePortalOrg();
   const isEN = language === 'en';
   const [search, setSearch] = useState('');
+  const orgId = activeOrg?.id || null;
 
   const { data: docs, isLoading } = useQuery({
-    queryKey: ['portal-documents'],
+    queryKey: ['portal-documents', orgId],
+    enabled: !!orgId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('documents')
         .select('id, file_name, file_name_ar, title, title_ar, file_size_bytes, file_type, file_path, created_at, case_id')
+        .eq('organization_id', orgId!)
         .eq('is_visible_to_client', true)
         .eq('status', 'active')
         .eq('is_latest_version', true)

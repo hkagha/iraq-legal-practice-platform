@@ -4,6 +4,7 @@ import { Scale, FileCheck, FileText, Receipt, MessageSquare, ChevronRight, Calen
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePortalOrg } from '@/contexts/PortalOrgContext';
 import { Card } from '@/components/ui/card';
 import { StatCard } from '@/components/ui/StatCard';
 import { PageLoader } from '@/components/ui/PageLoader';
@@ -18,22 +19,29 @@ function fmt(n: number, c: string, lang: 'en' | 'ar') {
 export default function PortalDashboardPage() {
   const { language } = useLanguage();
   const { profile, getFullName } = useAuth();
+  const { activeOrg } = usePortalOrg();
   const isEN = language === 'en';
+  const orgId = activeOrg?.id || null;
 
   const { data, isLoading } = useQuery({
-    queryKey: ['portal-dashboard'],
+    queryKey: ['portal-dashboard', orgId],
+    enabled: !!orgId,
     queryFn: async () => {
       const today = new Date().toISOString().slice(0, 10);
       const [casesRes, errandsRes, invoicesRes, hearingsRes, messagesRes] = await Promise.all([
-        supabase.from('cases').select('id, case_number, title, title_ar, status, updated_at')
+        supabase.from('cases').select('id, case_number, title, title_ar, status, updated_at, organization_id')
+          .eq('organization_id', orgId!)
           .eq('is_visible_to_client', true).order('updated_at', { ascending: false }).limit(5),
-        supabase.from('errands').select('id, errand_number, title, title_ar, status, updated_at, completed_steps, total_steps')
+        supabase.from('errands').select('id, errand_number, title, title_ar, status, updated_at, completed_steps, total_steps, organization_id')
+          .eq('organization_id', orgId!)
           .eq('is_visible_to_client', true).order('updated_at', { ascending: false }).limit(5),
-        supabase.from('invoices').select('id, invoice_number, currency, total_amount, amount_paid, due_date, status')
+        supabase.from('invoices').select('id, invoice_number, currency, total_amount, amount_paid, due_date, status, organization_id')
+          .eq('organization_id', orgId!)
           .neq('status', 'draft'),
-        supabase.from('case_hearings').select('id, hearing_date, hearing_time, hearing_type, case_id, cases(case_number, title, title_ar)')
+        supabase.from('case_hearings').select('id, hearing_date, hearing_time, hearing_type, case_id, organization_id, cases(case_number, title, title_ar)')
+          .eq('organization_id', orgId!)
           .eq('is_visible_to_client', true).gte('hearing_date', today).order('hearing_date').limit(5),
-        supabase.from('client_messages').select('id').eq('is_read', false).eq('sender_type', 'staff'),
+        supabase.from('client_messages').select('id').eq('organization_id', orgId!).eq('is_read', false).eq('sender_type', 'staff'),
       ]);
       const invoices = invoicesRes.data ?? [];
       const outstandingByCcy: Record<string, number> = {};

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { Receipt, Search, ChevronRight, Calendar } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePortalOrg } from '@/contexts/PortalOrgContext';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -24,15 +25,19 @@ function formatMoney(amount: number, currency: string, lang: 'en' | 'ar') {
 
 export default function PortalInvoicesPage() {
   const { language, isRTL } = useLanguage();
+  const { activeOrg } = usePortalOrg();
   const isEN = language === 'en';
   const [search, setSearch] = useState('');
+  const orgId = activeOrg?.id || null;
 
   const { data: invoices, isLoading } = useQuery({
-    queryKey: ['portal-invoices'],
+    queryKey: ['portal-invoices', orgId],
+    enabled: !!orgId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('invoices')
         .select('id, invoice_number, status, issue_date, due_date, currency, total_amount, amount_paid')
+        .eq('organization_id', orgId!)
         .neq('status', 'draft')
         .order('issue_date', { ascending: false });
       if (error) throw error;

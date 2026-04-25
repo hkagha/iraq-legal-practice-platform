@@ -85,12 +85,12 @@ export default function ClientLayout() {
       <header className="h-16 bg-card border-b border-border flex items-center justify-between px-4 md:px-6 shrink-0">
         <div className="flex items-center gap-3">
           <span className="text-lg font-bold text-primary">
-            {activeOrg?.organization_logo_url ? (
-              <img src={activeOrg.organization_logo_url} alt="" className="h-8 w-8 rounded object-contain" />
+            {activeOrg?.logo_url ? (
+              <img src={activeOrg.logo_url} alt="" className="h-8 w-8 rounded object-contain" />
             ) : organization?.logo_url ? (
               <img src={organization.logo_url} alt="" className="h-8 w-8 rounded object-contain" />
             ) : (
-              activeOrg?.organization_name || organization?.name || 'Qanuni'
+              activeOrg?.name || organization?.name || 'Qanuni'
             )}
           </span>
           <span className="text-muted-foreground text-body-sm hidden sm:inline">|</span>
@@ -103,13 +103,13 @@ export default function ClientLayout() {
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <button className="flex items-center gap-2 h-9 px-3 rounded-lg border border-border bg-background hover:bg-muted transition-colors">
-                  {activeOrg.organization_logo_url ? (
-                    <img src={activeOrg.organization_logo_url} alt="" className="h-5 w-5 rounded object-contain" />
+                  {activeOrg.logo_url ? (
+                    <img src={activeOrg.logo_url} alt="" className="h-5 w-5 rounded object-contain" />
                   ) : (
                     <Building className="h-4 w-4 text-muted-foreground" />
                   )}
                   <span className="text-body-sm font-medium text-foreground max-w-[120px] truncate hidden sm:inline">
-                    {language === 'ar' ? activeOrg.organization_name_ar : activeOrg.organization_name}
+                    {language === 'ar' && activeOrg.name_ar ? activeOrg.name_ar : activeOrg.name}
                   </span>
                   <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
                 </button>
@@ -120,22 +120,22 @@ export default function ClientLayout() {
                 </p>
                 <DropdownMenuSeparator />
                 {linkedOrgs.map(org => {
-                  const isActive = activeOrg.organization_id === org.organization_id;
+                  const isActive = activeOrg.id === org.id;
                   return (
                     <DropdownMenuItem
-                      key={org.organization_id}
-                      onClick={() => switchOrg(org.organization_id)}
+                      key={org.id}
+                      onClick={() => switchOrg(org.id)}
                       className="flex items-center gap-3 py-2.5"
                     >
-                      {org.organization_logo_url ? (
-                        <img src={org.organization_logo_url} alt="" className="h-6 w-6 rounded object-contain shrink-0" />
+                      {org.logo_url ? (
+                        <img src={org.logo_url} alt="" className="h-6 w-6 rounded object-contain shrink-0" />
                       ) : (
                         <div className="h-6 w-6 rounded bg-accent/10 flex items-center justify-center shrink-0">
                           <Building className="h-3.5 w-3.5 text-accent" />
                         </div>
                       )}
                       <span className="flex-1 text-body-sm font-medium truncate">
-                        {language === 'ar' ? org.organization_name_ar : org.organization_name}
+                        {language === 'ar' && org.name_ar ? org.name_ar : org.name}
                       </span>
                       {isActive && <Check className="h-4 w-4 text-accent shrink-0" />}
                     </DropdownMenuItem>
