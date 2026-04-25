@@ -61,7 +61,7 @@ export default function ClientMessagesThread({ partyType, partyId, caseId }: Pro
       let q = supabase
         .from('client_messages')
         .select(
-          'id, organization_id, party_type, person_id, entity_id, case_id, errand_id, sender_id, sender_type, content, is_read, read_at, created_at, profiles:profiles!client_messages_sender_id_fkey(first_name, last_name)',
+          'id, organization_id, party_type, person_id, entity_id, case_id, errand_id, sender_id, sender_type, content, is_read, read_at, created_at',
         )
         .eq('organization_id', orgId!)
         .eq('party_type', partyType)
@@ -71,7 +71,25 @@ export default function ClientMessagesThread({ partyType, partyId, caseId }: Pro
       if (caseId) q = q.eq('case_id', caseId);
       const { data, error } = await q;
       if (error) throw error;
-      return (data || []) as unknown as Message[];
+
+      // Resolve staff sender names. Client senders are anonymous from the staff
+      // POV — they're just the client we're chatting with.
+      const staffIds = Array.from(new Set(
+        (data || []).filter((m: any) => m.sender_type === 'staff').map((m: any) => m.sender_id),
+      ));
+      let staffById: Record<string, { first_name: string; last_name: string }> = {};
+      if (staffIds.length > 0) {
+        const { data: profs } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name')
+          .in('id', staffIds);
+        staffById = Object.fromEntries((profs || []).map((p: any) => [p.id, { first_name: p.first_name, last_name: p.last_name }]));
+      }
+
+      return (data || []).map((m: any) => ({
+        ...m,
+        profiles: m.sender_type === 'staff' ? staffById[m.sender_id] || null : null,
+      })) as Message[];
     },
   });
 

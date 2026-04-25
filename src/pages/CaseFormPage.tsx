@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -51,6 +52,7 @@ export default function CaseFormPage() {
   const navigate = useNavigate();
   const { profile } = useAuth();
   const { language } = useLanguage();
+  const qc = useQueryClient();
   const lang = language as 'en' | 'ar';
   const isEdit = !!id;
 
@@ -175,6 +177,7 @@ export default function CaseFormPage() {
         payload.updated_by = profile.id;
         const { error } = await supabase.from('cases').update(payload).eq('id', id!);
         if (error) throw error;
+        qc.invalidateQueries({ queryKey: ['cases'] });
         toast.success(lang === 'ar' ? 'تم الحفظ' : 'Saved');
         navigate(`/cases/${id}`);
       } else {
@@ -206,6 +209,7 @@ export default function CaseFormPage() {
           }
         }
 
+        qc.invalidateQueries({ queryKey: ['cases'] });
         toast.success(lang === 'ar' ? 'تم إنشاء القضية' : 'Case created');
         navigate(`/cases/${newCaseId}`);
       }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { useQueryClient } from '@tanstack/react-query';
 import { ArrowLeft, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,6 +25,7 @@ export default function ErrandFormPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { profile } = useAuth();
+  const qc = useQueryClient();
   const { language } = useLanguage();
   const lang = language as 'en' | 'ar';
   const isEdit = !!id;
@@ -51,7 +53,7 @@ export default function ErrandFormPage() {
   useEffect(() => {
     if (!profile?.organization_id) return;
     supabase.from('cases').select('id, case_number, title').eq('organization_id', profile.organization_id).order('updated_at', { ascending: false }).limit(200).then(({ data }) => setCases(data || []));
-    supabase.from('profiles').select('id, first_name, last_name, role').eq('organization_id', profile.organization_id).eq('is_active', true).in('role', ['firm_admin', 'lawyer', 'paralegal', 'secretary']).order('first_name', { ascending: true }).then(({ data }) => setStaff(data || []));
+    supabase.from('profiles').select('id, first_name, last_name, role').eq('organization_id', profile.organization_id).eq('is_active', true).in('role', ['firm_admin', 'lawyer', 'paralegal', 'secretary', 'accountant']).order('first_name', { ascending: true }).then(({ data }) => setStaff(data || []));
   }, [profile?.organization_id]);
 
   useEffect(() => {
@@ -113,6 +115,7 @@ export default function ErrandFormPage() {
       if (isEdit) {
         const { error } = await supabase.from('errands').update(payload).eq('id', id!);
         if (error) throw error;
+        qc.invalidateQueries({ queryKey: ['errands'] });
         toast.success(lang === 'ar' ? 'تم الحفظ' : 'Saved');
         navigate(`/errands/${id}`);
       } else {
@@ -120,6 +123,7 @@ export default function ErrandFormPage() {
         payload.errand_number = '';
         const { data, error } = await supabase.from('errands').insert(payload).select('id').single();
         if (error) throw error;
+        qc.invalidateQueries({ queryKey: ['errands'] });
         toast.success(lang === 'ar' ? 'تم الإنشاء' : 'Created');
         navigate(`/errands/${data!.id}`);
       }
