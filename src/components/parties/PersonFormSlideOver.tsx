@@ -15,6 +15,7 @@ import { FormSelect } from '@/components/ui/FormSelect';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { GovernorateSelect } from '@/components/ui/GovernorateSelect';
 import { CountrySelect } from '@/components/ui/CountrySelect';
+import { CitySelect } from '@/components/ui/CitySelect';
 import type { PersonRow, PartyRef } from '@/types/parties';
 import { resolvePersonName } from '@/lib/parties';
 
@@ -209,12 +210,20 @@ export default function PersonFormSlideOver({ isOpen, onClose, person, onSaved }
             <CountrySelect value={watch('nationality') || 'IQ'} onChange={(v) => setValue('nationality', v)} />
           </Field>
         </div>
-        <Field label="Governorate" labelAr="المحافظة">
-          <GovernorateSelect value={watch('governorate') || ''} onChange={(v) => setValue('governorate', v)} />
-        </Field>
+        {/* Governorate is Iraq-only — it is the legal taxonomy of Iraqi addresses. */}
+        {(watch('country') || 'IQ') === 'IQ' && (
+          <Field label="Governorate" labelAr="المحافظة">
+            <GovernorateSelect value={watch('governorate') || ''} onChange={(v) => setValue('governorate', v)} />
+          </Field>
+        )}
         <div className="grid grid-cols-2 gap-3">
           <Field label="City" labelAr="المدينة">
-            <FormInput {...register('city')} dir="ltr" />
+            <CitySelect
+              value={watch('city') || ''}
+              onChange={(v) => setValue('city', v)}
+              countryCode={watch('country') || 'IQ'}
+              governorateCode={watch('governorate') || undefined}
+            />
           </Field>
           <Field label="City (Arabic)" labelAr="المدينة (عربي)">
             <FormInput {...register('city_ar')} dir="rtl" />

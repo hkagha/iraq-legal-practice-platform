@@ -39,6 +39,11 @@ interface ArchiveDoc {
 
 type FacetKey = 'people' | 'organizations' | 'places' | 'tags';
 
+interface FacetSelection {
+  kind: FacetKey;
+  value: string;
+}
+
 export default function DocumentArchivePage() {
   const { t, language } = useLanguage();
   const { profile } = useAuth();
@@ -48,13 +53,36 @@ export default function DocumentArchivePage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'done' | 'pending' | 'processing' | 'failed'>('all');
-  const [selected, setSelected] = useState<{ kind: FacetKey; value: string } | null>(null);
+  const [selectedFacets, setSelectedFacets] = useState<FacetSelection[]>([]);
   const [uploadOpen, setUploadOpen] = useState(false);
   const [detailId, setDetailId] = useState<string | null>(null);
   const [reindexing, setReindexing] = useState(false);
   const [backfilling, setBackfilling] = useState(false);
   const [backfillProgress, setBackfillProgress] = useState<{ done: number; total: number } | null>(null);
   const [counts, setCounts] = useState({ total: 0, indexed: 0, pending: 0, failed: 0 });
+
+  const toggleFacet = useCallback((kind: FacetKey, value: string) => {
+    setSelectedFacets((prev) => {
+      const idx = prev.findIndex((f) => f.kind === kind && f.value === value);
+      if (idx >= 0) {
+        const next = [...prev];
+        next.splice(idx, 1);
+        return next;
+      }
+      return [...prev, { kind, value }];
+    });
+  }, []);
+
+  const removeFacet = useCallback((kind: FacetKey, value: string) => {
+    setSelectedFacets((prev) => prev.filter((f) => !(f.kind === kind && f.value === value)));
+  }, []);
+
+  const clearFacets = useCallback(() => setSelectedFacets([]), []);
+
+  const isFacetSelected = useCallback(
+    (kind: FacetKey, value: string) => selectedFacets.some((f) => f.kind === kind && f.value === value),
+    [selectedFacets],
+  );
 
   const load = useCallback(async () => {
     if (!orgId) return;
@@ -64,7 +92,6 @@ export default function DocumentArchivePage() {
       .select('id, file_name, title, ai_doc_type, ai_summary, ai_people, ai_organizations, ai_places, ai_tags, ai_dates, ai_language, indexing_status, indexing_error, created_at, file_size_bytes, file_type')
       .eq('organization_id', orgId)
       .eq('status', 'active')
-      .eq('visibility_scope', 'shared_library')
       .eq('is_latest_version', true)
       .order('created_at', { ascending: false })
       .limit(500);
@@ -76,11 +103,25 @@ export default function DocumentArchivePage() {
       q = q.or(`file_name.ilike.%${s}%,title.ilike.%${s}%,ai_summary.ilike.%${s}%,ai_doc_type.ilike.%${s}%,extracted_text.ilike.%${s}%`);
     }
 
-    if (selected) {
-      const col = selected.kind === 'people' ? 'ai_people'
-        : selected.kind === 'organizations' ? 'ai_organizations'
-        : selected.kind === 'places' ? 'ai_places' : 'ai_tags';
-      q = q.contains(col, [selected.value]);
+    // AND-combine multiple facets across kinds (multi-tag filtering)
+    if (selectedFacets.length > 0) {
+      // Group selections by kind
+      const byKind: Record<FacetKey, string[]> = { people: [], organizations: [], places: [], tags: [] };
+      for (const f of selectedFacets) byKind[f.kind].push(f.value);
+
+      // Within a single kind, use 'contains' to require ALL selected values to be present
+      // (e.g. all selected people must appear in ai_people array)
+      const kindToCol: Record<FacetKey, string> = {
+        people: 'ai_people',
+        organizations: 'ai_organizations',
+        places: 'ai_places',
+        tags: 'ai_tags',
+      };
+      for (const kind of Object.keys(byKind) as FacetKey[]) {
+        if (byKind[kind].length > 0) {
+          q = q.contains(kindToCol[kind], byKind[kind]);
+        }
+      }
     }
 
     const { data, error } = await q;
@@ -90,20 +131,19 @@ export default function DocumentArchivePage() {
       setDocs((data || []) as ArchiveDoc[]);
     }
     setLoading(false);
-  }, [orgId, search, statusFilter, selected]);
+  }, [orgId, search, statusFilter, selectedFacets]);
 
   const loadCounts = useCallback(async () => {
     if (!orgId) return;
-    const base = supabase.from('documents').select('*', { count: 'exact', head: true })
+    const baseFilter = (qb: any) => qb
       .eq('organization_id', orgId)
       .eq('status', 'active')
-      .eq('visibility_scope', 'shared_library')
       .eq('is_latest_version', true);
     const [total, indexed, pending, failed] = await Promise.all([
-      base,
-      supabase.from('documents').select('*', { count: 'exact', head: true }).eq('organization_id', orgId).eq('status', 'active').eq('visibility_scope', 'shared_library').eq('is_latest_version', true).eq('indexing_status', 'done'),
-      supabase.from('documents').select('*', { count: 'exact', head: true }).eq('organization_id', orgId).eq('status', 'active').eq('visibility_scope', 'shared_library').eq('is_latest_version', true).in('indexing_status', ['pending', 'processing']),
-      supabase.from('documents').select('*', { count: 'exact', head: true }).eq('organization_id', orgId).eq('status', 'active').eq('visibility_scope', 'shared_library').eq('is_latest_version', true).eq('indexing_status', 'failed'),
+      baseFilter(supabase.from('documents').select('*', { count: 'exact', head: true })),
+      baseFilter(supabase.from('documents').select('*', { count: 'exact', head: true })).eq('indexing_status', 'done'),
+      baseFilter(supabase.from('documents').select('*', { count: 'exact', head: true })).in('indexing_status', ['pending', 'processing']),
+      baseFilter(supabase.from('documents').select('*', { count: 'exact', head: true })).eq('indexing_status', 'failed'),
     ]);
     setCounts({
       total: total.count || 0,
@@ -300,22 +340,36 @@ export default function DocumentArchivePage() {
         </select>
       </div>
 
-      {/* Active facet chip */}
-      {selected && (
-        <div className="flex items-center gap-2">
+      {/* Active facet chips (multi-select) */}
+      {selectedFacets.length > 0 && (
+        <div className="flex items-center gap-2 flex-wrap">
           <span className="text-body-sm text-muted-foreground">
             {language === 'ar' ? 'تصفية حسب:' : 'Filtered by:'}
           </span>
-          <Badge variant="outline" className="gap-1.5">
-            {selected.kind === 'people' && <UsersIcon className="h-3 w-3" />}
-            {selected.kind === 'organizations' && <Building2 className="h-3 w-3" />}
-            {selected.kind === 'places' && <MapPin className="h-3 w-3" />}
-            {selected.kind === 'tags' && <Tag className="h-3 w-3" />}
-            {selected.value}
-            <button onClick={() => setSelected(null)} className="ms-1 hover:text-destructive">
-              <X className="h-3 w-3" />
+          {selectedFacets.map((f) => (
+            <Badge key={`${f.kind}:${f.value}`} variant="outline" className="gap-1.5">
+              {f.kind === 'people' && <UsersIcon className="h-3 w-3" />}
+              {f.kind === 'organizations' && <Building2 className="h-3 w-3" />}
+              {f.kind === 'places' && <MapPin className="h-3 w-3" />}
+              {f.kind === 'tags' && <Tag className="h-3 w-3" />}
+              {f.value}
+              <button
+                onClick={() => removeFacet(f.kind, f.value)}
+                className="ms-1 hover:text-destructive"
+                aria-label={language === 'ar' ? 'إزالة الفلتر' : 'Remove filter'}
+              >
+                <X className="h-3 w-3" />
+              </button>
+            </Badge>
+          ))}
+          {selectedFacets.length > 1 && (
+            <button
+              onClick={clearFacets}
+              className="text-body-sm text-muted-foreground hover:text-foreground underline-offset-2 hover:underline"
+            >
+              {language === 'ar' ? 'مسح الكل' : 'Clear all'}
             </button>
-          </Badge>
+          )}
         </div>
       )}
 
@@ -327,32 +381,32 @@ export default function DocumentArchivePage() {
             icon={UsersIcon}
             items={facets.people}
             kind="people"
-            selected={selected}
-            onSelect={setSelected}
+            isSelected={isFacetSelected}
+            onToggle={toggleFacet}
           />
           <FacetGroup
             title={language === 'ar' ? 'المؤسسات' : 'Organizations'}
             icon={Building2}
             items={facets.organizations}
             kind="organizations"
-            selected={selected}
-            onSelect={setSelected}
+            isSelected={isFacetSelected}
+            onToggle={toggleFacet}
           />
           <FacetGroup
             title={language === 'ar' ? 'الأماكن' : 'Places'}
             icon={MapPin}
             items={facets.places}
             kind="places"
-            selected={selected}
-            onSelect={setSelected}
+            isSelected={isFacetSelected}
+            onToggle={toggleFacet}
           />
           <FacetGroup
             title={language === 'ar' ? 'الوسوم' : 'Tags'}
             icon={Tag}
             items={facets.tags}
             kind="tags"
-            selected={selected}
-            onSelect={setSelected}
+            isSelected={isFacetSelected}
+            onToggle={toggleFacet}
           />
         </aside>
 
@@ -482,11 +536,11 @@ function ChipMini({ icon: Icon, label, muted }: { icon: any; label: string; mute
 }
 
 function FacetGroup({
-  title, icon: Icon, items, kind, selected, onSelect,
+  title, icon: Icon, items, kind, isSelected, onToggle,
 }: {
   title: string; icon: any; items: [string, number][]; kind: FacetKey;
-  selected: { kind: FacetKey; value: string } | null;
-  onSelect: (s: { kind: FacetKey; value: string } | null) => void;
+  isSelected: (kind: FacetKey, value: string) => boolean;
+  onToggle: (kind: FacetKey, value: string) => void;
 }) {
   if (items.length === 0) return null;
   return (
@@ -497,16 +551,27 @@ function FacetGroup({
       </div>
       <div className="space-y-1">
         {items.map(([value, count]) => {
-          const active = selected?.kind === kind && selected.value === value;
+          const active = isSelected(kind, value);
           return (
             <button
               key={value}
-              onClick={() => onSelect(active ? null : { kind, value })}
+              onClick={() => onToggle(kind, value)}
               className={`w-full text-start flex items-center justify-between gap-2 px-2 py-1 rounded text-body-sm transition-colors ${
                 active ? 'bg-accent/15 text-accent font-medium' : 'text-foreground/80 hover:bg-secondary'
               }`}
             >
-              <span className="truncate">{value}</span>
+              <span className="flex items-center gap-2 min-w-0">
+                <span className={`shrink-0 inline-flex items-center justify-center h-3.5 w-3.5 rounded-sm border ${
+                  active ? 'bg-accent border-accent' : 'border-border'
+                }`}>
+                  {active && (
+                    <svg className="h-2.5 w-2.5 text-accent-foreground" viewBox="0 0 12 12" fill="none">
+                      <path d="M2.5 6L5 8.5L9.5 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  )}
+                </span>
+                <span className="truncate">{value}</span>
+              </span>
               <span className="tabular-nums text-[11px] text-muted-foreground shrink-0">{count}</span>
             </button>
           );

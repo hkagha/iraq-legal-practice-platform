@@ -32,6 +32,7 @@ export default function ErrandFormPage() {
   const [saving, setSaving] = useState(false);
   const [party, setParty] = useState<PartyRef | null>(null);
   const [cases, setCases] = useState<{ id: string; case_number: string; title: string }[]>([]);
+  const [staff, setStaff] = useState<{ id: string; first_name: string; last_name: string; role: string }[]>([]);
 
   const [form, setForm] = useState({
     title: '',
@@ -43,11 +44,14 @@ export default function ErrandFormPage() {
     priority: 'normal',
     due_date: undefined as Date | undefined,
     case_id: '',
+    assigned_to: '',
+    is_visible_to_client: false,
   });
 
   useEffect(() => {
     if (!profile?.organization_id) return;
     supabase.from('cases').select('id, case_number, title').eq('organization_id', profile.organization_id).order('updated_at', { ascending: false }).limit(200).then(({ data }) => setCases(data || []));
+    supabase.from('profiles').select('id, first_name, last_name, role').eq('organization_id', profile.organization_id).eq('is_active', true).in('role', ['firm_admin', 'lawyer', 'paralegal', 'secretary']).order('first_name', { ascending: true }).then(({ data }) => setStaff(data || []));
   }, [profile?.organization_id]);
 
   useEffect(() => {
@@ -66,6 +70,8 @@ export default function ErrandFormPage() {
           priority: data.priority || 'normal',
           due_date: data.due_date ? new Date(data.due_date) : undefined,
           case_id: data.case_id || '',
+          assigned_to: data.assigned_to || '',
+          is_visible_to_client: data.is_visible_to_client ?? false,
         });
         if (data.party_type === 'person' && data.person_id) {
           const { data: p } = await supabase.from('persons').select('first_name, first_name_ar, last_name, last_name_ar').eq('id', data.person_id).maybeSingle();
@@ -97,6 +103,8 @@ export default function ErrandFormPage() {
         priority: form.priority,
         due_date: form.due_date ? form.due_date.toISOString().slice(0, 10) : null,
         case_id: form.case_id || null,
+        assigned_to: form.assigned_to || null,
+        is_visible_to_client: form.is_visible_to_client,
         party_type: party?.partyType || null,
         person_id: party?.partyType === 'person' ? party.personId : null,
         entity_id: party?.partyType === 'entity' ? party.entityId : null,
@@ -167,6 +175,34 @@ export default function ErrandFormPage() {
               onValueChange={(v) => setForm({ ...form, case_id: v === '__none' ? '' : v })}
               options={[{ value: '__none', label: lang === 'ar' ? 'بدون' : 'None' }, ...cases.map((c) => ({ value: c.id, label: `${c.case_number} — ${c.title}` }))]}
             />
+          </FormField>
+          <FormField label={lang === 'ar' ? 'المسؤول' : 'Assigned to'}>
+            <FormSelect
+              value={form.assigned_to || '__none'}
+              onValueChange={(v) => setForm({ ...form, assigned_to: v === '__none' ? '' : v })}
+              options={[
+                { value: '__none', label: lang === 'ar' ? 'غير معيّن' : 'Unassigned' },
+                ...staff.map((s) => ({
+                  value: s.id,
+                  label: `${s.first_name} ${s.last_name}${s.role ? ` (${s.role.replace(/_/g, ' ')})` : ''}`,
+                })),
+              ]}
+            />
+          </FormField>
+          <FormField label={lang === 'ar' ? 'مشاركة مع العميل' : 'Share with client'}>
+            <label className="flex items-center gap-3 h-10 px-3 rounded-input border border-border bg-card cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.is_visible_to_client}
+                onChange={(e) => setForm({ ...form, is_visible_to_client: e.target.checked })}
+                className="h-4 w-4 rounded accent-accent"
+              />
+              <span className="text-body-sm text-muted-foreground">
+                {lang === 'ar'
+                  ? (form.is_visible_to_client ? 'مرئي للعميل' : 'مخفي عن العميل')
+                  : (form.is_visible_to_client ? 'Visible in client portal' : 'Hidden from client')}
+              </span>
+            </label>
           </FormField>
           <FormField label={lang === 'ar' ? 'الوصف' : 'Description'} className="md:col-span-2">
             <FormTextarea value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} />

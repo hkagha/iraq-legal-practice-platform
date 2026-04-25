@@ -49,12 +49,58 @@ export default function DocumentCommentsTab({ documentId, organizationId, varian
   }, [documentVisibleToClient]);
 
   const fetchComments = async () => {
-    const { data, error } = await supabase
+    // Note: author_id has no FK constraint (clients live in portal_users, staff in profiles).
+    // We fetch comments first, then resolve staff author names in a follow-up query.
+    const { data: rows, error } = await supabase
       .from('document_comments')
-      .select('*, author:profiles!document_comments_author_id_fkey(first_name,last_name,first_name_ar,last_name_ar)' as any)
+      .select('id, document_id, organization_id, author_id, author_type, content, content_ar, is_visible_to_client, created_at, updated_at')
       .eq('document_id', documentId)
       .order('created_at', { ascending: true });
-    if (!error) setComments((data || []) as any);
+    if (error || !rows) {
+      setLoading(false);
+      return;
+    }
+
+    // Resolve staff authors (author_type='staff') via profiles
+    const staffIds = Array.from(new Set(
+      rows.filter((r: any) => r.author_type === 'staff' && r.author_id).map((r: any) => r.author_id),
+    ));
+    let staffById: Record<string, any> = {};
+    if (staffIds.length > 0) {
+      const { data: profs } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name, first_name_ar, last_name_ar')
+        .in('id', staffIds);
+      staffById = Object.fromEntries((profs || []).map((p: any) => [p.id, p]));
+    }
+
+    // Resolve client authors (author_type='client') via portal_users
+    const clientIds = Array.from(new Set(
+      rows.filter((r: any) => r.author_type === 'client' && r.author_id).map((r: any) => r.author_id),
+    ));
+    let clientById: Record<string, any> = {};
+    if (clientIds.length > 0) {
+      const { data: pus } = await supabase
+        .from('portal_users')
+        .select('auth_user_id, full_name, full_name_ar')
+        .in('auth_user_id', clientIds);
+      clientById = Object.fromEntries((pus || []).map((p: any) => {
+        const [first, ...rest] = (p.full_name || '').split(' ');
+        const [firstAr, ...restAr] = (p.full_name_ar || '').split(' ');
+        return [p.auth_user_id, {
+          first_name: first || '',
+          last_name: rest.join(' ') || '',
+          first_name_ar: firstAr || '',
+          last_name_ar: restAr.join(' ') || '',
+        }];
+      }));
+    }
+
+    const enriched = rows.map((r: any) => ({
+      ...r,
+      author: r.author_type === 'staff' ? staffById[r.author_id] : clientById[r.author_id],
+    }));
+    setComments(enriched);
     setLoading(false);
   };
 
