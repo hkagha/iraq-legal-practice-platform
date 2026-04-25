@@ -120,7 +120,7 @@ export default function PortalErrandDetailPage() {
                     {isDone ? (
                       <CheckCircle2 className="h-5 w-5 text-green-600" />
                     ) : isInProgress ? (
-                      <Clock className="h-5 w-5 text-amber-500" />
+                      <Clock className="h-5 w-5 text-warning" />
                     ) : (
                       <Circle className="h-5 w-5 text-muted-foreground" />
                     )}

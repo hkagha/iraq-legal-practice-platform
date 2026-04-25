@@ -152,9 +152,9 @@ Provide a JSON response with:
   };
 
   const riskColors: Record<string, string> = {
-    high: 'bg-destructive/10 text-destructive border-destructive/30',
-    medium: 'bg-amber-100 text-amber-700 border-amber-300',
-    low: 'bg-emerald-100 text-emerald-700 border-emerald-300',
+    high:   'bg-destructive/10 text-destructive border-destructive/30',
+    medium: 'bg-warning-light text-warning border-warning/20',
+    low:    'bg-success-light text-success border-success/20',
   };
 
   const SectionHeader = ({ sectionKey, label }: { sectionKey: string; label: string }) => (

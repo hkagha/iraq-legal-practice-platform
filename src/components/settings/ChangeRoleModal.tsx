@@ -53,13 +53,13 @@ export default function ChangeRoleModal({ member, adminCount, onClose, onSuccess
             />
           </FormField>
           {isDowngradingAdmin && !cantDowngrade && (
-            <div className="flex items-start gap-2 p-3 rounded-md bg-amber-50 text-amber-800 text-body-sm">
+            <div className="flex items-start gap-2 p-3 rounded-md bg-warning-light text-warning text-body-sm">
               <AlertTriangle size={16} className="mt-0.5 shrink-0" />
               <span>Removing admin access means {name} will lose access to settings, team management, and financial reports.</span>
             </div>
           )}
           {isUpgradingToAdmin && (
-            <div className="flex items-start gap-2 p-3 rounded-md bg-amber-50 text-amber-800 text-body-sm">
+            <div className="flex items-start gap-2 p-3 rounded-md bg-warning-light text-warning text-body-sm">
               <AlertTriangle size={16} className="mt-0.5 shrink-0" />
               <span>Making {name} an admin gives them full access to all settings and data.</span>
             </div>

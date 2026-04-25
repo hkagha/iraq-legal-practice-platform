@@ -33,16 +33,16 @@ const permissions: PermRow[] = [
 ];
 
 const roles = [
-  { key: 'firm_admin', style: 'bg-accent/15 text-accent border-accent/30' },
-  { key: 'lawyer', style: 'bg-blue-100 text-blue-700 border-blue-200' },
-  { key: 'paralegal', style: 'bg-purple-100 text-purple-700 border-purple-200' },
-  { key: 'secretary', style: 'bg-muted text-muted-foreground border-border' },
-  { key: 'accountant', style: 'bg-green-100 text-green-700 border-green-200' },
+  { key: 'firm_admin', style: 'bg-accent/15 text-accent-dark border-accent/30' },
+  { key: 'lawyer',     style: 'bg-info-light text-info border-info/20' },
+  { key: 'paralegal',  style: 'bg-secondary text-secondary-foreground border-border' },
+  { key: 'secretary',  style: 'bg-muted text-muted-foreground border-border' },
+  { key: 'accountant', style: 'bg-success-light text-success border-success/20' },
 ];
 
 function CellIcon({ access }: { access: Access }) {
-  if (access === 'full') return <Check size={16} className="text-green-600 mx-auto" />;
-  if (access === 'view') return <Eye size={14} className="text-blue-500 mx-auto" />;
+  if (access === 'full') return <Check size={16} className="text-success mx-auto" />;
+  if (access === 'view') return <Eye size={14} className="text-info mx-auto" />;
   if (access === 'none') return <Minus size={14} className="text-muted-foreground/40 mx-auto" />;
   return <span className="text-xs text-muted-foreground text-center block">{access}</span>;
 }

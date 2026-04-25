@@ -36,15 +36,17 @@ const TYPE_ICONS: Record<string, typeof Bell> = {
   mention: AtSign,
 };
 
+// Subtle, restrained category tints — calibrated to the navy + gold + limestone palette.
+// Each pair uses a 10–12% tint of the hue with foreground at full saturation.
 const TYPE_COLORS: Record<string, string> = {
-  task: 'bg-blue-100 text-blue-600',
-  case: 'bg-emerald-100 text-emerald-600',
-  errand: 'bg-purple-100 text-purple-600',
-  hearing: 'bg-red-100 text-red-600',
-  invoice: 'bg-amber-100 text-amber-600',
-  document: 'bg-slate-100 text-slate-600',
-  event: 'bg-yellow-100 text-yellow-700',
-  mention: 'bg-pink-100 text-pink-600',
+  task:     'bg-info-light text-info',
+  case:     'bg-success-light text-success',
+  errand:   'bg-accent/10 text-accent-dark',
+  hearing:  'bg-error-light text-error',
+  invoice:  'bg-warning-light text-warning',
+  document: 'bg-muted text-muted-foreground',
+  event:    'bg-secondary text-foreground/70',
+  mention:  'bg-accent/10 text-accent-dark',
 };
 
 function getTypeFromNotificationType(nt: string): string {
@@ -284,7 +286,7 @@ export default function NotificationBell() {
                     <button
                       key={n.id}
                       onClick={() => handleClick(n)}
-                      className={`w-full flex items-start gap-3 px-4 py-3 text-start transition-colors hover:bg-muted/50 ${!n.is_read ? 'bg-blue-50/50' : ''}`}
+                      className={`w-full flex items-start gap-3 px-4 py-3 text-start transition-colors hover:bg-muted/50 ${!n.is_read ? 'bg-accent/5' : ''}`}
                     >
                       <div className={`h-8 w-8 rounded-full flex items-center justify-center shrink-0 ${colorClass}`}>
                         <Icon size={15} />
@@ -302,7 +304,7 @@ export default function NotificationBell() {
                           {relativeTime(n.created_at, language)}
                         </span>
                         {!n.is_read && (
-                          <span className="h-2 w-2 rounded-full bg-blue-500" />
+                          <span className="h-2 w-2 rounded-full bg-accent" />
                         )}
                       </div>
                     </button>

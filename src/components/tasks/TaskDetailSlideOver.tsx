@@ -23,13 +23,16 @@ import TaskFormModal from './TaskFormModal';
 
 const STATUSES = ['todo', 'in_progress', 'in_review', 'completed'] as const;
 const STATUS_COLORS: Record<string, string> = {
-  todo: 'bg-muted-foreground/60 text-white',
-  in_progress: 'bg-blue-500 text-white',
-  in_review: 'bg-amber-500 text-white',
-  completed: 'bg-green-500 text-white',
+  todo:        'bg-muted-foreground/60 text-white',
+  in_progress: 'bg-info text-white',
+  in_review:   'bg-warning text-white',
+  completed:   'bg-success text-white',
 };
 const PRIORITY_DOT: Record<string, string> = {
-  low: 'bg-muted-foreground/50', medium: 'bg-blue-500', high: 'bg-amber-500', urgent: 'bg-red-500',
+  low:    'bg-muted-foreground/50',
+  medium: 'bg-info',
+  high:   'bg-warning',
+  urgent: 'bg-error',
 };
 
 interface TaskDetailSlideOverProps {
@@ -191,7 +194,7 @@ export default function TaskDetailSlideOver({ isOpen, onClose, taskId, onUpdated
               <Button variant="outline" size="sm" className="text-destructive border-destructive/30" onClick={() => setShowDeleteConfirm(true)}>
                 <Trash2 size={14} className="me-1" /> {t('common.delete')}
               </Button>
-              <Button size="sm" className="bg-green-600 text-white hover:bg-green-700" onClick={() => handleStatusChange('completed')}>
+              <Button size="sm" className="bg-success text-white hover:bg-success/90" onClick={() => handleStatusChange('completed')}>
                 <CheckCircle size={14} className="me-1" /> {t('tasks.completeTask')}
               </Button>
             </div>

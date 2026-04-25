@@ -188,7 +188,7 @@ export default function TaskFormModal({ isOpen, onClose, task, onSaved, prefillC
     onClose();
   };
 
-  const priorityDots: Record<string, string> = { low: 'bg-muted-foreground/50', medium: 'bg-blue-500', high: 'bg-amber-500', urgent: 'bg-red-500' };
+  const priorityDots: Record<string, string> = { low: 'bg-muted-foreground/50', medium: 'bg-info', high: 'bg-warning', urgent: 'bg-error' };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>

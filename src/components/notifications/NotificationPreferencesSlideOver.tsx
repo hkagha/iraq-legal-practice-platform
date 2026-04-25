@@ -207,13 +207,13 @@ export default function NotificationPreferencesSlideOver({ open, onClose }: Prop
 
           {/* Config banners */}
           <div className="space-y-3">
-            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
-              <p className="text-body-sm text-amber-800">
+            <div className="rounded-lg border border-warning/30 bg-warning-light p-3">
+              <p className="text-body-sm text-warning">
                 {language === 'ar' ? 'إشعارات البريد الإلكتروني تتطلب الإعداد. تواصل مع الدعم للتفعيل.' : 'Email notifications require configuration. Contact support to enable.'}
               </p>
             </div>
-            <div className="rounded-lg border border-blue-200 bg-blue-50 p-3">
-              <p className="text-body-sm text-blue-800">
+            <div className="rounded-lg border border-info/30 bg-info-light p-3">
+              <p className="text-body-sm text-info">
                 {language === 'ar' ? 'إشعارات الواتساب قريباً. سيتطلب ذلك ربط حساب واتساب للأعمال.' : 'WhatsApp notifications coming soon. This will require connecting your WhatsApp Business account.'}
               </p>
             </div>

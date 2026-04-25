@@ -215,7 +215,7 @@ export default function InvoiceDetailPage() {
       <Card className="relative overflow-hidden p-6 md:p-8 print:shadow-none print:border-0">
         {isPaid && !isCancelled && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <div className="rotate-[-20deg] border-4 border-green-600/30 text-green-600/30 text-7xl font-bold px-10 py-4 rounded">
+            <div className="rotate-[-20deg] border-4 border-success/30 text-success/30 text-7xl font-bold px-10 py-4 rounded">
               {isEN ? 'PAID' : 'مدفوعة'}
             </div>
           </div>

@@ -30,11 +30,11 @@ interface TeamMember {
 }
 
 const roleBadgeStyles: Record<string, string> = {
-  firm_admin: 'bg-accent/15 text-accent border-accent/30',
-  lawyer: 'bg-blue-100 text-blue-700 border-blue-200',
-  paralegal: 'bg-purple-100 text-purple-700 border-purple-200',
-  secretary: 'bg-muted text-muted-foreground border-border',
-  accountant: 'bg-green-100 text-green-700 border-green-200',
+  firm_admin: 'bg-accent/15 text-accent-dark border-accent/30',
+  lawyer:     'bg-info-light text-info border-info/20',
+  paralegal:  'bg-secondary text-secondary-foreground border-border',
+  secretary:  'bg-muted text-muted-foreground border-border',
+  accountant: 'bg-success-light text-success border-success/20',
 };
 
 export default function TeamMembersSection() {
@@ -167,7 +167,7 @@ export default function TeamMembersSection() {
                   {getRoleLabel(member.role)}
                 </Badge>
                 <div className="flex items-center gap-1.5">
-                  <span className={cn('w-2 h-2 rounded-full', member.is_active ? 'bg-green-500' : 'bg-muted-foreground/40')} />
+                  <span className={cn('w-2 h-2 rounded-full', member.is_active ? 'bg-success' : 'bg-muted-foreground/40')} />
                   <span className="text-body-sm text-muted-foreground hidden sm:inline">
                     {member.is_active ? t('team.active') : t('team.inactive')}
                   </span>

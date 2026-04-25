@@ -211,7 +211,7 @@ export default function DocumentTemplatesView({ onDocumentSaved }: DocumentTempl
                 <p className="text-body-sm text-muted-foreground line-clamp-2">{language === 'ar' && tmpl.description_ar ? tmpl.description_ar : tmpl.description}</p>
                 <div className="flex items-center gap-2 mt-3">
                   <span className="text-xs bg-muted rounded-badge px-2 py-0.5">{tmpl.language === 'ar' ? (language === 'ar' ? 'عربي' : 'Arabic') : tmpl.language === 'en' ? (language === 'ar' ? 'إنجليزي' : 'English') : (language === 'ar' ? 'ثنائي' : 'Bilingual')}</span>
-                  {tmpl.is_system && <span className="text-xs bg-blue-50 text-blue-600 rounded-badge px-2 py-0.5">{language === 'ar' ? 'قالب النظام' : 'System'}</span>}
+                  {tmpl.is_system && <span className="text-xs bg-info-light text-info rounded-badge px-2 py-0.5">{language === 'ar' ? 'قالب النظام' : 'System'}</span>}
                 </div>
                 <Button variant="outline" size="sm" className="mt-3 w-full">{language === 'ar' ? 'استخدام القالب' : 'Use Template'}</Button>
               </div>
