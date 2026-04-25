@@ -31,12 +31,26 @@ interface Organization {
   subscription_status: string;
 }
 
+interface PortalUser {
+  id: string;
+  auth_user_id: string;
+  email: string;
+  full_name: string | null;
+  full_name_ar: string | null;
+  phone: string | null;
+  preferred_language: string | null;
+  last_selected_org_id: string | null;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   profile: Profile | null;
   organization: Organization | null;
+  portalUser: PortalUser | null;
   isLoading: boolean;
+  /** True once we've finished checking BOTH profiles and portal_users for the current session. */
+  identityResolved: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null }>;
   signUp: (data: SignUpData) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
@@ -62,28 +76,74 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [organization, setOrganization] = useState<Organization | null>(null);
+  const [portalUser, setPortalUser] = useState<PortalUser | null>(null);
+  const [identityResolved, setIdentityResolved] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const activityInterval = useRef<NodeJS.Timeout | null>(null);
 
-  const fetchProfile = useCallback(async (userId: string) => {
-    const { data } = await supabase
+  /**
+   * Resolve the identity for an authenticated auth.users row. A given auth user
+   * is either a staff member (has a row in `profiles`) or a portal user (has a
+   * row in `portal_users`). We check both, in that order, and surface whichever
+   * exists.
+   */
+  const resolveIdentity = useCallback(async (userId: string) => {
+    setIdentityResolved(false);
+    // Try staff profile first.
+    const { data: profileRow } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', userId)
-      .single();
-    if (data) {
-      setProfile(data as unknown as Profile);
-      if (data.organization_id) {
+      .maybeSingle();
+
+    if (profileRow) {
+      setProfile(profileRow as unknown as Profile);
+      setPortalUser(null);
+      if (profileRow.organization_id) {
         const { data: org } = await supabase
           .from('organizations')
           .select('*')
-          .eq('id', data.organization_id)
-          .single();
+          .eq('id', profileRow.organization_id)
+          .maybeSingle();
         if (org) setOrganization(org as unknown as Organization);
+      } else {
+        setOrganization(null);
       }
+      setIdentityResolved(true);
+      return { kind: 'staff' as const, profile: profileRow as unknown as Profile };
     }
-    return data as unknown as Profile | null;
+
+    // Otherwise check for a portal_users row.
+    const { data: portalRow } = await supabase
+      .from('portal_users')
+      .select('*')
+      .eq('auth_user_id', userId)
+      .maybeSingle();
+
+    if (portalRow) {
+      setPortalUser(portalRow as unknown as PortalUser);
+      setProfile(null);
+      setOrganization(null);
+      setIdentityResolved(true);
+      return { kind: 'portal' as const, portalUser: portalRow as unknown as PortalUser };
+    }
+
+    // Neither — orphaned auth user.
+    setProfile(null);
+    setPortalUser(null);
+    setOrganization(null);
+    setIdentityResolved(true);
+    return { kind: 'orphan' as const };
   }, []);
+
+  // Backward-compat alias used by signUp below.
+  const fetchProfile = useCallback(
+    async (userId: string) => {
+      const result = await resolveIdentity(userId);
+      return result.kind === 'staff' ? result.profile : null;
+    },
+    [resolveIdentity],
+  );
 
   useEffect(() => {
     // Set up auth state listener FIRST
@@ -92,10 +152,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(session?.user ?? null);
       if (session?.user) {
         // Use setTimeout to avoid deadlocks with Supabase
-        setTimeout(() => fetchProfile(session.user.id), 0);
+        setTimeout(() => resolveIdentity(session.user.id), 0);
       } else {
         setProfile(null);
         setOrganization(null);
+        setPortalUser(null);
+        setIdentityResolved(true);
       }
       setIsLoading(false);
     });
@@ -105,17 +167,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        fetchProfile(session.user.id);
+        resolveIdentity(session.user.id);
+      } else {
+        setIdentityResolved(true);
       }
       setIsLoading(false);
     });
 
     return () => subscription.unsubscribe();
-  }, [fetchProfile]);
+  }, [resolveIdentity]);
 
-  // Update last_active_at every 5 minutes
+  // Update last_active_at every 5 minutes for staff users (portal users don't have a profiles row)
   useEffect(() => {
-    if (user) {
+    if (user && profile) {
       activityInterval.current = setInterval(() => {
         supabase.from('profiles').update({ last_active_at: new Date().toISOString() }).eq('id', user.id).then(() => {});
       }, 5 * 60 * 1000);
@@ -123,7 +187,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       if (activityInterval.current) clearInterval(activityInterval.current);
     };
-  }, [user]);
+  }, [user, profile]);
 
   const signIn = async (email: string, password: string) => {
     const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -187,6 +251,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setSession(null);
     setProfile(null);
     setOrganization(null);
+    setPortalUser(null);
+    setIdentityResolved(true);
   };
 
   const updateProfile = async (updates: Partial<Profile>) => {
@@ -198,24 +264,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const isRole = (role: string) => profile?.role === role;
 
   const getFullName = () => {
-    if (!profile) return '';
     const lang = localStorage.getItem('qanuni_language') || 'en';
-    if (lang === 'ar' && profile.first_name_ar && profile.last_name_ar) {
-      return `${profile.first_name_ar} ${profile.last_name_ar}`;
+    if (profile) {
+      if (lang === 'ar' && profile.first_name_ar && profile.last_name_ar) {
+        return `${profile.first_name_ar} ${profile.last_name_ar}`;
+      }
+      return `${profile.first_name} ${profile.last_name}`;
     }
-    return `${profile.first_name} ${profile.last_name}`;
+    if (portalUser) {
+      if (lang === 'ar' && portalUser.full_name_ar) return portalUser.full_name_ar;
+      return portalUser.full_name || portalUser.email;
+    }
+    return '';
   };
 
   const getInitials = () => {
-    if (!profile) return '';
-    const first = profile.first_name?.[0] || '';
-    const last = profile.last_name?.[0] || '';
-    return (first + last).toUpperCase();
+    if (profile) {
+      const first = profile.first_name?.[0] || '';
+      const last = profile.last_name?.[0] || '';
+      return (first + last).toUpperCase();
+    }
+    if (portalUser) {
+      const name = portalUser.full_name || portalUser.email || '';
+      const parts = name.trim().split(/\s+/);
+      const first = parts[0]?.[0] || '';
+      const last = parts.length > 1 ? parts[parts.length - 1][0] : '';
+      return (first + last).toUpperCase() || (portalUser.email[0] || '').toUpperCase();
+    }
+    return '';
   };
 
   return (
     <AuthContext.Provider value={{
-      user, session, profile, organization, isLoading,
+      user, session, profile, organization, portalUser, isLoading, identityResolved,
       signIn, signUp, signOut, updateProfile,
       isRole, getFullName, getInitials,
     }}>

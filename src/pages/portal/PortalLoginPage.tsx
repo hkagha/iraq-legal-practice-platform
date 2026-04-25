@@ -6,7 +6,7 @@ import { Eye, EyeOff, Shield, Loader2 } from 'lucide-react';
 
 export default function PortalLoginPage() {
   const { t, language, setLanguage } = useLanguage();
-  const { signIn, profile, user } = useAuth();
+  const { signIn, signOut, profile, portalUser, user, identityResolved } = useAuth();
   const navigate = useNavigate();
   const isEN = language === 'en';
 
@@ -17,11 +17,35 @@ export default function PortalLoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user && profile) {
-      if (profile.role === 'client') navigate('/portal/dashboard', { replace: true });
-      else navigate('/dashboard', { replace: true });
+    if (!user || !identityResolved) return;
+
+    if (portalUser) {
+      navigate('/portal/dashboard', { replace: true });
+      return;
     }
-  }, [user, profile, navigate]);
+
+    // Wrong segment.
+    let message = isEN
+      ? 'This login is for clients only. Please use the appropriate login window for your account.'
+      : 'تسجيل الدخول هذا مخصص للعملاء فقط. يرجى استخدام نافذة تسجيل الدخول المناسبة لحسابك.';
+
+    if (profile) {
+      const isStaff = ['firm_admin', 'lawyer', 'paralegal', 'secretary', 'accountant'].includes(profile.role);
+      if (isStaff) {
+        message = isEN
+          ? 'This account is registered as law firm staff. Please use the Staff login.'
+          : 'هذا الحساب مسجّل كموظف مكتب. يرجى استخدام تسجيل دخول الموظفين.';
+      } else if (profile.role === 'super_admin' || profile.role === 'sales_admin') {
+        message = isEN
+          ? 'This account is a platform administrator. Please use the Admin login.'
+          : 'هذا الحساب مسؤول منصة. يرجى استخدام تسجيل دخول المسؤول.';
+      }
+    }
+
+    setError(message);
+    setLoading(false);
+    signOut();
+  }, [user, profile, portalUser, identityResolved, navigate, isEN, signOut]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -31,11 +55,12 @@ export default function PortalLoginPage() {
 
     setLoading(true);
     const result = await signIn(email, password);
-    setLoading(false);
 
     if (result.error) {
+      setLoading(false);
       setError(isEN ? 'Invalid email or password' : 'بريد إلكتروني أو كلمة مرور غير صالحة');
     }
+    // Successful sign-in: useEffect validates segment.
   };
 
   return (

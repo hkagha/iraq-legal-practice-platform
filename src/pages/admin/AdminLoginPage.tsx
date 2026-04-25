@@ -6,7 +6,7 @@ import { Scale, Eye, EyeOff, Loader2, ShieldCheck } from 'lucide-react';
 
 export default function AdminLoginPage() {
   const { t, language, setLanguage } = useLanguage();
-  const { signIn, signOut, profile, user } = useAuth();
+  const { signIn, signOut, profile, portalUser, user, identityResolved } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
@@ -16,18 +16,32 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (!user) return;
-    if (!profile) return; // Still loading profile
+    if (!user || !identityResolved) return;
 
-    if (profile.role === 'super_admin') {
+    if (profile && (profile.role === 'super_admin' || profile.role === 'sales_admin')) {
       navigate('/admin/dashboard', { replace: true });
-    } else if (profile.role === 'client') {
-      navigate('/portal/dashboard', { replace: true });
-    } else {
-      // Firm staff (firm_admin, lawyer, paralegal) — send to main app instead of blocking
-      navigate('/dashboard', { replace: true });
+      return;
     }
-  }, [user, profile, navigate, signOut, language]);
+
+    // Wrong segment: reject and sign out.
+    let message = language === 'en'
+      ? 'This login is for platform administrators only. Please use the appropriate login window for your account.'
+      : 'تسجيل الدخول هذا مخصص لمسؤولي المنصة فقط. يرجى استخدام نافذة تسجيل الدخول المناسبة لحسابك.';
+
+    if (portalUser) {
+      message = language === 'en'
+        ? 'This account is registered as a client. Please use the Client Portal login.'
+        : 'هذا الحساب مسجّل كعميل. يرجى استخدام تسجيل دخول بوابة العملاء.';
+    } else if (profile) {
+      message = language === 'en'
+        ? 'This account is law firm staff. Please use the Staff login.'
+        : 'هذا الحساب موظف مكتب. يرجى استخدام تسجيل دخول الموظفين.';
+    }
+
+    setError(message);
+    setLoading(false);
+    signOut();
+  }, [user, profile, portalUser, identityResolved, navigate, signOut, language]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,7 +57,7 @@ export default function AdminLoginPage() {
       setLoading(false);
       return;
     }
-    // The useEffect watching [user, profile] will handle redirect or rejection
+    // useEffect handles segment validation.
   };
 
   return (

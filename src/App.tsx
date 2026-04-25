@@ -128,7 +128,7 @@ const App = () => (
                 <Route path="/admin/login" element={<AdminLoginPage />} />
                 <Route path="/portal/login" element={<PortalLoginPage />} />
                 {/* Protected main routes */}
-                <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+                <Route element={<ProtectedRoute allowedRoles={['firm_admin', 'lawyer', 'paralegal', 'secretary', 'accountant']}><MainLayout /></ProtectedRoute>}>
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/cases" element={<CasesPage />} />
                   <Route path="/cases/new" element={<CaseFormPage />} />
@@ -173,7 +173,7 @@ const App = () => (
                 </Route>
 
                 {/* Client portal */}
-                <Route path="/portal" element={<ProtectedRoute allowedRoles={['client']}><PortalOrgProvider><ClientLayout /></PortalOrgProvider></ProtectedRoute>}>
+                <Route path="/portal" element={<ProtectedRoute><PortalOrgProvider><ClientLayout /></PortalOrgProvider></ProtectedRoute>}>
                   <Route index element={<Navigate to="/portal/dashboard" replace />} />
                   <Route path="dashboard" element={<PortalDashboardPage />} />
                   <Route path="cases" element={<PortalCasesPage />} />
@@ -189,7 +189,7 @@ const App = () => (
                 </Route>
 
                 {/* Admin */}
-                <Route path="/admin" element={<ProtectedRoute allowedRoles={['super_admin']}><AdminLayout /></ProtectedRoute>}>
+                <Route path="/admin" element={<ProtectedRoute allowedRoles={['super_admin', 'sales_admin']}><AdminLayout /></ProtectedRoute>}>
                   <Route index element={<Navigate to="/admin/dashboard" replace />} />
                   <Route path="dashboard" element={<AdminDashboardPage />} />
                   <Route path="organizations" element={<AdminOrganizationsPage />} />

@@ -4,9 +4,12 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { Eye, EyeOff, Scale, FileText, BarChart3, Loader2, ArrowLeft } from 'lucide-react';
 
+// Roles allowed to use the staff login.
+const STAFF_ROLES = ['firm_admin', 'lawyer', 'paralegal', 'secretary', 'accountant'];
+
 const StaffLoginPage = forwardRef<HTMLDivElement>((_props, _ref) => {
   const { t, language, setLanguage } = useLanguage();
-  const { signIn, profile, user } = useAuth();
+  const { signIn, signOut, profile, portalUser, user, identityResolved } = useAuth();
   const navigate = useNavigate();
 
   const [email, setEmail] = useState('');
@@ -17,16 +20,33 @@ const StaffLoginPage = forwardRef<HTMLDivElement>((_props, _ref) => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (user && profile) {
-      if (profile.role === 'client') {
-        navigate('/portal/dashboard', { replace: true });
-      } else if (['super_admin', 'sales_admin'].includes(profile.role)) {
-        navigate('/admin/dashboard', { replace: true });
-      } else {
-        navigate('/dashboard', { replace: true });
-      }
+    // Wait until identity has been resolved (profile and/or portalUser fetch complete).
+    if (!user || !identityResolved) return;
+
+    if (profile && STAFF_ROLES.includes(profile.role)) {
+      navigate('/dashboard', { replace: true });
+      return;
     }
-  }, [user, profile, navigate]);
+
+    // Wrong segment: portal user, super_admin, or orphan trying to use staff login.
+    let message = language === 'en'
+      ? 'This login is for law firm staff only. Please use the appropriate login window for your account.'
+      : 'تسجيل الدخول هذا مخصص لموظفي المكتب فقط. يرجى استخدام نافذة تسجيل الدخول المناسبة لحسابك.';
+
+    if (portalUser) {
+      message = language === 'en'
+        ? 'This account is registered as a client. Please use the Client Portal login.'
+        : 'هذا الحساب مسجّل كعميل. يرجى استخدام تسجيل دخول بوابة العملاء.';
+    } else if (profile && (profile.role === 'super_admin' || profile.role === 'sales_admin')) {
+      message = language === 'en'
+        ? 'This account is a platform administrator. Please use the Admin login.'
+        : 'هذا الحساب مسؤول منصة. يرجى استخدام تسجيل دخول المسؤول.';
+    }
+
+    setError(message);
+    setLoading(false);
+    signOut();
+  }, [user, profile, portalUser, identityResolved, navigate, language, signOut]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,15 +57,17 @@ const StaffLoginPage = forwardRef<HTMLDivElement>((_props, _ref) => {
 
     setLoading(true);
     const result = await signIn(email, password);
-    setLoading(false);
 
     if (result.error) {
+      setLoading(false);
       setError(
         language === 'en'
           ? 'Invalid email or password. If your password was recently reset by an administrator, use "Forgot password?" below to set a new one.'
           : 'البريد الإلكتروني أو كلمة المرور غير صحيحة. إذا قام المسؤول بإعادة تعيين كلمة المرور مؤخراً، استخدم "نسيت كلمة المرور؟" أدناه لتعيين كلمة جديدة.'
       );
     }
+    // If sign-in succeeded, the useEffect above will validate the role and either
+    // navigate (success) or sign out + show error (wrong segment).
   };
 
   return (
