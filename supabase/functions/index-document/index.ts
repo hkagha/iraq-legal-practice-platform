@@ -65,8 +65,8 @@ async function aiExtractFromMultimodal(args: {
 }): Promise<any | null> {
   // Use Gemini with inline file part to OCR & extract from PDFs and images directly.
   const { fileName, mimeType, base64 } = args;
-  const sysPrompt = `You are an expert legal document indexer for an Iraqi law firm. Read the provided document and return a strict JSON object describing it. Do not include any prose outside the JSON.`;
-  const userPrompt = `File name: ${fileName}\n\nReturn JSON with this exact shape:\n{\n  "language": "en"|"ar"|"mixed"|"other",\n  "doc_type": short label (e.g. "Contract","Power of Attorney","Court Judgment","Invoice","ID Card"),\n  "summary": one to two sentence neutral summary,\n  "people": [full names of individuals],\n  "organizations": [companies, ministries, courts, banks],\n  "places": [cities, governorates, addresses],\n  "dates": [{"date":"YYYY-MM-DD or original","type":"signed|effective|expiry|hearing|filed|issued|other","label":""}],\n  "tags": [5-10 short topical keywords],\n  "extracted_text": full readable text (or best-effort OCR), trimmed to ~30000 chars\n}\nIf a field is unknown use [] or "" appropriately. Names should be in their original script (Arabic stays Arabic).`;
+  const sysPrompt = INDEXER_SYSTEM_PROMPT;
+  const userPrompt = INDEXER_USER_PROMPT(fileName);
 
   const resp = await callLovableAI({
     model: "google/gemini-2.5-flash",
@@ -98,8 +98,8 @@ async function aiExtractFromMultimodal(args: {
 async function aiExtractFromText(args: { fileName: string; text: string }): Promise<any | null> {
   const { fileName, text } = args;
   const truncated = text.slice(0, MAX_TEXT_CHARS);
-  const sysPrompt = `You are an expert legal document indexer for an Iraqi law firm. Return strict JSON only.`;
-  const userPrompt = `File name: ${fileName}\n\nDocument text:\n"""\n${truncated}\n"""\n\nReturn JSON exactly in this shape:\n{\n  "language": "en"|"ar"|"mixed"|"other",\n  "doc_type": "",\n  "summary": "",\n  "people": [],\n  "organizations": [],\n  "places": [],\n  "dates": [{"date":"","type":"signed|effective|expiry|hearing|filed|issued|other","label":""}],\n  "tags": [],\n  "extracted_text": ""\n}\nKeep extracted_text under 30000 chars. Names in their original script.`;
+  const sysPrompt = INDEXER_SYSTEM_PROMPT;
+  const userPrompt = `${INDEXER_USER_PROMPT(fileName)}\n\nDocument text:\n"""\n${truncated}\n"""`;
 
   const resp = await callLovableAI({
     model: "google/gemini-2.5-flash",
@@ -119,6 +119,82 @@ async function aiExtractFromText(args: { fileName: string; text: string }): Prom
   const block = extractFirstJsonBlock(content);
   return block ? safeJsonParse(block) : null;
 }
+
+// =============================================================================
+// Indexer prompts — shared between text and multimodal paths so output schema
+// stays consistent regardless of how the document is read.
+// =============================================================================
+
+const INDEXER_SYSTEM_PROMPT = `You are an expert legal-document indexer working inside an Iraqi law firm. Your job is to read a document the firm has uploaded and produce a STRICT, CLEAN JSON metadata record so the firm can later find this document by searching for any of the people, places, dates, parties, statutes, monetary amounts, or topics it contains.
+
+The firm will upload thousands of documents over time. Your indexing must be PRECISE and CONSISTENT so search across the whole archive works. Apply these rules:
+
+A. NAMES
+   - Extract every personal name that appears (parties, signatories, witnesses, judges, lawyers, notaries, witnesses).
+   - Keep names in their ORIGINAL SCRIPT (Arabic stays Arabic, English stays English). Don't transliterate.
+   - Normalise titles by stripping them: "السيد محمد كاظم" → "محمد كاظم"; "Mr. John Smith" → "John Smith".
+   - Don't deduplicate by language: include both the Arabic and English form if the document shows both.
+
+B. ORGANISATIONS
+   - Extract companies, ministries, government departments, courts, banks, embassies, NGOs.
+   - Use the FULL official name (e.g. "محكمة بداءة الكرخ", "وزارة العدل العراقية", "Ministry of Justice — Republic of Iraq").
+   - Identify the court name as both an organisation AND, when applicable, surface the court_type field.
+
+C. PLACES
+   - Extract cities, governorates, neighbourhoods, complete addresses, plot numbers (المقاطعة، الزقاق، الدار), country names.
+   - For Iraqi addresses prefer the Arabic name; preserve plot/registration numbers verbatim.
+
+D. DATES
+   - Extract every date that appears: signing date, effective date, expiry, hearing date, filing date, issuance date, deadlines.
+   - Output dates in ISO YYYY-MM-DD format whenever possible. Convert Hijri dates to Gregorian if both are present; otherwise keep the original string.
+   - Always tag each date with its type: "signed" | "effective" | "expiry" | "hearing" | "filed" | "issued" | "due" | "executed" | "other".
+   - Include a short label describing what the date refers to.
+
+E. STATUTORY REFERENCES (very important for Iraqi legal search)
+   - Extract every law cited: official name + law number + year + article number(s).
+   - Examples: "القانون المدني العراقي رقم 40 لسنة 1951 — المادة 234", "قانون العقوبات رقم 111 لسنة 1969 — المادة 432".
+
+F. CASE / FILE NUMBERS
+   - Extract every case, file, registration, contract, or transaction number that uniquely identifies a record.
+
+G. MONETARY AMOUNTS
+   - Extract amounts with currency: "5,000,000 IQD", "12,500 USD", "100,000 دينار عراقي".
+
+H. PARTIES (for legal documents)
+   - Identify which person/entity plays which role: plaintiff (المدّعي), defendant (المدّعى عليه), buyer/seller, lessor/lessee, principal/attorney-in-fact, etc.
+
+I. DOC TYPE
+   - Use a precise short label: "Power of Attorney", "Sale Contract", "Lease Agreement", "Court Judgment", "Court Pleading", "Court Decision", "Investigation Statement", "Marriage Contract", "Divorce Decree", "Birth Certificate", "Civil ID", "Passport", "Commercial Registration", "Invoice", "Receipt", "Internal Memo", etc.
+
+J. SUMMARY
+   - Two to four sentences, neutral, factual. State who the parties are, what the document does, and any key date/amount.
+
+K. TAGS
+   - 5–12 short topical keywords that a lawyer would use to search later.
+
+Return STRICT JSON only — no prose, no code fences, no explanation outside the JSON.`;
+
+const INDEXER_USER_PROMPT = (fileName: string) =>
+  `File name: ${fileName}
+
+Return JSON in this exact schema. Use [] or "" for unknown values.
+
+{
+  "language": "ar" | "en" | "mixed" | "other",
+  "doc_type": "",
+  "summary": "",
+  "people": [],
+  "organizations": [],
+  "places": [],
+  "dates": [{"date":"","type":"signed|effective|expiry|hearing|filed|issued|due|executed|other","label":""}],
+  "statutes": [{"name":"","number":"","year":"","article":""}],
+  "case_numbers": [],
+  "amounts": [{"value":"","currency":""}],
+  "parties": [{"name":"","role":""}],
+  "tags": [],
+  "extracted_text": "(full readable text trimmed to ~30,000 chars)"
+}`;
+
 
 function normalizeArr(v: unknown): string[] {
   if (!Array.isArray(v)) return [];
@@ -229,6 +305,10 @@ serve(async (req) => {
       ai_places: normalizeArr(extracted.places),
       ai_tags: normalizeArr(extracted.tags),
       ai_dates: Array.isArray(extracted.dates) ? extracted.dates.slice(0, 50) : [],
+      ai_statutes: Array.isArray(extracted.statutes) ? extracted.statutes.slice(0, 50) : [],
+      ai_case_numbers: normalizeArr(extracted.case_numbers),
+      ai_amounts: Array.isArray(extracted.amounts) ? extracted.amounts.slice(0, 50) : [],
+      ai_parties: Array.isArray(extracted.parties) ? extracted.parties.slice(0, 50) : [],
       ai_language: typeof extracted.language === "string" ? extracted.language.slice(0, 16) : null,
       extracted_text: typeof extracted.extracted_text === "string" ? extracted.extracted_text.slice(0, 100_000) : null,
       indexing_status: "done",

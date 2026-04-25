@@ -194,7 +194,7 @@ export default function DocumentArchivePage() {
     setReindexing(true);
     const { data } = await supabase.from('documents')
       .select('id').eq('organization_id', orgId).eq('status', 'active')
-      .eq('visibility_scope', 'shared_library').eq('is_latest_version', true)
+      .eq('is_latest_version', true)
       .in('indexing_status', ['pending', 'failed']).limit(20);
     const list = data || [];
     if (!list.length) {
@@ -222,7 +222,6 @@ export default function DocumentArchivePage() {
         .select('id')
         .eq('organization_id', orgId)
         .eq('status', 'active')
-        .eq('visibility_scope', 'shared_library')
         .eq('is_latest_version', true)
         .in('indexing_status', ['pending', 'failed']);
       if (error) throw error;
