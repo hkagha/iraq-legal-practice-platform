@@ -44,6 +44,7 @@ export default function EditOrganizationModal({ open, orgId, onClose, onSuccess 
         subscription_status: form.subscription_status, max_users: form.max_users,
         max_storage_mb: form.max_storage_mb, phone: form.phone, email: form.email,
         website: form.website, city: form.city, governorate: form.governorate, is_active: form.is_active,
+        ai_platform_disabled_by_admin: !!form.ai_platform_disabled_by_admin,
       } as any).eq('id', orgId);
       if (error) throw error;
       if (user) await logAdminAction(user.id, 'org_updated', 'organization', orgId, form.name);
@@ -100,6 +101,31 @@ export default function EditOrganizationModal({ open, orgId, onClose, onSuccess 
           <div className="flex items-center justify-between bg-muted/50 rounded-lg p-3">
             <span className="text-body-md font-medium text-foreground">{isEN ? 'Active' : 'نشط'}</span>
             <Switch checked={form.is_active ?? true} onCheckedChange={v => set('is_active', v)} />
+          </div>
+
+          {/* Platform AI control */}
+          <div className="rounded-lg border border-border p-3 space-y-3">
+            <div>
+              <h4 className="text-body-md font-semibold text-foreground">
+                {isEN ? 'Platform AI access' : 'الوصول إلى الذكاء الاصطناعي للمنصة'}
+              </h4>
+              <p className="text-body-sm text-muted-foreground mt-1">
+                {isEN
+                  ? 'When disabled, this organisation cannot use the platform-managed AI gateway. They must configure their own AI provider in Settings → AI to use AI features.'
+                  : 'عند الإيقاف، لا يمكن لهذه المؤسسة استخدام الذكاء الاصطناعي المُدار من المنصة. يجب أن يقوموا بإعداد مزوّد الذكاء الاصطناعي الخاص بهم من الإعدادات → الذكاء الاصطناعي لاستخدام ميزات الذكاء الاصطناعي.'}
+              </p>
+            </div>
+            <div className="flex items-center justify-between bg-background rounded-md p-3 border border-border">
+              <span className="text-body-sm font-medium text-foreground">
+                {form.ai_platform_disabled_by_admin
+                  ? (isEN ? 'Platform AI disabled (BYOK only)' : 'الذكاء الاصطناعي للمنصة معطّل (مفتاح المؤسسة فقط)')
+                  : (isEN ? 'Platform AI enabled' : 'الذكاء الاصطناعي للمنصة مفعّل')}
+              </span>
+              <Switch
+                checked={!form.ai_platform_disabled_by_admin}
+                onCheckedChange={v => set('ai_platform_disabled_by_admin', !v)}
+              />
+            </div>
           </div>
         </div>
         <DialogFooter className="gap-2">

@@ -54,6 +54,7 @@ export default function AIConfigSettings() {
   const [aiEnabled, setAiEnabled] = useState(false);
   const [monthlyLimit, setMonthlyLimit] = useState(500000);
   const [tokensUsed, setTokensUsed] = useState(0);
+  const [platformDisabledByAdmin, setPlatformDisabledByAdmin] = useState(false);
 
   // BYOK
   const [provider, setProvider] = useState<Provider>('lovable');
@@ -73,7 +74,7 @@ export default function AIConfigSettings() {
       const orgId = profile.organization_id!;
       const [orgRes, hasKeyRes] = await Promise.all([
         supabase.from('organizations')
-          .select('ai_enabled, ai_monthly_token_limit, ai_tokens_used_this_month, ai_provider, ai_model, ai_base_url, ai_fallback_to_platform')
+          .select('ai_enabled, ai_monthly_token_limit, ai_tokens_used_this_month, ai_provider, ai_model, ai_base_url, ai_fallback_to_platform, ai_platform_disabled_by_admin')
           .eq('id', orgId).maybeSingle(),
         supabase.rpc('org_has_ai_key' as any, { _org_id: orgId }),
       ]);
@@ -82,6 +83,7 @@ export default function AIConfigSettings() {
         setAiEnabled(data.ai_enabled ?? false);
         setMonthlyLimit(data.ai_monthly_token_limit ?? 500000);
         setTokensUsed(data.ai_tokens_used_this_month ?? 0);
+        setPlatformDisabledByAdmin(!!data.ai_platform_disabled_by_admin);
         const p = (data.ai_provider as Provider) || 'lovable';
         setProvider(p);
         setModel(data.ai_model || '');
@@ -204,6 +206,25 @@ export default function AIConfigSettings() {
           {language === 'ar' ? 'إدارة ميزات الذكاء الاصطناعي لمؤسستك' : 'Manage AI features for your organization'}
         </p>
       </div>
+
+      {/* Admin-disabled platform AI notice */}
+      {platformDisabledByAdmin && (
+        <div className="rounded-lg border border-warning/40 bg-warning/5 p-4 flex items-start gap-3">
+          <ShieldCheck size={18} className="text-warning shrink-0 mt-0.5" />
+          <div>
+            <p className="text-body-md font-semibold text-foreground">
+              {language === 'ar'
+                ? 'تم إيقاف الذكاء الاصطناعي للمنصة لمؤسستك'
+                : 'Platform AI is disabled for your organisation'}
+            </p>
+            <p className="text-body-sm text-muted-foreground mt-1">
+              {language === 'ar'
+                ? 'قام مسؤول المنصة بإيقاف الذكاء الاصطناعي المُدار من المنصة لمؤسستك. لاستخدام ميزات الذكاء الاصطناعي، يجب اختيار مزوّد آخر (OpenAI أو Anthropic أو Google أو مخصص) وإدخال مفتاح API الخاص بك أدناه.'
+                : 'The platform administrator has disabled the platform-managed AI for your organisation. To use AI features, choose another provider (OpenAI, Anthropic, Google, or Custom) and enter your own API key below.'}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* AI Enabled */}
       <div className="bg-card border border-border rounded-lg p-5">
