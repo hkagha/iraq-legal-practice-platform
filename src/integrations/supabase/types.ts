@@ -1073,13 +1073,6 @@ export type Database = {
             referencedRelation: "persons"
             referencedColumns: ["id"]
           },
-          {
-            foreignKeyName: "client_messages_sender_id_fkey"
-            columns: ["sender_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
         ]
       }
       conflict_checks: {
@@ -1412,12 +1405,16 @@ export type Database = {
       }
       documents: {
         Row: {
+          ai_amounts: Json | null
+          ai_case_numbers: string[] | null
           ai_dates: Json | null
           ai_doc_type: string | null
           ai_language: string | null
           ai_organizations: string[] | null
+          ai_parties: Json | null
           ai_people: string[] | null
           ai_places: string[] | null
+          ai_statutes: Json | null
           ai_summary: string | null
           ai_tags: string[] | null
           case_id: string | null
@@ -1460,12 +1457,16 @@ export type Database = {
           visibility_scope: string
         }
         Insert: {
+          ai_amounts?: Json | null
+          ai_case_numbers?: string[] | null
           ai_dates?: Json | null
           ai_doc_type?: string | null
           ai_language?: string | null
           ai_organizations?: string[] | null
+          ai_parties?: Json | null
           ai_people?: string[] | null
           ai_places?: string[] | null
+          ai_statutes?: Json | null
           ai_summary?: string | null
           ai_tags?: string[] | null
           case_id?: string | null
@@ -1508,12 +1509,16 @@ export type Database = {
           visibility_scope?: string
         }
         Update: {
+          ai_amounts?: Json | null
+          ai_case_numbers?: string[] | null
           ai_dates?: Json | null
           ai_doc_type?: string | null
           ai_language?: string | null
           ai_organizations?: string[] | null
+          ai_parties?: Json | null
           ai_people?: string[] | null
           ai_places?: string[] | null
+          ai_statutes?: Json | null
           ai_summary?: string | null
           ai_tags?: string[] | null
           case_id?: string | null
@@ -2741,6 +2746,7 @@ export type Database = {
           ai_last_reset_date: string | null
           ai_model: string | null
           ai_monthly_token_limit: number | null
+          ai_platform_disabled_by_admin: boolean
           ai_provider: string | null
           ai_tokens_used_this_month: number | null
           bank_account_number: string | null
@@ -2803,6 +2809,7 @@ export type Database = {
           ai_last_reset_date?: string | null
           ai_model?: string | null
           ai_monthly_token_limit?: number | null
+          ai_platform_disabled_by_admin?: boolean
           ai_provider?: string | null
           ai_tokens_used_this_month?: number | null
           bank_account_number?: string | null
@@ -2865,6 +2872,7 @@ export type Database = {
           ai_last_reset_date?: string | null
           ai_model?: string | null
           ai_monthly_token_limit?: number | null
+          ai_platform_disabled_by_admin?: boolean
           ai_provider?: string | null
           ai_tokens_used_this_month?: number | null
           bank_account_number?: string | null
@@ -4208,6 +4216,17 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      org_ai_runtime_settings: {
+        Args: { _org_id: string }
+        Returns: {
+          ai_base_url: string
+          ai_enabled: boolean
+          ai_fallback_to_platform: boolean
+          ai_model: string
+          ai_platform_disabled_by_admin: boolean
+          ai_provider: string
+        }[]
       }
       org_has_ai_key: { Args: { _org_id: string }; Returns: boolean }
       portal_user_can_access_case: {
