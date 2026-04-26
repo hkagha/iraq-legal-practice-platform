@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { FileCheck, Search, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePortalOrg } from '@/contexts/PortalOrgContext';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -12,15 +13,19 @@ import { PageLoader } from '@/components/ui/PageLoader';
 
 export default function PortalErrandsPage() {
   const { language, isRTL } = useLanguage();
+  const { activeOrg } = usePortalOrg();
   const [search, setSearch] = useState('');
   const isEN = language === 'en';
+  const orgId = activeOrg?.id || null;
 
   const { data: errands, isLoading } = useQuery({
-    queryKey: ['portal-errands'],
+    queryKey: ['portal-errands', orgId],
+    enabled: !!orgId,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('errands')
         .select('id, errand_number, title, title_ar, status, errand_type, due_date, completed_steps, total_steps, updated_at')
+        .eq('organization_id', orgId!)
         .eq('is_visible_to_client', true)
         .order('updated_at', { ascending: false });
       if (error) throw error;

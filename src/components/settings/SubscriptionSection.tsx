@@ -40,7 +40,7 @@ export default function SubscriptionSection() {
           <Crown size={24} className="text-accent" />
           <div>
             <h3 className="text-heading-lg text-foreground">{tierLabel}</h3>
-            <span className={cn('text-body-sm px-2 py-0.5 rounded-full', status === 'active' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700')}>
+            <span className={cn('text-body-sm px-2 py-0.5 rounded-full', status === 'active' ? 'bg-success-light text-success' : 'bg-warning-light text-warning')}>
               {status === 'active' ? (language === 'ar' ? 'نشط' : 'Active') : (language === 'ar' ? 'تجريبي' : 'Trial')}
             </span>
           </div>

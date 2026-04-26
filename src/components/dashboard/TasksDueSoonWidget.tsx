@@ -45,8 +45,8 @@ export default function TasksDueSoonWidget() {
   const getDueDateColor = (dueDate: string) => {
     const d = new Date(dueDate + 'T00:00:00');
     if (isBefore(d, startOfDay(new Date()))) return 'text-destructive';
-    if (isToday(d)) return 'text-amber-600';
-    if (isTomorrow(d)) return 'text-blue-500';
+    if (isToday(d)) return 'text-warning';
+    if (isTomorrow(d)) return 'text-info';
     return 'text-muted-foreground';
   };
 

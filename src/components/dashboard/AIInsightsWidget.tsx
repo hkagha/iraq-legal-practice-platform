@@ -105,10 +105,10 @@ export default function AIInsightsWidget() {
   };
 
   const typeColors: Record<string, string> = {
-    urgent: 'text-destructive',
-    warning: 'text-yellow-600',
-    info: 'text-blue-500',
-    success: 'text-green-500',
+    urgent:  'text-destructive',
+    warning: 'text-warning',
+    info:    'text-info',
+    success: 'text-success',
   };
 
   const visibleInsights = insights.filter((_, i) => !dismissed.has(i));
@@ -117,7 +117,7 @@ export default function AIInsightsWidget() {
 
   return (
     <div className="bg-card border border-border rounded-lg overflow-hidden">
-      <div className="h-0.5 bg-gradient-to-r from-accent to-blue-500" />
+      <div className="h-0.5 bg-gradient-to-r from-accent via-accent-light to-primary" />
       <div className="p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-base font-semibold text-foreground flex items-center gap-2">

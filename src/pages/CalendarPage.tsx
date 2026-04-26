@@ -22,11 +22,11 @@ type DayItem = {
 };
 
 const TYPE_META = {
-  hearing: { icon: Briefcase, color: 'bg-blue-100 text-blue-700 border-blue-300' },
-  errand: { icon: FileText, color: 'bg-amber-100 text-amber-700 border-amber-300' },
-  task: { icon: CheckSquare, color: 'bg-violet-100 text-violet-700 border-violet-300' },
-  invoice: { icon: Receipt, color: 'bg-rose-100 text-rose-700 border-rose-300' },
-  event: { icon: CalendarClock, color: 'bg-emerald-100 text-emerald-700 border-emerald-300' },
+  hearing: { icon: Briefcase,     color: 'bg-info-light text-info border-info/20' },
+  errand:  { icon: FileText,      color: 'bg-warning-light text-warning border-warning/20' },
+  task:    { icon: CheckSquare,   color: 'bg-accent/10 text-accent-dark border-accent/20' },
+  invoice: { icon: Receipt,       color: 'bg-error-light text-error border-error/20' },
+  event:   { icon: CalendarClock, color: 'bg-success-light text-success border-success/20' },
 };
 
 function startOfMonth(d: Date) { return new Date(d.getFullYear(), d.getMonth(), 1); }

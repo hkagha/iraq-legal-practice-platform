@@ -106,7 +106,7 @@ export default function PortalInvoiceDetailPage() {
       <Card className="relative overflow-hidden p-6 md:p-8">
         {isPaid && (
           <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-            <div className="rotate-[-20deg] border-4 border-green-600/30 text-green-600/30 text-6xl font-bold px-8 py-3 rounded">
+            <div className="rotate-[-20deg] border-4 border-success/30 text-success/30 text-6xl font-bold px-8 py-3 rounded">
               {isEN ? 'PAID' : 'مدفوعة'}
             </div>
           </div>
@@ -217,7 +217,7 @@ export default function PortalInvoiceDetailPage() {
             </div>
             <div className="flex justify-between border-t pt-2 font-bold">
               <span>{isEN ? 'Balance due' : 'الرصيد المستحق'}</span>
-              <span className={balance > 0 ? 'text-red-600' : 'text-green-700'}>
+              <span className={balance > 0 ? 'text-error' : 'text-success'}>
                 {formatMoney(balance, invoice.currency, language)}
               </span>
             </div>

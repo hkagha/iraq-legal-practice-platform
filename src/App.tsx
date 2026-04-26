@@ -3,13 +3,14 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { TimerProvider } from "@/contexts/TimerContext";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { ImpersonationProvider } from "@/contexts/ImpersonationContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { PortalOrgProvider } from '@/contexts/PortalOrgContext';
+import PortalGate from '@/components/portal/PortalGate';
 import MainLayout from "@/layouts/MainLayout";
 import ClientLayout from "@/layouts/ClientLayout";
 import AdminLayout from "@/layouts/AdminLayout";
@@ -76,6 +77,7 @@ const TrustAccountingPage = React.lazy(() => import('@/pages/TrustAccountingPage
 
 // Portal pages
 const PortalDashboardPage = React.lazy(() => import('@/pages/portal/PortalDashboardPage'));
+const PortalOrgPickerPage = React.lazy(() => import('@/pages/portal/PortalOrgPickerPage'));
 const PortalCasesPage = React.lazy(() => import('@/pages/portal/PortalCasesPage'));
 const PortalCaseDetailPage = React.lazy(() => import('@/pages/portal/PortalCaseDetailPage'));
 const PortalErrandsPage = React.lazy(() => import('@/pages/portal/PortalErrandsPage'));
@@ -103,6 +105,9 @@ const AdminRevenuePage = React.lazy(() => import('@/pages/admin/AdminRevenuePage
 // Redirect stubs for removed placeholders
 const ProfilePage = () => <Navigate to="/settings" replace />;
 const MessagesPage = () => <Navigate to="/dashboard" replace />;
+
+/** Empty Outlet wrapper used as the parent route element for the portal. */
+const PortalRoot = () => <Outlet />;
 const TeamPage = () => <Navigate to="/settings" replace />;
 
 const App = () => (
@@ -128,7 +133,7 @@ const App = () => (
                 <Route path="/admin/login" element={<AdminLoginPage />} />
                 <Route path="/portal/login" element={<PortalLoginPage />} />
                 {/* Protected main routes */}
-                <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+                <Route element={<ProtectedRoute allowedRoles={['firm_admin', 'lawyer', 'paralegal', 'secretary', 'accountant']}><MainLayout /></ProtectedRoute>}>
                   <Route path="/dashboard" element={<DashboardPage />} />
                   <Route path="/cases" element={<CasesPage />} />
                   <Route path="/cases/new" element={<CaseFormPage />} />
@@ -173,23 +178,38 @@ const App = () => (
                 </Route>
 
                 {/* Client portal */}
-                <Route path="/portal" element={<ProtectedRoute allowedRoles={['client']}><PortalOrgProvider><ClientLayout /></PortalOrgProvider></ProtectedRoute>}>
+                <Route
+                  path="/portal"
+                  element={
+                    <ProtectedRoute>
+                      <PortalOrgProvider>
+                        {/* Outlet renders either the picker (full-screen) or the gated layout below */}
+                        <PortalRoot />
+                      </PortalOrgProvider>
+                    </ProtectedRoute>
+                  }
+                >
                   <Route index element={<Navigate to="/portal/dashboard" replace />} />
-                  <Route path="dashboard" element={<PortalDashboardPage />} />
-                  <Route path="cases" element={<PortalCasesPage />} />
-                  <Route path="cases/:id" element={<PortalCaseDetailPage />} />
-                  <Route path="errands" element={<PortalErrandsPage />} />
-                  <Route path="errands/:id" element={<PortalErrandDetailPage />} />
-                  <Route path="documents" element={<PortalDocumentsPage />} />
-                  <Route path="documents/:id" element={<PortalDocumentDetailPage />} />
-                  <Route path="messages" element={<PortalMessagesPage />} />
-                  <Route path="invoices" element={<PortalInvoicesPage />} />
-                  <Route path="invoices/:id" element={<PortalInvoiceDetailPage />} />
-                  <Route path="profile" element={<PortalProfilePage />} />
+                  <Route path="select" element={<PortalOrgPickerPage />} />
+
+                  {/* Everything below requires an active org (PortalGate) and renders inside ClientLayout */}
+                  <Route element={<PortalGate><ClientLayout /></PortalGate>}>
+                    <Route path="dashboard" element={<PortalDashboardPage />} />
+                    <Route path="cases" element={<PortalCasesPage />} />
+                    <Route path="cases/:id" element={<PortalCaseDetailPage />} />
+                    <Route path="errands" element={<PortalErrandsPage />} />
+                    <Route path="errands/:id" element={<PortalErrandDetailPage />} />
+                    <Route path="documents" element={<PortalDocumentsPage />} />
+                    <Route path="documents/:id" element={<PortalDocumentDetailPage />} />
+                    <Route path="messages" element={<PortalMessagesPage />} />
+                    <Route path="invoices" element={<PortalInvoicesPage />} />
+                    <Route path="invoices/:id" element={<PortalInvoiceDetailPage />} />
+                    <Route path="profile" element={<PortalProfilePage />} />
+                  </Route>
                 </Route>
 
                 {/* Admin */}
-                <Route path="/admin" element={<ProtectedRoute allowedRoles={['super_admin']}><AdminLayout /></ProtectedRoute>}>
+                <Route path="/admin" element={<ProtectedRoute allowedRoles={['super_admin', 'sales_admin']}><AdminLayout /></ProtectedRoute>}>
                   <Route index element={<Navigate to="/admin/dashboard" replace />} />
                   <Route path="dashboard" element={<AdminDashboardPage />} />
                   <Route path="organizations" element={<AdminOrganizationsPage />} />

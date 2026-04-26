@@ -4,6 +4,7 @@ import { Scale, Search, Calendar, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePortalOrg } from '@/contexts/PortalOrgContext';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { StatusBadge } from '@/components/ui/StatusBadge';
@@ -12,16 +13,22 @@ import { PageLoader } from '@/components/ui/PageLoader';
 
 export default function PortalCasesPage() {
   const { language, isRTL } = useLanguage();
+  const { activeOrg } = usePortalOrg();
   const [search, setSearch] = useState('');
   const isEN = language === 'en';
+  const orgId = activeOrg?.id || null;
 
   const { data: cases, isLoading } = useQuery({
-    queryKey: ['portal-cases'],
+    queryKey: ['portal-cases', orgId],
+    enabled: !!orgId,
     queryFn: async () => {
-      // RLS filters via portal_user_can_access_case + is_visible_to_client
+      // RLS filters via portal_user_can_access_case + is_visible_to_client.
+      // We additionally scope by organization_id so a multi-firm client only
+      // sees the firm they currently selected.
       const { data, error } = await supabase
         .from('cases')
         .select('id, case_number, title, title_ar, status, case_type, court_name, court_name_ar, filing_date, updated_at')
+        .eq('organization_id', orgId!)
         .eq('is_visible_to_client', true)
         .order('updated_at', { ascending: false });
       if (error) throw error;

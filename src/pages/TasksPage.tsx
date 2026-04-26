@@ -29,10 +29,10 @@ const STATUSES = ['todo', 'in_progress', 'in_review', 'completed', 'cancelled'];
 const PRIORITIES = ['low', 'medium', 'high', 'urgent'];
 
 const PRIORITY_DOT: Record<string, string> = {
-  low: 'bg-muted-foreground/50',
-  medium: 'bg-blue-500',
-  high: 'bg-amber-500',
-  urgent: 'bg-red-500',
+  low:    'bg-muted-foreground/50',
+  medium: 'bg-info',
+  high:   'bg-warning',
+  urgent: 'bg-error',
 };
 
 const KANBAN_COLUMNS = ['todo', 'in_progress', 'in_review', 'completed'] as const;
@@ -60,7 +60,9 @@ export default function TasksPage() {
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [priorityFilter, setPriorityFilter] = useState('all');
-  const [assignedFilter, setAssignedFilter] = useState('my');
+  // Default to 'all' so newly-created tasks (which may not be assigned to the
+  // creator) are visible. Users can switch to 'my' if they only want their own.
+  const [assignedFilter, setAssignedFilter] = useState('all');
   const [typeFilter, setTypeFilter] = useState('all');
   const [linkedFilter, setLinkedFilter] = useState('all');
   const [sortBy, setSortBy] = useState('due_date');
@@ -187,8 +189,8 @@ export default function TasksPage() {
     const d = new Date(dueDate + 'T00:00:00');
     const today = startOfDay(new Date());
     if (isBefore(d, today)) return 'text-destructive';
-    if (isToday(d)) return 'text-amber-600';
-    if (isTomorrow(d)) return 'text-blue-500';
+    if (isToday(d)) return 'text-warning';
+    if (isTomorrow(d)) return 'text-info';
     return 'text-muted-foreground';
   };
 

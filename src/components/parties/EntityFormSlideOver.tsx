@@ -14,7 +14,7 @@ import { FormTextarea } from '@/components/ui/FormTextarea';
 import { FormSelect } from '@/components/ui/FormSelect';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { GovernorateSelect } from '@/components/ui/GovernorateSelect';
-import { CountrySelect } from '@/components/ui/CountrySelect';
+import { CitySelect } from '@/components/ui/CitySelect';import { CountrySelect } from '@/components/ui/CountrySelect';
 import type { EntityRow, PartyRef } from '@/types/parties';
 import { resolveEntityName } from '@/lib/parties';
 
@@ -208,13 +208,20 @@ export default function EntityFormSlideOver({ isOpen, onClose, entity, onSaved }
           <Field label="Country" labelAr="الدولة">
             <CountrySelect value={watch('country') || 'IQ'} onChange={(v) => setValue('country', v)} />
           </Field>
-          <Field label="Governorate" labelAr="المحافظة">
-            <GovernorateSelect value={watch('governorate') || ''} onChange={(v) => setValue('governorate', v)} />
-          </Field>
+          {(watch('country') || 'IQ') === 'IQ' && (
+            <Field label="Governorate" labelAr="المحافظة">
+              <GovernorateSelect value={watch('governorate') || ''} onChange={(v) => setValue('governorate', v)} />
+            </Field>
+          )}
         </div>
         <div className="grid grid-cols-2 gap-3">
           <Field label="City" labelAr="المدينة">
-            <FormInput {...register('city')} dir="ltr" />
+            <CitySelect
+              value={watch('city') || ''}
+              onChange={(v) => setValue('city', v)}
+              countryCode={watch('country') || 'IQ'}
+              governorateCode={watch('governorate') || undefined}
+            />
           </Field>
           <Field label="City (Arabic)" labelAr="المدينة (عربي)">
             <FormInput {...register('city_ar')} dir="rtl" />

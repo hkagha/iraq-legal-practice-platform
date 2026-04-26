@@ -11,6 +11,7 @@ import {
   KeyRound,
   Mail,
   MapPin,
+  MessageSquare,
   Phone,
   User as UserIcon,
   Pencil,
@@ -29,6 +30,7 @@ import { StatusBadge } from '@/components/ui/StatusBadge';
 import PersonFormSlideOver from '@/components/parties/PersonFormSlideOver';
 import EntityFormSlideOver from '@/components/parties/EntityFormSlideOver';
 import { EntityRepresentativesEditor } from '@/components/parties/EntityRepresentativesEditor';
+import ClientMessagesThread from '@/components/clients/ClientMessagesThread';
 import CreateUserModal from '@/components/admin/CreateUserModal';
 import SkeletonLoader from '@/components/SkeletonLoader';
 import { cn } from '@/lib/utils';
@@ -218,6 +220,10 @@ export default function ClientDetailPage() {
             {language === 'ar' ? 'القضايا' : 'Cases'}
             <span className="ms-1.5 text-[10px] opacity-70">({casesQuery.data?.length ?? 0})</span>
           </TabsTrigger>
+          <TabsTrigger value="messages">
+            <MessageSquare size={14} className="me-1.5" />
+            {language === 'ar' ? 'الرسائل' : 'Messages'}
+          </TabsTrigger>
           {partyType === 'entity' && (
             <TabsTrigger value="reps">{language === 'ar' ? 'الممثلون' : 'Representatives'}</TabsTrigger>
           )}
@@ -310,6 +316,12 @@ export default function ClientDetailPage() {
             />
           </TabsContent>
         )}
+
+        <TabsContent value="messages" className="mt-4">
+          {!id ? null : (
+            <ClientMessagesThread partyType={partyType} partyId={id} />
+          )}
+        </TabsContent>
       </Tabs>
 
       <CreateUserModal

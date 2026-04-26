@@ -19,13 +19,15 @@ interface FormSearchSelectProps {
   showCreate?: boolean;
   createLabel?: string;
   onCreateNew?: () => void;
+  /** When true, the search query can be used as a custom value if it doesn't match any option. */
+  allowCustomValue?: boolean;
 }
 
 export function FormSearchSelect({
   value, onChange, placeholder, options, error, disabled,
-  showCreate, createLabel, onCreateNew,
+  showCreate, createLabel, onCreateNew, allowCustomValue,
 }: FormSearchSelectProps) {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState('');
   const ref = useRef<HTMLDivElement>(null);
@@ -36,7 +38,16 @@ export function FormSearchSelect({
     return options.filter(o => o.label.toLowerCase().includes(q) || o.subtitle?.toLowerCase().includes(q));
   }, [options, search]);
 
+  // For allowCustomValue mode: if value is not in options, treat it as a custom value.
   const selected = options.find(o => o.value === value);
+  const displayLabel = selected?.label || (allowCustomValue && value ? value : '');
+
+  // Whether to show the "Use typed value" CTA inside the dropdown
+  const showUseTypedCta = !!(
+    allowCustomValue &&
+    search.trim() &&
+    !filtered.some((o) => o.value === search.trim() || o.label.toLowerCase() === search.trim().toLowerCase())
+  );
 
   useEffect(() => {
     const handler = (e: MouseEvent) => {
@@ -45,6 +56,13 @@ export function FormSearchSelect({
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
+
+  const commitCustom = () => {
+    if (!search.trim()) return;
+    onChange?.(search.trim());
+    setOpen(false);
+    setSearch('');
+  };
 
   return (
     <div ref={ref} className="relative">
@@ -59,7 +77,7 @@ export function FormSearchSelect({
           disabled && 'opacity-70 cursor-not-allowed',
         )}
       >
-        <span className={cn(!selected && 'text-slate-400')}>{selected?.label || placeholder}</span>
+        <span className={cn(!displayLabel && 'text-slate-400', 'truncate')}>{displayLabel || placeholder}</span>
         <ChevronDown size={16} className="text-muted-foreground" />
       </button>
 
@@ -72,13 +90,19 @@ export function FormSearchSelect({
                 autoFocus
                 value={search}
                 onChange={e => setSearch(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && allowCustomValue && showUseTypedCta) {
+                    e.preventDefault();
+                    commitCustom();
+                  }
+                }}
                 placeholder={t('common.search')}
                 className="w-full h-8 ps-8 pe-2 text-body-sm rounded-sm border border-border bg-background outline-none focus:ring-1 focus:ring-accent"
               />
             </div>
           </div>
           <div className="max-h-[240px] overflow-y-auto">
-            {filtered.length === 0 && (
+            {filtered.length === 0 && !showUseTypedCta && (
               <p className="px-3 py-4 text-body-sm text-muted-foreground text-center">{t('common.noResults')}</p>
             )}
             {filtered.map(o => (
@@ -95,6 +119,18 @@ export function FormSearchSelect({
                 {o.subtitle && <div className="text-body-sm text-muted-foreground">{o.subtitle}</div>}
               </button>
             ))}
+            {showUseTypedCta && (
+              <button
+                type="button"
+                onClick={commitCustom}
+                className="w-full flex items-center gap-2 px-3 py-2.5 text-body-sm text-accent border-t border-border hover:bg-muted/50"
+              >
+                <Plus size={14} />
+                {language === 'ar'
+                  ? `استخدم: "${search.trim()}"`
+                  : `Use: "${search.trim()}"`}
+              </button>
+            )}
           </div>
           {showCreate && onCreateNew && (
             <button

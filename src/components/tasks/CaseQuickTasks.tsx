@@ -45,7 +45,7 @@ export default function CaseQuickTasks({ caseId }: CaseQuickTasksProps) {
     if (!dueDate) return 'text-muted-foreground';
     const d = new Date(dueDate + 'T00:00:00');
     if (isBefore(d, startOfDay(new Date()))) return 'text-destructive';
-    if (isToday(d)) return 'text-amber-600';
+    if (isToday(d)) return 'text-warning';
     return 'text-muted-foreground';
   };
 

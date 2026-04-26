@@ -39,14 +39,14 @@ const TYPE_ICONS: Record<string, typeof Bell> = {
 };
 
 const TYPE_COLORS: Record<string, string> = {
-  task: 'bg-blue-100 text-blue-600',
-  case: 'bg-emerald-100 text-emerald-600',
-  errand: 'bg-purple-100 text-purple-600',
-  hearing: 'bg-red-100 text-red-600',
-  invoice: 'bg-amber-100 text-amber-600',
-  document: 'bg-slate-100 text-slate-600',
-  event: 'bg-yellow-100 text-yellow-700',
-  mention: 'bg-pink-100 text-pink-600',
+  task:     'bg-info-light text-info',
+  case:     'bg-success-light text-success',
+  errand:   'bg-accent/10 text-accent-dark',
+  hearing:  'bg-error-light text-error',
+  invoice:  'bg-warning-light text-warning',
+  document: 'bg-muted text-muted-foreground',
+  event:    'bg-secondary text-foreground/70',
+  mention:  'bg-accent/10 text-accent-dark',
 };
 
 function getTypeKey(nt: string): string {

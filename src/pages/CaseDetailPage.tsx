@@ -18,6 +18,7 @@ import { CasePartiesEditor } from '@/components/parties/CasePartiesEditor';
 import { PageLoader } from '@/components/ui/PageLoader';
 import CaseQuickTasks from '@/components/tasks/CaseQuickTasks';
 import DocumentUploadModal from '@/components/documents/DocumentUploadModal';
+import DocumentDetailSlideOver from '@/components/documents/DocumentDetailSlideOver';
 import { toast } from 'sonner';
 
 export default function CaseDetailPage() {
@@ -29,6 +30,7 @@ export default function CaseDetailPage() {
   const isAR = lang === 'ar';
 
   const [showUpload, setShowUpload] = useState(false);
+  const [selectedDocId, setSelectedDocId] = useState<string | null>(null);
 
   const { data: caseRow, isLoading } = useQuery({
     queryKey: ['case', id],
@@ -247,7 +249,12 @@ export default function CaseDetailPage() {
           ) : (
             <div className="rounded-card border border-border bg-card divide-y divide-border">
               {documents!.map((d: any) => (
-                <div key={d.id} className="p-4 flex items-center gap-3">
+                <button
+                  key={d.id}
+                  type="button"
+                  onClick={() => setSelectedDocId(d.id)}
+                  className="w-full p-4 flex items-center gap-3 text-start hover:bg-muted/40 transition-colors"
+                >
                   <FileText size={18} className="text-muted-foreground shrink-0" />
                   <div className="flex-1 min-w-0">
                     <p className="text-body-md font-medium truncate">{isAR && d.file_name_ar ? d.file_name_ar : d.file_name}</p>
@@ -259,7 +266,7 @@ export default function CaseDetailPage() {
                   <span className="text-[11px] rounded-badge bg-muted px-2 py-0.5 text-muted-foreground capitalize">
                     {d.document_category?.replace(/_/g, ' ')}
                   </span>
-                </div>
+                </button>
               ))}
             </div>
           )}
@@ -359,6 +366,14 @@ export default function CaseDetailPage() {
         onClose={() => setShowUpload(false)}
         onComplete={() => { setShowUpload(false); refetchDocs(); }}
         caseId={id!}
+      />
+
+      {/* Document detail slide-over (preview, comments, AI index, download) */}
+      <DocumentDetailSlideOver
+        documentId={selectedDocId}
+        isOpen={!!selectedDocId}
+        onClose={() => setSelectedDocId(null)}
+        onRefresh={() => refetchDocs()}
       />
     </div>
   );
