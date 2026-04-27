@@ -14,6 +14,24 @@ export type Database = {
   }
   public: {
     Tables: {
+      _seed_staging_baghdad: {
+        Row: {
+          idx: number | null
+          kind: string | null
+          ref_id: string | null
+        }
+        Insert: {
+          idx?: number | null
+          kind?: string | null
+          ref_id?: string | null
+        }
+        Update: {
+          idx?: number | null
+          kind?: string | null
+          ref_id?: string | null
+        }
+        Relationships: []
+      }
       admin_audit_log: {
         Row: {
           action: string
