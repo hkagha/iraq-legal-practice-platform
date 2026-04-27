@@ -80,8 +80,11 @@ export default function AdminOrganizationsPage() {
     if (!user) return;
     const { data: admins } = await supabase.from('profiles').select('id').eq('organization_id', org.id).eq('role', 'firm_admin').limit(1);
     const adminUserId = admins?.[0]?.id || user.id;
-    startImpersonation(org.id, org.name, adminUserId, user.id);
-    await logAdminAction(user.id, 'impersonate_start', 'organization', org.id, org.name);
+    const res = await startImpersonation(org.id, org.name, adminUserId);
+    if (res.error) {
+      toast.error(res.error);
+      return;
+    }
     navigate('/dashboard');
   }
 
