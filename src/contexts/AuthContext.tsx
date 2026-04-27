@@ -130,12 +130,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return { kind: 'staff' as const, profile: profileRow as unknown as Profile };
     }
 
-    // Otherwise check for a portal_users row.
-    const { data: portalRow } = await supabase
+    // Otherwise check for a portal_users row (with the same defensive retry).
+    let { data: portalRow } = await supabase
       .from('portal_users')
       .select('*')
       .eq('auth_user_id', userId)
       .maybeSingle();
+
+    if (!portalRow) {
+      await new Promise((r) => setTimeout(r, 150));
+      const retry = await supabase
+        .from('portal_users')
+        .select('*')
+        .eq('auth_user_id', userId)
+        .maybeSingle();
+      portalRow = retry.data;
+    }
 
     if (portalRow) {
       setPortalUser(portalRow as unknown as PortalUser);
