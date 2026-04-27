@@ -23,6 +23,7 @@ interface ProtectedRouteProps {
  */
 export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const { user, profile, portalUser, isLoading, identityResolved } = useAuth();
+  const { isImpersonating } = useImpersonation();
   const { t } = useLanguage();
   const location = useLocation();
 
