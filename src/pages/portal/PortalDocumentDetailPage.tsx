@@ -101,14 +101,16 @@ export default function PortalDocumentDetailPage() {
     if (!doc?.id) return;
     try {
       await downloadDocumentById(doc.id, doc.file_name);
-      await supabase.from('document_activities').insert({
+      supabase.from('document_activities').insert({
         document_id: doc.id,
         organization_id: doc.organization_id,
         actor_id: user?.id,
         activity_type: 'downloaded',
         title: `Client downloaded: ${doc.file_name}`,
         title_ar: `قام العميل بتحميل: ${doc.file_name}`,
-      } as any);
+      } as any).then(({ error }) => {
+        if (error) console.error('Failed to record document download activity', error);
+      });
     } catch {
       toast.error(isEN ? 'Download failed' : 'فشل التحميل');
     }
