@@ -89,12 +89,29 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    */
   const resolveIdentity = useCallback(async (userId: string) => {
     setIdentityResolved(false);
-    // Try staff profile first.
-    const { data: profileRow } = await supabase
+    // Ensure supabase-js has the latest session attached before issuing
+    // RLS-protected queries. Without this, queries fired immediately after
+    // an auth state change can race and go out as anon (returning empty
+    // rows and causing the user to be misclassified as orphan/wrong-segment).
+    await supabase.auth.getSession();
+
+    // Try staff profile first. Retry once if the first attempt returns null
+    // (defensive against the JWT-attach race in supabase-js).
+    let { data: profileRow } = await supabase
       .from('profiles')
       .select('*')
       .eq('id', userId)
       .maybeSingle();
+
+    if (!profileRow) {
+      await new Promise((r) => setTimeout(r, 150));
+      const retry = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+      profileRow = retry.data;
+    }
 
     if (profileRow) {
       setProfile(profileRow as unknown as Profile);
