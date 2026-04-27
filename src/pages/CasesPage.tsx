@@ -72,7 +72,7 @@ export default function CasesPage() {
       let q = supabase
         .from('cases')
         .select(
-          'id, case_number, title, title_ar, status, priority, case_type, filing_date, updated_at, case_parties(id, role, is_primary, party_type, person:persons(first_name, first_name_ar, last_name, last_name_ar), entity:entities(company_name, company_name_ar))',
+          'id, case_number, title, title_ar, status, priority, case_type, filing_date, updated_at, case_parties(id, role, is_primary, party_type, person:persons!case_parties_person_id_fkey(first_name, first_name_ar, last_name, last_name_ar), entity:entities(company_name, company_name_ar))',
         )
         .eq('organization_id', profile!.organization_id!)
         .order('updated_at', { ascending: false })
