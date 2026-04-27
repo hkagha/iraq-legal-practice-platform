@@ -84,11 +84,16 @@ export default function MainLayout() {
       )}
       {isImpersonating && (
         <div className="bg-warning text-warning-foreground px-4 py-2 text-body-sm font-semibold flex items-center justify-center gap-3 z-50">
-          <span>⚠️ VIEWING AS: {impersonatedOrgName}</span>
-          <button onClick={async () => {
-            if (originalAdminId && impersonatedOrgId) await logAdminAction(originalAdminId, 'impersonate_end', 'organization', impersonatedOrgId, impersonatedOrgName || '');
-            endImpersonation(); navigate('/admin/dashboard');
-          }} className="underline hover:no-underline">Exit Impersonation</button>
+          <span>⚠️ {isEN ? 'VIEWING AS' : 'يتم العرض كـ'}: {impersonatedOrgName}</span>
+          <button
+            onClick={async () => {
+              await endImpersonation();
+              navigate('/admin/dashboard');
+            }}
+            className="underline hover:no-underline"
+          >
+            {isEN ? 'Stop Impersonating' : 'إنهاء انتحال الصفة'}
+          </button>
         </div>
       )}
       <div className="flex flex-1 min-h-0">
