@@ -43,7 +43,7 @@ export function CasePartiesEditor({ caseId, organizationId }: Props) {
     setLoading(true);
     const { data, error } = await supabase
       .from('case_parties')
-      .select('*, person:persons(*), entity:entities(*)')
+      .select('*, person:persons!case_parties_person_id_fkey(*), entity:entities(*)')
       .eq('case_id', caseId);
     if (error) {
       toast.error(error.message);
