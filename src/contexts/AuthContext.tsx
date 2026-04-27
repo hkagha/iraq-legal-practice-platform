@@ -187,9 +187,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        // Pass the access token explicitly so resolveIdentity can authenticate
-        // its profile/portal_users queries even if the supabase-js client
-        // hasn't yet committed the session to its internal getter.
+        // Mark identity as unresolved IMMEDIATELY so any consumer effects
+        // (e.g. login page segmentation checks) wait until resolveIdentity
+        // has populated profile/portalUser. Without this, there is a render
+        // window where user is set but profile is still null, identityResolved
+        // is still true (from a prior unauthenticated mount), and segmentation
+        // logic falsely concludes the user is an orphan.
+        setIdentityResolved(false);
         const token = session.access_token;
         setTimeout(() => resolveIdentity(session.user.id, token), 0);
       } else {
