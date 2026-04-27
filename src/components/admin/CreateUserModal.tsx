@@ -39,23 +39,54 @@ export default function CreateUserModal({ open, onClose, onSuccess, preselectedO
   const [saving, setSaving] = useState(false);
   const [orgs, setOrgs] = useState<{ value: string; label: string }[]>([]);
   const [people, setPeople] = useState<{ value: string; label: string }[]>([]);
+  const [prefilledFromPerson, setPrefilledFromPerson] = useState(false);
+
+  // Lock-in mode: admin opened this from an existing client to ONLY set credentials
+  const isExistingClientMode = !!preselectedPersonId;
 
   useEffect(() => {
     if (!open) return;
 
-    supabase
-      .from('organizations')
-      .select('id, name')
-      .eq('is_active', true)
-      .order('name')
-      .then(({ data }) => {
-        setOrgs((data || []).map((o: any) => ({ value: o.id, label: o.name })));
-      });
+    if (!isExistingClientMode) {
+      supabase
+        .from('organizations')
+        .select('id, name')
+        .eq('is_active', true)
+        .order('name')
+        .then(({ data }) => {
+          setOrgs((data || []).map((o: any) => ({ value: o.id, label: o.name })));
+        });
+    }
 
     if (preselectedOrgId) setOrgId(preselectedOrgId);
     if (defaultRole) setRole(defaultRole);
     if (preselectedPersonId) setPersonId(preselectedPersonId);
-  }, [open, preselectedOrgId, preselectedPersonId, defaultRole]);
+  }, [open, preselectedOrgId, preselectedPersonId, defaultRole, isExistingClientMode]);
+
+  // When opening for an existing client, fetch their details and prefill (no manual entry needed)
+  useEffect(() => {
+    if (!open || !preselectedPersonId) {
+      setPrefilledFromPerson(false);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from('persons')
+        .select('id, first_name, last_name, first_name_ar, last_name_ar, email, phone, organization_id')
+        .eq('id', preselectedPersonId)
+        .maybeSingle();
+      if (cancelled || error || !data) return;
+      setFirstName(data.first_name || data.first_name_ar || '');
+      setLastName(data.last_name || data.last_name_ar || '');
+      setEmail(data.email || '');
+      setPhone(data.phone || '');
+      if (data.organization_id) setOrgId(data.organization_id);
+      setRole('client');
+      setPrefilledFromPerson(true);
+    })();
+    return () => { cancelled = true; };
+  }, [open, preselectedPersonId]);
 
   useEffect(() => {
     if (!open || !orgId) {
