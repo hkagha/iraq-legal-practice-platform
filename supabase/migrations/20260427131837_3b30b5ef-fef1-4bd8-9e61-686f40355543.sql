@@ -1,0 +1,1 @@
+DROP TABLE IF EXISTS public._seed_staging_baghdad;
