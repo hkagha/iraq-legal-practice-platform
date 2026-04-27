@@ -87,30 +87,42 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    * row in `portal_users`). We check both, in that order, and surface whichever
    * exists.
    */
-  const resolveIdentity = useCallback(async (userId: string) => {
+  const resolveIdentity = useCallback(async (userId: string, accessToken?: string) => {
     setIdentityResolved(false);
-    // Ensure supabase-js has the latest session attached before issuing
-    // RLS-protected queries. Without this, queries fired immediately after
-    // an auth state change can race and go out as anon (returning empty
-    // rows and causing the user to be misclassified as orphan/wrong-segment).
-    await supabase.auth.getSession();
 
-    // Try staff profile first. Retry once if the first attempt returns null
-    // (defensive against the JWT-attach race in supabase-js).
-    let { data: profileRow } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
+    // Workaround for a race in supabase-js: occasionally the SIGNED_IN event
+    // fires before the client has committed the session to its internal getter,
+    // so subsequent PostgREST calls go out with the anon key (Authorization)
+    // and RLS returns no rows for the user (treating them as anon). When we
+    // have the access token from the auth event, attach it explicitly.
+    const authedFetch = accessToken
+      ? async <T,>(table: string, query: string): Promise<{ data: T | null }> => {
+          const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/${table}?${query}`;
+          const res = await fetch(url, {
+            headers: {
+              apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+              Authorization: `Bearer ${accessToken}`,
+              Accept: 'application/json',
+            },
+          });
+          if (!res.ok) return { data: null };
+          const arr = await res.json();
+          return { data: (Array.isArray(arr) && arr.length > 0 ? arr[0] : null) as T | null };
+        }
+      : null;
 
-    if (!profileRow) {
-      await new Promise((r) => setTimeout(r, 150));
-      const retry = await supabase
+    // Try staff profile first.
+    let profileRow: any = null;
+    if (authedFetch) {
+      const { data } = await authedFetch<any>('profiles', `select=*&id=eq.${userId}`);
+      profileRow = data;
+    } else {
+      const { data } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .maybeSingle();
-      profileRow = retry.data;
+      profileRow = data;
     }
 
     if (profileRow) {
