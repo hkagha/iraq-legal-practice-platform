@@ -36,7 +36,7 @@ interface Props {
 
 export default function DocumentCommentsTab({ documentId, organizationId, variant, documentVisibleToClient }: Props) {
   const { language } = useLanguage();
-  const { profile } = useAuth();
+  const { profile, user } = useAuth();
   const [comments, setComments] = useState<CommentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [content, setContent] = useState('');
@@ -125,19 +125,28 @@ export default function DocumentCommentsTab({ documentId, organizationId, varian
   }, [comments.length]);
 
   const handlePost = async () => {
-    if (!content.trim() || !profile?.id) return;
+    const authorId = variant === 'client' ? user?.id : profile?.id;
+    if (!content.trim() || !authorId) return;
     setPosting(true);
     try {
       const payload: any = {
         document_id: documentId,
         organization_id: organizationId,
-        author_id: profile.id,
+        author_id: authorId,
         author_type: variant,
         content: content.trim(),
         is_visible_to_client: variant === 'client' ? true : visibleToClient,
       };
       const { error } = await supabase.from('document_comments').insert(payload);
       if (error) throw error;
+      await supabase.from('document_activities').insert({
+        document_id: documentId,
+        organization_id: organizationId,
+        actor_id: authorId,
+        activity_type: 'commented',
+        title: variant === 'client' ? 'Client commented on document' : 'Staff commented on document',
+        title_ar: variant === 'client' ? 'علّق العميل على المستند' : 'علّق الفريق على المستند',
+      } as any);
       setContent('');
     } catch (err: any) {
       toast.error(err.message || (language === 'ar' ? 'فشل إرسال التعليق' : 'Failed to post comment'));
