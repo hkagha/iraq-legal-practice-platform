@@ -75,8 +75,11 @@ export default function AdminOrganizationDetailPage() {
   async function handleImpersonate() {
     if (!org || !user) return;
     const admin = orgUsers.find(u => u.role === 'firm_admin') || orgUsers[0];
-    startImpersonation(org.id, org.name, admin?.id || user.id, user.id);
-    await logAdminAction(user.id, 'impersonate_start', 'organization', org.id, org.name);
+    const res = await startImpersonation(org.id, org.name, admin?.id || user.id);
+    if (res.error) {
+      toast.error(res.error);
+      return;
+    }
     navigate('/dashboard');
   }
 
