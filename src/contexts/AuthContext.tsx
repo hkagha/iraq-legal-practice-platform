@@ -87,14 +87,43 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    * row in `portal_users`). We check both, in that order, and surface whichever
    * exists.
    */
-  const resolveIdentity = useCallback(async (userId: string) => {
+  const resolveIdentity = useCallback(async (userId: string, accessToken?: string) => {
     setIdentityResolved(false);
+
+    // Workaround for a race in supabase-js: occasionally the SIGNED_IN event
+    // fires before the client has committed the session to its internal getter,
+    // so subsequent PostgREST calls go out with the anon key (Authorization)
+    // and RLS returns no rows for the user (treating them as anon). When we
+    // have the access token from the auth event, attach it explicitly.
+    const authedFetch = accessToken
+      ? async <T,>(table: string, query: string): Promise<{ data: T | null }> => {
+          const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/${table}?${query}`;
+          const res = await fetch(url, {
+            headers: {
+              apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+              Authorization: `Bearer ${accessToken}`,
+              Accept: 'application/json',
+            },
+          });
+          if (!res.ok) return { data: null };
+          const arr = await res.json();
+          return { data: (Array.isArray(arr) && arr.length > 0 ? arr[0] : null) as T | null };
+        }
+      : null;
+
     // Try staff profile first.
-    const { data: profileRow } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
+    let profileRow: any = null;
+    if (authedFetch) {
+      const { data } = await authedFetch<any>('profiles', `select=*&id=eq.${userId}`);
+      profileRow = data;
+    } else {
+      const { data } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .maybeSingle();
+      profileRow = data;
+    }
 
     if (profileRow) {
       setProfile(profileRow as unknown as Profile);
@@ -114,11 +143,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     // Otherwise check for a portal_users row.
-    const { data: portalRow } = await supabase
-      .from('portal_users')
-      .select('*')
-      .eq('auth_user_id', userId)
-      .maybeSingle();
+    let portalRow: any = null;
+    if (authedFetch) {
+      const { data } = await authedFetch<any>('portal_users', `select=*&auth_user_id=eq.${userId}`);
+      portalRow = data;
+    } else {
+      const { data } = await supabase
+        .from('portal_users')
+        .select('*')
+        .eq('auth_user_id', userId)
+        .maybeSingle();
+      portalRow = data;
+    }
 
     if (portalRow) {
       setPortalUser(portalRow as unknown as PortalUser);
@@ -151,8 +187,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        // Use setTimeout to avoid deadlocks with Supabase
-        setTimeout(() => resolveIdentity(session.user.id), 0);
+        // Mark identity as unresolved IMMEDIATELY so any consumer effects
+        // (e.g. login page segmentation checks) wait until resolveIdentity
+        // has populated profile/portalUser. Without this, there is a render
+        // window where user is set but profile is still null, identityResolved
+        // is still true (from a prior unauthenticated mount), and segmentation
+        // logic falsely concludes the user is an orphan.
+        setIdentityResolved(false);
+        const token = session.access_token;
+        setTimeout(() => resolveIdentity(session.user.id, token), 0);
       } else {
         setProfile(null);
         setOrganization(null);
@@ -167,7 +210,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        resolveIdentity(session.user.id);
+        resolveIdentity(session.user.id, session.access_token);
       } else {
         setIdentityResolved(true);
       }
