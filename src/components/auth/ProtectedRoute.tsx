@@ -61,6 +61,10 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
     }
     // Role gating, when provided.
     if (allowedRoles && !allowedRoles.includes(profile.role)) {
+      // While impersonating, a platform admin should be allowed into firm-staff routes.
+      if (isImpersonating && (profile.role === 'super_admin' || profile.role === 'sales_admin')) {
+        return <>{children}</>;
+      }
       // Sensible fallback per role.
       if (profile.role === 'super_admin' || profile.role === 'sales_admin') {
         return <Navigate to="/admin/dashboard" replace />;
