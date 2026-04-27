@@ -4217,6 +4217,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_org_staff_member: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
       org_ai_runtime_settings: {
         Args: { _org_id: string }
         Returns: {

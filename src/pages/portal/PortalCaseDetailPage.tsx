@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { Link, useParams } from 'react-router-dom';
-import { ArrowLeft, Scale, Calendar, Building2, Gavel, FileText } from 'lucide-react';
+import { ArrowLeft, Scale, Calendar, Building2, Gavel, FileText, ChevronRight } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Card } from '@/components/ui/card';
@@ -53,6 +53,7 @@ export default function PortalCaseDetailPage() {
         .eq('case_id', id!)
         .eq('is_visible_to_client', true)
         .eq('status', 'active')
+        .eq('is_latest_version', true)
         .order('created_at', { ascending: false });
       if (error) throw error;
       return data ?? [];
@@ -207,7 +208,8 @@ export default function PortalCaseDetailPage() {
         ) : (
           <ul className="divide-y divide-border">
             {documents!.map((d) => (
-              <li key={d.id} className="py-2.5 flex items-center gap-3">
+              <li key={d.id}>
+                <Link to={`/portal/documents/${d.id}`} className="py-2.5 flex items-center gap-3 hover:text-accent transition-colors">
                 <FileText className="h-4 w-4 text-muted-foreground shrink-0" />
                 <div className="flex-1 min-w-0">
                   <div className="text-body-sm font-medium text-foreground truncate">
@@ -217,6 +219,8 @@ export default function PortalCaseDetailPage() {
                     {(d.file_size_bytes / 1024).toFixed(1)} KB · {fmtDate(d.created_at)}
                   </div>
                 </div>
+                <ChevronRight className={`h-4 w-4 text-muted-foreground shrink-0 ${isRTL ? 'rotate-180' : ''}`} />
+                </Link>
               </li>
             ))}
           </ul>

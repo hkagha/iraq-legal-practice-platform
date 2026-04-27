@@ -41,7 +41,7 @@ function safeName(n: string) {
 
 export default function PortalDocumentDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const { profile, user } = useAuth();
+  const { user } = useAuth();
   const { language, isRTL } = useLanguage();
   const isEN = language === 'en';
   const navigate = useNavigate();
@@ -101,6 +101,16 @@ export default function PortalDocumentDetailPage() {
     if (!doc?.id) return;
     try {
       await downloadDocumentById(doc.id, doc.file_name);
+      supabase.from('document_activities').insert({
+        document_id: doc.id,
+        organization_id: doc.organization_id,
+        actor_id: user?.id,
+        activity_type: 'downloaded',
+        title: `Client downloaded: ${doc.file_name}`,
+        title_ar: `قام العميل بتحميل: ${doc.file_name}`,
+      } as any).then(({ error }) => {
+        if (error) console.error('Failed to record document download activity', error);
+      });
     } catch {
       toast.error(isEN ? 'Download failed' : 'فشل التحميل');
     }
@@ -118,7 +128,7 @@ export default function PortalDocumentDetailPage() {
   };
 
   const handleSendReply = async () => {
-    if (!doc || !replyFile || !user?.id || !profile?.id) return;
+    if (!doc || !replyFile || !user?.id) return;
     if (!doc.case_id) {
       toast.error(isEN ? 'Reply uploads are only available on case documents' : 'الرفع متاح فقط على مستندات القضايا');
       return;
@@ -174,10 +184,19 @@ export default function PortalDocumentDetailPage() {
       await supabase.from('document_comments').insert({
         document_id: doc.id,
         organization_id: doc.organization_id,
-        author_id: profile.id,
+        author_id: user.id,
         author_type: 'client',
         content: noteText,
         is_visible_to_client: true,
+      } as any);
+      await supabase.from('document_activities').insert({
+        document_id: doc.id,
+        organization_id: doc.organization_id,
+        actor_id: user.id,
+        activity_type: 'uploaded_reply',
+        title: `Client uploaded related file: ${replyFile.name}`,
+        title_ar: `رفع العميل ملفاً ذا صلة: ${replyFile.name}`,
+        metadata: { related_document_id: inserted!.id },
       } as any);
 
       toast.success(isEN ? 'File sent to your firm' : 'تم إرسال الملف إلى مكتبك');
