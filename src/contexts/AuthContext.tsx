@@ -55,6 +55,8 @@ interface AuthContextType {
   signUp: (data: SignUpData) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<void>;
+  /** Re-fetch profile/organization for the current session. Used by impersonation to pick up org swaps. */
+  refreshIdentity: () => Promise<void>;
   isRole: (role: string) => boolean;
   getFullName: () => string;
   getInitials: () => string;
