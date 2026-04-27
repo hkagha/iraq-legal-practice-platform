@@ -55,6 +55,8 @@ interface AuthContextType {
   signUp: (data: SignUpData) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<void>;
+  /** Re-fetch profile/organization for the current session. Used by impersonation to pick up org swaps. */
+  refreshIdentity: () => Promise<void>;
   isRole: (role: string) => boolean;
   getFullName: () => string;
   getInitials: () => string;
@@ -420,10 +422,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return '';
   };
 
+  const refreshIdentity = useCallback(async () => {
+    if (!user) return;
+    const token = session?.access_token;
+    await resolveIdentity(user.id, token);
+  }, [user, session, resolveIdentity]);
+
   return (
     <AuthContext.Provider value={{
       user, session, profile, organization, portalUser, isLoading, identityResolved,
-      signIn, signUp, signOut, updateProfile,
+      signIn, signUp, signOut, updateProfile, refreshIdentity,
       isRole, getFullName, getInitials,
     }}>
       {children}

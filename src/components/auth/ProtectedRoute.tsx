@@ -1,6 +1,7 @@
 import { Navigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useImpersonation } from '@/contexts/ImpersonationContext';
 import { Loader2 } from 'lucide-react';
 
 interface ProtectedRouteProps {
@@ -22,6 +23,7 @@ interface ProtectedRouteProps {
  */
 export default function ProtectedRoute({ children, allowedRoles }: ProtectedRouteProps) {
   const { user, profile, portalUser, isLoading, identityResolved } = useAuth();
+  const { isImpersonating } = useImpersonation();
   const { t } = useLanguage();
   const location = useLocation();
 
@@ -59,6 +61,10 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
     }
     // Role gating, when provided.
     if (allowedRoles && !allowedRoles.includes(profile.role)) {
+      // While impersonating, a platform admin should be allowed into firm-staff routes.
+      if (isImpersonating && (profile.role === 'super_admin' || profile.role === 'sales_admin')) {
+        return <>{children}</>;
+      }
       // Sensible fallback per role.
       if (profile.role === 'super_admin' || profile.role === 'sales_admin') {
         return <Navigate to="/admin/dashboard" replace />;
