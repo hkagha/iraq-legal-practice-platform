@@ -162,7 +162,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       profileRow = data;
     }
 
-    if (profileRow) {
+    if (profileRow && profileRow.role !== 'client') {
       authDebug('profile:branch:staff-found:setProfile', { runId, profile: summarizeIdentityRow(profileRow) });
       setProfile(profileRow as unknown as Profile);
       setPortalUser(null);
