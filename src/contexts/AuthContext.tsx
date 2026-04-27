@@ -85,6 +85,13 @@ const summarizeIdentityRow = (row: any) => row ? {
   is_active: row.is_active,
 } : null;
 
+const errorSummary = (error: unknown) => {
+  if (!error) return null;
+  if (typeof error === 'string') return error;
+  if (typeof error === 'object' && 'message' in error) return String((error as { message?: unknown }).message);
+  return String(error);
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -166,7 +173,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               .select('*')
               .eq('id', profileRow.organization_id)
               .maybeSingle();
-        authDebug('organization:result', { runId, status: orgStatus, error: orgError?.message ?? orgError ?? null, found: Boolean(org), organizationId: org?.id ?? null });
+        authDebug('organization:result', { runId, status: orgStatus, error: errorSummary(orgError), found: Boolean(org), organizationId: org?.id ?? null });
         if (org) setOrganization(org as unknown as Organization);
         else setOrganization(null);
       } else {
