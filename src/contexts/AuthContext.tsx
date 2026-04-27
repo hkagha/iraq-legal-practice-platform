@@ -312,7 +312,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user, profile]);
 
   const signIn = async (email: string, password: string) => {
+    authDebug('signIn:start', { email });
     const { error } = await supabase.auth.signInWithPassword({ email, password });
+    authDebug('signIn:result', { email, error: error?.message ?? null });
     if (error) return { error: error.message };
     return { error: null };
   };
@@ -368,7 +370,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const signOut = async () => {
+    authDebug('signOut:start', { userId: user?.id ?? null, email: user?.email ?? null, hadProfile: Boolean(profile), hadPortalUser: Boolean(portalUser) });
     await supabase.auth.signOut();
+    authDebug('signOut:after-auth-signOut:clear-state');
     setUser(null);
     setSession(null);
     setProfile(null);
