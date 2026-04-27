@@ -422,10 +422,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return '';
   };
 
+  const refreshIdentity = useCallback(async () => {
+    if (!user) return;
+    const token = session?.access_token;
+    await resolveIdentity(user.id, token);
+  }, [user, session, resolveIdentity]);
+
   return (
     <AuthContext.Provider value={{
       user, session, profile, organization, portalUser, isLoading, identityResolved,
-      signIn, signUp, signOut, updateProfile,
+      signIn, signUp, signOut, updateProfile, refreshIdentity,
       isRole, getFullName, getInitials,
     }}>
       {children}
