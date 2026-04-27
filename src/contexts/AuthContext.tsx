@@ -71,6 +71,20 @@ interface SignUpData {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+const authDebug = (...args: unknown[]) => {
+  // Temporary production diagnostics for the staff-login identity race.
+  console.log('[AuthContext]', ...args);
+};
+
+const summarizeIdentityRow = (row: any) => row ? {
+  id: row.id,
+  auth_user_id: row.auth_user_id,
+  email: row.email,
+  role: row.role,
+  organization_id: row.organization_id,
+  is_active: row.is_active,
+} : null;
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
@@ -80,6 +94,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [identityResolved, setIdentityResolved] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const activityInterval = useRef<NodeJS.Timeout | null>(null);
+  const authEventSequence = useRef(0);
+  const latestIdentityRun = useRef(0);
 
   /**
    * Resolve the identity for an authenticated auth.users row. A given auth user
@@ -88,6 +104,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
    * exists.
    */
   const resolveIdentity = useCallback(async (userId: string, accessToken?: string) => {
+    const runId = ++latestIdentityRun.current;
+    authDebug('resolveIdentity:start', { runId, userId, hasAccessToken: Boolean(accessToken) });
     setIdentityResolved(false);
 
     // Workaround for a race in supabase-js: occasionally the SIGNED_IN event
@@ -96,8 +114,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // and RLS returns no rows for the user (treating them as anon). When we
     // have the access token from the auth event, attach it explicitly.
     const authedFetch = accessToken
-      ? async <T,>(table: string, query: string): Promise<{ data: T | null }> => {
+      ? async <T,>(table: string, query: string): Promise<{ data: T | null; status: number; error: string | null }> => {
           const url = `${import.meta.env.VITE_SUPABASE_URL}/rest/v1/${table}?${query}`;
+          authDebug('authedFetch:request', { runId, table, query });
           const res = await fetch(url, {
             headers: {
               apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
@@ -105,66 +124,90 @@ export function AuthProvider({ children }: { children: ReactNode }) {
               Accept: 'application/json',
             },
           });
-          if (!res.ok) return { data: null };
+          if (!res.ok) {
+            const error = await res.text();
+            authDebug('authedFetch:error', { runId, table, status: res.status, error });
+            return { data: null, status: res.status, error };
+          }
           const arr = await res.json();
-          return { data: (Array.isArray(arr) && arr.length > 0 ? arr[0] : null) as T | null };
+          const row = (Array.isArray(arr) && arr.length > 0 ? arr[0] : null) as T | null;
+          authDebug('authedFetch:success', { runId, table, status: res.status, row: summarizeIdentityRow(row) });
+          return { data: row, status: res.status, error: null };
         }
       : null;
 
     // Try staff profile first.
     let profileRow: any = null;
     if (authedFetch) {
+      authDebug('profile:query:explicit-token', { runId, userId });
       const { data } = await authedFetch<any>('profiles', `select=*&id=eq.${userId}`);
       profileRow = data;
     } else {
-      const { data } = await supabase
+      authDebug('profile:query:supabase-client', { runId, userId });
+      const { data, error, status } = await supabase
         .from('profiles')
         .select('*')
         .eq('id', userId)
         .maybeSingle();
+      authDebug('profile:result:supabase-client', { runId, status, error: error?.message ?? null, row: summarizeIdentityRow(data) });
       profileRow = data;
     }
 
     if (profileRow) {
+      authDebug('profile:branch:staff-found:setProfile', { runId, profile: summarizeIdentityRow(profileRow) });
       setProfile(profileRow as unknown as Profile);
       setPortalUser(null);
       if (profileRow.organization_id) {
-        const { data: org } = await supabase
-          .from('organizations')
-          .select('*')
-          .eq('id', profileRow.organization_id)
-          .maybeSingle();
+        authDebug('organization:query', { runId, organizationId: profileRow.organization_id, usingExplicitToken: Boolean(authedFetch) });
+        const { data: org, error: orgError, status: orgStatus } = authedFetch
+          ? await authedFetch<any>('organizations', `select=*&id=eq.${profileRow.organization_id}`)
+          : await supabase
+              .from('organizations')
+              .select('*')
+              .eq('id', profileRow.organization_id)
+              .maybeSingle();
+        authDebug('organization:result', { runId, status: orgStatus, error: orgError?.message ?? orgError ?? null, found: Boolean(org), organizationId: org?.id ?? null });
         if (org) setOrganization(org as unknown as Organization);
+        else setOrganization(null);
       } else {
+        authDebug('organization:branch:profile-has-no-org', { runId });
         setOrganization(null);
       }
+      authDebug('resolveIdentity:complete:staff', { runId });
       setIdentityResolved(true);
       return { kind: 'staff' as const, profile: profileRow as unknown as Profile };
     }
+    authDebug('profile:branch:not-found', { runId, userId });
 
     // Otherwise check for a portal_users row.
     let portalRow: any = null;
     if (authedFetch) {
+      authDebug('portal:query:explicit-token', { runId, userId });
       const { data } = await authedFetch<any>('portal_users', `select=*&auth_user_id=eq.${userId}`);
       portalRow = data;
     } else {
-      const { data } = await supabase
+      authDebug('portal:query:supabase-client', { runId, userId });
+      const { data, error, status } = await supabase
         .from('portal_users')
         .select('*')
         .eq('auth_user_id', userId)
         .maybeSingle();
+      authDebug('portal:result:supabase-client', { runId, status, error: error?.message ?? null, row: summarizeIdentityRow(data) });
       portalRow = data;
     }
 
     if (portalRow) {
+      authDebug('portal:branch:portal-found:setPortalUser', { runId, portalUser: summarizeIdentityRow(portalRow) });
       setPortalUser(portalRow as unknown as PortalUser);
       setProfile(null);
       setOrganization(null);
+      authDebug('resolveIdentity:complete:portal', { runId });
       setIdentityResolved(true);
       return { kind: 'portal' as const, portalUser: portalRow as unknown as PortalUser };
     }
 
     // Neither — orphaned auth user.
+    authDebug('resolveIdentity:complete:orphan', { runId, userId });
     setProfile(null);
     setPortalUser(null);
     setOrganization(null);
