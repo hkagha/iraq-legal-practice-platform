@@ -234,6 +234,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      const eventId = ++authEventSequence.current;
+      authDebug('auth-event:received', {
+        eventId,
+        event,
+        hasSession: Boolean(session),
+        userId: session?.user?.id ?? null,
+        email: session?.user?.email ?? null,
+      });
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -243,10 +251,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         // window where user is set but profile is still null, identityResolved
         // is still true (from a prior unauthenticated mount), and segmentation
         // logic falsely concludes the user is an orphan.
+        authDebug('auth-event:branch:has-user:set-session-user-unresolved', { eventId, event, userId: session.user.id });
         setIdentityResolved(false);
         const token = session.access_token;
-        setTimeout(() => resolveIdentity(session.user.id, token), 0);
+        setTimeout(() => {
+          authDebug('auth-event:deferred-resolveIdentity', { eventId, event, userId: session.user.id });
+          resolveIdentity(session.user.id, token);
+        }, 0);
       } else {
+        authDebug('auth-event:branch:no-session:clear-identity', { eventId, event });
         setProfile(null);
         setOrganization(null);
         setPortalUser(null);
@@ -256,12 +269,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     // THEN check for existing session
+    const getSessionStartedAtEvent = authEventSequence.current;
+    authDebug('initial-session:request', { getSessionStartedAtEvent });
     supabase.auth.getSession().then(({ data: { session } }) => {
+      authDebug('initial-session:result', {
+        getSessionStartedAtEvent,
+        latestAuthEvent: authEventSequence.current,
+        ignored: authEventSequence.current !== getSessionStartedAtEvent,
+        hasSession: Boolean(session),
+        userId: session?.user?.id ?? null,
+        email: session?.user?.email ?? null,
+      });
+      if (authEventSequence.current !== getSessionStartedAtEvent) {
+        authDebug('initial-session:ignored-stale-result');
+        return;
+      }
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
+        authDebug('initial-session:branch:has-user:resolveIdentity', { userId: session.user.id });
         resolveIdentity(session.user.id, session.access_token);
       } else {
+        authDebug('initial-session:branch:no-session:set-resolved');
         setIdentityResolved(true);
       }
       setIsLoading(false);
