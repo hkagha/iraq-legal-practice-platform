@@ -39,23 +39,54 @@ export default function CreateUserModal({ open, onClose, onSuccess, preselectedO
   const [saving, setSaving] = useState(false);
   const [orgs, setOrgs] = useState<{ value: string; label: string }[]>([]);
   const [people, setPeople] = useState<{ value: string; label: string }[]>([]);
+  const [prefilledFromPerson, setPrefilledFromPerson] = useState(false);
+
+  // Lock-in mode: admin opened this from an existing client to ONLY set credentials
+  const isExistingClientMode = !!preselectedPersonId;
 
   useEffect(() => {
     if (!open) return;
 
-    supabase
-      .from('organizations')
-      .select('id, name')
-      .eq('is_active', true)
-      .order('name')
-      .then(({ data }) => {
-        setOrgs((data || []).map((o: any) => ({ value: o.id, label: o.name })));
-      });
+    if (!isExistingClientMode) {
+      supabase
+        .from('organizations')
+        .select('id, name')
+        .eq('is_active', true)
+        .order('name')
+        .then(({ data }) => {
+          setOrgs((data || []).map((o: any) => ({ value: o.id, label: o.name })));
+        });
+    }
 
     if (preselectedOrgId) setOrgId(preselectedOrgId);
     if (defaultRole) setRole(defaultRole);
     if (preselectedPersonId) setPersonId(preselectedPersonId);
-  }, [open, preselectedOrgId, preselectedPersonId, defaultRole]);
+  }, [open, preselectedOrgId, preselectedPersonId, defaultRole, isExistingClientMode]);
+
+  // When opening for an existing client, fetch their details and prefill (no manual entry needed)
+  useEffect(() => {
+    if (!open || !preselectedPersonId) {
+      setPrefilledFromPerson(false);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      const { data, error } = await supabase
+        .from('persons')
+        .select('id, first_name, last_name, first_name_ar, last_name_ar, email, phone, organization_id')
+        .eq('id', preselectedPersonId)
+        .maybeSingle();
+      if (cancelled || error || !data) return;
+      setFirstName(data.first_name || data.first_name_ar || '');
+      setLastName(data.last_name || data.last_name_ar || '');
+      setEmail(data.email || '');
+      setPhone(data.phone || '');
+      if (data.organization_id) setOrgId(data.organization_id);
+      setRole('client');
+      setPrefilledFromPerson(true);
+    })();
+    return () => { cancelled = true; };
+  }, [open, preselectedPersonId]);
 
   useEffect(() => {
     if (!open || !orgId) {
@@ -141,62 +172,109 @@ export default function CreateUserModal({ open, onClose, onSuccess, preselectedO
     }
   };
 
+  const fullName = [firstName, lastName].filter(Boolean).join(' ').trim();
+
   return (
     <Dialog open={open} onOpenChange={v => !v && onClose()}>
       <DialogContent className="max-w-[520px]">
-        <DialogHeader><DialogTitle>{isEN ? 'Create User' : 'إنشاء مستخدم'}</DialogTitle></DialogHeader>
-        <div className="space-y-4">
-          <FormField label={isEN ? 'Email' : 'البريد الإلكتروني'} required>
-            <FormInput type="email" value={email} onChange={e => setEmail(e.target.value)} />
-          </FormField>
-          <div className="grid grid-cols-2 gap-3">
-            <FormField label={isEN ? 'First Name' : 'الاسم الأول'} required>
-              <FormInput value={firstName} onChange={e => setFirstName(e.target.value)} />
+        <DialogHeader>
+          <DialogTitle>
+            {isExistingClientMode
+              ? (isEN ? 'Create Client Login' : 'إنشاء دخول للعميل')
+              : (isEN ? 'Create User' : 'إنشاء مستخدم')}
+          </DialogTitle>
+        </DialogHeader>
+
+        {isExistingClientMode ? (
+          <div className="space-y-4">
+            {!prefilledFromPerson ? (
+              <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Loader2 size={14} className="animate-spin" />
+                {isEN ? 'Loading client info…' : 'جارٍ تحميل بيانات العميل…'}
+              </div>
+            ) : (
+              <>
+                <div className="rounded-md border bg-muted/30 p-3 space-y-1 text-sm">
+                  <div><span className="text-muted-foreground">{isEN ? 'Client:' : 'العميل:'}</span> <span className="font-medium">{fullName || '—'}</span></div>
+                  <div><span className="text-muted-foreground">{isEN ? 'Email:' : 'البريد الإلكتروني:'}</span> <span className="font-medium">{email || '—'}</span></div>
+                  {phone && (
+                    <div><span className="text-muted-foreground">{isEN ? 'Phone:' : 'الهاتف:'}</span> <span className="font-medium">{phone}</span></div>
+                  )}
+                </div>
+                {!email && (
+                  <div className="text-xs text-destructive">
+                    {isEN
+                      ? 'This client has no email on file. Please add an email to the client record before creating a login.'
+                      : 'لا يوجد بريد إلكتروني لهذا العميل. الرجاء إضافة بريد إلكتروني لسجل العميل قبل إنشاء حساب الدخول.'}
+                  </div>
+                )}
+                <FormField
+                  label={isEN ? 'Temporary Password' : 'كلمة المرور المؤقتة'}
+                  required
+                  helperText={isEN ? 'Minimum 8 characters. Share it securely with the client.' : '٨ أحرف على الأقل. شاركها مع العميل بشكل آمن.'}
+                >
+                  <FormInput type="password" value={password} onChange={e => setPassword(e.target.value)} />
+                </FormField>
+              </>
+            )}
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <FormField label={isEN ? 'Email' : 'البريد الإلكتروني'} required>
+              <FormInput type="email" value={email} onChange={e => setEmail(e.target.value)} />
             </FormField>
-            <FormField label={isEN ? 'Last Name' : 'الاسم الأخير'} required>
-              <FormInput value={lastName} onChange={e => setLastName(e.target.value)} />
+            <div className="grid grid-cols-2 gap-3">
+              <FormField label={isEN ? 'First Name' : 'الاسم الأول'} required>
+                <FormInput value={firstName} onChange={e => setFirstName(e.target.value)} />
+              </FormField>
+              <FormField label={isEN ? 'Last Name' : 'الاسم الأخير'} required>
+                <FormInput value={lastName} onChange={e => setLastName(e.target.value)} />
+              </FormField>
+            </div>
+            <FormField label={isEN ? 'Phone' : 'الهاتف'}>
+              <PhoneInput value={phone} onChange={setPhone} />
+            </FormField>
+            <FormField label={isEN ? 'Organization' : 'المؤسسة'} required>
+              <FormSelect value={orgId} onValueChange={value => { setOrgId(value); setPersonId(''); }} options={orgs} placeholder={isEN ? 'Select organization...' : 'اختر المؤسسة...'} />
+            </FormField>
+            <FormField label={isEN ? 'Role' : 'الدور'} required>
+              <FormSelect value={role} onValueChange={value => { setRole(value); if (value !== 'client') setPersonId(''); }} options={ROLES.map(r => ({ value: r, label: r.replace('_', ' ') }))} />
+            </FormField>
+            {isClientRole && (
+              <FormField
+                label={isEN ? 'Linked Individual Client' : 'العميل الفرد المرتبط'}
+                required
+                helperText={
+                  isEN
+                    ? 'Select the person record for this login. If this person represents a company client, they will inherit access to that company in the portal.'
+                    : 'اختر سجل الشخص لهذا الحساب. إذا كان هذا الشخص ممثلاً لشركة عميلة، فسيحصل تلقائياً على صلاحية الوصول إلى تلك الشركة في البوابة.'
+                }
+              >
+                <FormSelect
+                  value={personId}
+                  onValueChange={setPersonId}
+                  options={people}
+                  placeholder={
+                    people.length > 0
+                      ? isEN ? 'Select individual client...' : 'اختر العميل الفرد...'
+                      : isEN ? 'No people found in this organization' : 'لا يوجد أفراد في هذه المؤسسة'
+                  }
+                />
+              </FormField>
+            )}
+            <FormField label={isEN ? 'Temporary Password' : 'كلمة المرور المؤقتة'} required>
+              <FormInput type="password" value={password} onChange={e => setPassword(e.target.value)} />
             </FormField>
           </div>
-          <FormField label={isEN ? 'Phone' : 'الهاتف'}>
-            <PhoneInput value={phone} onChange={setPhone} />
-          </FormField>
-          <FormField label={isEN ? 'Organization' : 'المؤسسة'} required>
-            <FormSelect value={orgId} onValueChange={value => { setOrgId(value); setPersonId(''); }} options={orgs} placeholder={isEN ? 'Select organization...' : 'اختر المؤسسة...'} />
-          </FormField>
-          <FormField label={isEN ? 'Role' : 'الدور'} required>
-            <FormSelect value={role} onValueChange={value => { setRole(value); if (value !== 'client') setPersonId(''); }} options={ROLES.map(r => ({ value: r, label: r.replace('_', ' ') }))} />
-          </FormField>
-          {isClientRole && (
-            <FormField
-              label={isEN ? 'Linked Individual Client' : 'العميل الفرد المرتبط'}
-              required
-              helperText={
-                isEN
-                  ? 'Select the person record for this login. If this person represents a company client, they will inherit access to that company in the portal.'
-                  : 'اختر سجل الشخص لهذا الحساب. إذا كان هذا الشخص ممثلاً لشركة عميلة، فسيحصل تلقائياً على صلاحية الوصول إلى تلك الشركة في البوابة.'
-              }
-            >
-              <FormSelect
-                value={personId}
-                onValueChange={setPersonId}
-                options={people}
-                placeholder={
-                  people.length > 0
-                    ? isEN ? 'Select individual client...' : 'اختر العميل الفرد...'
-                    : isEN ? 'No people found in this organization' : 'لا يوجد أفراد في هذه المؤسسة'
-                }
-              />
-            </FormField>
-          )}
-          <FormField label={isEN ? 'Temporary Password' : 'كلمة المرور المؤقتة'} required>
-            <FormInput type="password" value={password} onChange={e => setPassword(e.target.value)} />
-          </FormField>
-        </div>
+        )}
+
         <DialogFooter className="gap-2">
           <Button variant="outline" onClick={onClose}>{isEN ? 'Cancel' : 'إلغاء'}</Button>
           <Button onClick={handleSubmit} disabled={isSubmitDisabled} className="bg-accent text-accent-foreground hover:bg-accent/90">
             {saving && <Loader2 size={16} className="animate-spin me-2" />}
-            {isEN ? 'Create User' : 'إنشاء المستخدم'}
+            {isExistingClientMode
+              ? (isEN ? 'Create Login' : 'إنشاء الدخول')
+              : (isEN ? 'Create User' : 'إنشاء المستخدم')}
           </Button>
         </DialogFooter>
       </DialogContent>
