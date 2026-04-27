@@ -187,8 +187,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        // Use setTimeout to avoid deadlocks with Supabase
-        setTimeout(() => resolveIdentity(session.user.id), 0);
+        // Pass the access token explicitly so resolveIdentity can authenticate
+        // its profile/portal_users queries even if the supabase-js client
+        // hasn't yet committed the session to its internal getter.
+        const token = session.access_token;
+        setTimeout(() => resolveIdentity(session.user.id, token), 0);
       } else {
         setProfile(null);
         setOrganization(null);
@@ -203,7 +206,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
-        resolveIdentity(session.user.id);
+        resolveIdentity(session.user.id, session.access_token);
       } else {
         setIdentityResolved(true);
       }
