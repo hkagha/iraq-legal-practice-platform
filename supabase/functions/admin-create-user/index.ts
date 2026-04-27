@@ -145,26 +145,38 @@ serve(async (req) => {
 
     if (!targetUserId) return jsonResponse({ error: "Failed to obtain user id" }, 500);
 
-    const { error: profileError } = await adminClient.from("profiles").upsert(
-      {
-        id: targetUserId,
-        email,
-        organization_id,
-        role,
-        first_name: first_name || "",
-        last_name: last_name || "",
-        phone: phone || null,
-        is_active: true,
-        password_set_by_admin: true,
-        password_last_changed_at: new Date().toISOString(),
-        password_changed_by: callerProfile.id,
-      },
-      { onConflict: "id" },
-    );
+    if (role === "client") {
+      // Clients should NOT have a staff profile row. The handle_new_user trigger
+      // may have inserted one — remove it so AuthContext routes them to the portal.
+      const { error: deleteProfileError } = await adminClient
+        .from("profiles")
+        .delete()
+        .eq("id", targetUserId);
+      if (deleteProfileError) {
+        console.error("Failed to clean staff profile for client:", deleteProfileError);
+      }
+    } else {
+      const { error: profileError } = await adminClient.from("profiles").upsert(
+        {
+          id: targetUserId,
+          email,
+          organization_id,
+          role,
+          first_name: first_name || "",
+          last_name: last_name || "",
+          phone: phone || null,
+          is_active: true,
+          password_set_by_admin: true,
+          password_last_changed_at: new Date().toISOString(),
+          password_changed_by: callerProfile.id,
+        },
+        { onConflict: "id" },
+      );
 
-    if (profileError) {
-      console.error("Profile upsert failed:", profileError);
-      return jsonResponse({ error: `Profile setup failed: ${profileError.message}` }, 500);
+      if (profileError) {
+        console.error("Profile upsert failed:", profileError);
+        return jsonResponse({ error: `Profile setup failed: ${profileError.message}` }, 500);
+      }
     }
 
     if (role === "client") {
