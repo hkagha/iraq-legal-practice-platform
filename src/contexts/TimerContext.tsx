@@ -19,11 +19,16 @@ interface StartTimerOpts {
   is_billable?: boolean;
 }
 
+interface StartTimerResult {
+  ok: boolean;
+  error?: string;
+}
+
 interface TimerContextValue {
   isRunning: boolean;
   elapsedSeconds: number;
   activeTimer: ActiveTimer | null;
-  startTimer: (opts: StartTimerOpts) => Promise<void>;
+  startTimer: (opts: StartTimerOpts) => Promise<StartTimerResult>;
   stopTimer: () => Promise<void>;
   pauseTimer: () => Promise<void>;
   resumeTimer: () => Promise<void>;
@@ -34,7 +39,7 @@ const TimerContext = createContext<TimerContextValue>({
   isRunning: false,
   elapsedSeconds: 0,
   activeTimer: null,
-  startTimer: async () => {},
+  startTimer: async () => ({ ok: false }),
   stopTimer: async () => {},
   pauseTimer: async () => {},
   resumeTimer: async () => {},
@@ -87,11 +92,11 @@ export function TimerProvider({ children }: { children: ReactNode }) {
   const startTimer = useCallback(async (opts: StartTimerOpts) => {
     if (!profile?.id || !profile?.organization_id) {
       toast.error('Not signed in');
-      return;
+      return { ok: false, error: 'Not signed in' };
     }
     if (activeTimer) {
       toast.error('A timer is already running. Stop it first.');
-      return;
+      return { ok: false, error: 'A timer is already running. Stop it first.' };
     }
     const now = new Date();
     const { data, error } = await supabase
@@ -113,10 +118,11 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       .single();
     if (error) {
       toast.error(error.message);
-      return;
+      return { ok: false, error: error.message };
     }
     setActiveTimer(data as ActiveTimer);
     setElapsedSeconds(0);
+    return { ok: true };
   }, [profile?.id, profile?.organization_id, activeTimer]);
 
   const stopTimer = useCallback(async () => {

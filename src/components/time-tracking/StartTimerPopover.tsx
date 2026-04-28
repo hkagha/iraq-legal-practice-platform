@@ -44,13 +44,14 @@ export default function StartTimerPopover() {
       return;
     }
     setStarting(true);
-    await startTimer({
+    const result = await startTimer({
       description: description || t('Timer', 'مؤقت'),
       case_id: caseId || undefined,
       errand_id: errandId || undefined,
-    });
+    }).finally(() => setStarting(false));
+    if (!result.ok) return;
+
     toast.success(t('Timer started', 'بدأ المؤقت'));
-    setStarting(false);
     setOpen(false);
     setDescription('');
     setCaseId('');

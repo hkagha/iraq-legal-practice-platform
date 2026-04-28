@@ -111,6 +111,7 @@ export default function LogTimeModal(props: Props) {
       case_id: caseId || null,
       errand_id: errandId || null,
       is_billable: isBillable,
+      is_timer_running: false,
       billing_rate: isBillable && billingRate ? parseFloat(billingRate) : null,
       status: 'draft' as const,
     };
