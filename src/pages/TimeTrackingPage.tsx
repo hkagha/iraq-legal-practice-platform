@@ -21,6 +21,7 @@ import BulkActionBar from '@/components/time-tracking/BulkActionBar';
 import { Clock, DollarSign, Banknote, MoreHorizontal, Pencil, Copy, Send, CheckCircle, Trash2, List, CalendarDays } from 'lucide-react';
 import { toast } from 'sonner';
 import { format, isToday, isYesterday, startOfWeek, endOfWeek, startOfMonth, endOfMonth, addDays } from 'date-fns';
+import { resolveEntityName, resolvePersonName } from '@/lib/parties';
 
 export default function TimeTrackingPage() {
   const { language } = useLanguage();
@@ -62,7 +63,7 @@ export default function TimeTrackingPage() {
     const range = getDateRange();
     let query = supabase
       .from('time_entries')
-      .select('*, cases(case_number, title), errands(errand_number, title), clients(first_name, last_name, company_name, client_type)')
+      .select('*, cases(case_number, title), errands(errand_number, title), person:persons!time_entries_person_id_fkey(first_name, last_name, first_name_ar, last_name_ar), entity:entities!time_entries_entity_id_fkey(company_name, company_name_ar)')
       .eq('organization_id', profile.organization_id)
       .eq('is_timer_running', false)
       .gte('date', range.from)
@@ -165,6 +166,8 @@ export default function TimeTrackingPage() {
   const getLinkedEntity = (entry: any) => {
     if (entry.cases) return { label: entry.cases.case_number, name: entry.cases.title };
     if (entry.errands) return { label: entry.errands.errand_number, name: entry.errands.title };
+    if (entry.party_type === 'person' && entry.person) return { label: t('Client', 'الموكل'), name: resolvePersonName(entry.person, language as 'en' | 'ar') };
+    if (entry.party_type === 'entity' && entry.entity) return { label: t('Client', 'الموكل'), name: resolveEntityName(entry.entity, language as 'en' | 'ar') };
     return null;
   };
 

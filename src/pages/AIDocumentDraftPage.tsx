@@ -12,6 +12,7 @@ import { FormSearchSelect } from '@/components/ui/FormSearchSelect';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { Sparkles, Copy, Save, RefreshCw, Loader2, Pencil, AlertTriangle } from 'lucide-react';
+import { resolveEntityName, resolvePersonName } from '@/lib/parties';
 
 const DOCUMENT_TYPES = [
   'auto_detect', 'power_of_attorney', 'contract', 'memorandum',
@@ -64,16 +65,35 @@ export default function AIDocumentDraftPage() {
     let clientData: Record<string, any> | undefined;
 
     if (linkedCaseId) {
-      const { data: c } = await supabase.from('cases').select('*, clients(first_name, last_name, first_name_ar, last_name_ar, company_name, company_name_ar, client_type, national_id_number)').eq('id', linkedCaseId).maybeSingle();
+      const { data: c } = await supabase
+        .from('cases')
+        .select(`
+          *,
+          case_parties(
+            role,
+            is_primary,
+            party_type,
+            person:persons!case_parties_person_id_fkey(first_name, last_name, first_name_ar, last_name_ar, national_id_number),
+            entity:entities(company_name, company_name_ar, company_registration_number)
+          )
+        `)
+        .eq('id', linkedCaseId)
+        .maybeSingle();
       if (c) {
         caseData = c;
-        const cl = (c as any).clients;
-        if (cl) {
+        const parties = ((c as any).case_parties || []) as any[];
+        const clientParty = parties.find(p => p.role === 'client' && p.is_primary) || parties.find(p => p.role === 'client') || parties.find(p => p.is_primary);
+        if (clientParty?.party_type === 'person' && clientParty.person) {
           clientData = {
-            name: cl.client_type === 'company'
-              ? (language === 'ar' ? cl.company_name_ar || cl.company_name : cl.company_name)
-              : (language === 'ar' ? `${cl.first_name_ar || ''} ${cl.last_name_ar || ''}` : `${cl.first_name || ''} ${cl.last_name || ''}`).trim(),
-            national_id: cl.national_id_number,
+            name: resolvePersonName(clientParty.person, language as 'en' | 'ar'),
+            national_id: clientParty.person.national_id_number,
+            party_type: 'person',
+          };
+        } else if (clientParty?.party_type === 'entity' && clientParty.entity) {
+          clientData = {
+            name: resolveEntityName(clientParty.entity, language as 'en' | 'ar'),
+            registration_number: clientParty.entity.company_registration_number,
+            party_type: 'entity',
           };
         }
       }
