@@ -37,7 +37,7 @@ export default function TimeUtilizationReport() {
     const endStr = format(range.end, 'yyyy-MM-dd');
 
     const [timeRes, profilesRes, casesRes] = await Promise.all([
-      supabase.from('time_entries').select('id, duration_minutes, is_billable, date, user_id, case_id, errand_id, billing_rate').eq('organization_id', orgId).gte('date', startStr).lte('date', endStr),
+      supabase.from('time_entries').select('id, duration_minutes, is_billable, date, user_id, case_id, errand_id, billing_rate').eq('organization_id', orgId).or('is_timer_running.eq.false,is_timer_running.is.null').gte('date', startStr).lte('date', endStr),
       supabase.from('profiles').select('id, first_name, last_name, role').eq('organization_id', orgId),
       supabase.from('cases').select('id, case_number, case_type').eq('organization_id', orgId),
     ]);
