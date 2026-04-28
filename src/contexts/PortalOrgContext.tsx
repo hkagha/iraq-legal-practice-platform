@@ -95,15 +95,15 @@ export function PortalOrgProvider({ children }: { children: ReactNode }) {
     setLinkedOrgs(orgs);
 
     // Decide which org to activate:
-    // 1. portal_users.last_selected_org_id if it's still in the list
-    // 2. session-stored choice (qanuni_portal_active_org)
-    // 3. the only org if user has just one
-    // 4. null → portal will force the picker screen
+    // 1. session-stored choice (qanuni_portal_active_org) for the current tab
+    // 2. the only org if user has just one
+    // 3. null → multi-firm portal users must choose on /portal/select
+    //
+    // We intentionally do not auto-select portal_users.last_selected_org_id here:
+    // multi-firm clients should see the picker at the start of a fresh session.
     const sessionPick = sessionStorage.getItem('qanuni_portal_active_org');
     let chosen: string | null = null;
-    if (portalUser.last_selected_org_id && orgs.some(o => o.id === portalUser.last_selected_org_id)) {
-      chosen = portalUser.last_selected_org_id;
-    } else if (sessionPick && orgs.some(o => o.id === sessionPick)) {
+    if (sessionPick && orgs.some(o => o.id === sessionPick)) {
       chosen = sessionPick;
     } else if (orgs.length === 1) {
       chosen = orgs[0].id;
