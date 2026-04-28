@@ -67,7 +67,7 @@ interface ScheduleRow {
 }
 
 const ALL_TABLES = [
-  'organizations', 'profiles', 'clients', 'client_contacts', 'client_user_links',
+  'organizations', 'profiles', 'persons', 'entities', 'entity_representatives', 'case_parties', 'portal_users', 'portal_user_links',
   'cases', 'case_hearings', 'case_notes', 'case_team_members', 'case_activities',
   'errands', 'errand_steps', 'errand_notes', 'errand_documents', 'errand_activities',
   'documents', 'document_templates', 'document_activities',

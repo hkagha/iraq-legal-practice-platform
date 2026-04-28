@@ -13,7 +13,7 @@ import { useEffect } from 'react';
 
 const TABLE_GROUPS = {
   core: ['organizations', 'profiles'],
-  crm: ['clients', 'client_contacts', 'client_user_links'],
+  crm: ['persons', 'entities', 'entity_representatives', 'case_parties', 'portal_users', 'portal_user_links'],
   cases: ['cases', 'case_hearings', 'case_notes', 'case_team_members', 'case_activities'],
   errands: ['errands', 'errand_steps', 'errand_notes', 'errand_documents', 'errand_activities'],
   documents: ['documents', 'document_templates', 'document_activities'],
@@ -28,9 +28,12 @@ const ALL_TABLES = Object.values(TABLE_GROUPS).flat();
 const TABLE_LABELS: Record<string, { en: string; ar: string }> = {
   organizations: { en: 'Organizations', ar: 'المؤسسات' },
   profiles: { en: 'Users', ar: 'المستخدمون' },
-  clients: { en: 'Clients', ar: 'العملاء' },
-  client_contacts: { en: 'Client Contacts', ar: 'جهات اتصال العملاء' },
-  client_user_links: { en: 'Client Links', ar: 'روابط العملاء' },
+  persons: { en: 'Persons', ar: 'الأشخاص' },
+  entities: { en: 'Companies', ar: 'الشركات' },
+  entity_representatives: { en: 'Company Representatives', ar: 'ممثلو الشركات' },
+  case_parties: { en: 'Case Parties', ar: 'أطراف القضايا' },
+  portal_users: { en: 'Portal Users', ar: 'مستخدمو البوابة' },
+  portal_user_links: { en: 'Portal Links', ar: 'روابط البوابة' },
   cases: { en: 'Cases', ar: 'القضايا' },
   case_hearings: { en: 'Case Hearings', ar: 'جلسات القضايا' },
   case_notes: { en: 'Case Notes', ar: 'ملاحظات القضايا' },
