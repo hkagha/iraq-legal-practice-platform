@@ -87,15 +87,17 @@ export function ImpersonationProvider({ children }: { children: ReactNode }) {
 
   const endImpersonation = useCallback(async () => {
     const snapshot = state;
-    // Always clear local state first so the banner disappears even if the DB call fails.
-    persist(EMPTY);
+    let shouldClear = !snapshot.isImpersonating;
 
-    if (snapshot.isImpersonating && snapshot.originalAdminId && snapshot.originalOrgId) {
+    if (snapshot.isImpersonating && snapshot.originalAdminId) {
       try {
-        await supabase
+        const { error } = await supabase
           .from('profiles')
           .update({ organization_id: snapshot.originalOrgId } as any)
           .eq('id', snapshot.originalAdminId);
+
+        if (error) throw error;
+
         await logAdminAction(
           snapshot.originalAdminId,
           'impersonate_end',
@@ -103,11 +105,14 @@ export function ImpersonationProvider({ children }: { children: ReactNode }) {
           snapshot.impersonatedOrgId,
           snapshot.impersonatedOrgName || '',
         );
+        shouldClear = true;
       } catch (e) {
         console.error('[Impersonation] Failed to restore original org_id:', e);
       }
       await refreshIdentity();
     }
+
+    if (shouldClear) persist(EMPTY);
   }, [state, refreshIdentity]);
 
   return (
