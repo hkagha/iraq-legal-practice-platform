@@ -63,9 +63,9 @@ export default function TimeTrackingPage() {
     const range = getDateRange();
     let query = supabase
       .from('time_entries')
-      .select('*, cases(case_number, title), errands(errand_number, title), person:persons!time_entries_person_id_fkey(first_name, last_name, first_name_ar, last_name_ar), entity:entities!time_entries_entity_id_fkey(company_name, company_name_ar)')
+      .select('*')
       .eq('organization_id', profile.organization_id)
-      .eq('is_timer_running', false)
+      .or('is_timer_running.eq.false,is_timer_running.is.null')
       .gte('date', range.from)
       .lte('date', range.to)
       .order('date', { ascending: false })
@@ -76,8 +76,40 @@ export default function TimeTrackingPage() {
     if (statusFilter !== 'all') query = query.eq('status', statusFilter);
     if (search) query = query.or(`description.ilike.%${search}%,description_ar.ilike.%${search}%`);
 
-    const { data } = await query.limit(200);
-    const entries = data || [];
+    const { data, error } = await query.limit(200);
+    if (error) {
+      toast.error(error.message);
+      setEntries([]);
+      setStats({ totalMinutes: 0, billableMinutes: 0, nonBillableMinutes: 0, totalAmount: 0 });
+      setLoading(false);
+      return;
+    }
+
+    const rows = data || [];
+    const caseIds = [...new Set(rows.map(e => e.case_id).filter(Boolean))];
+    const errandIds = [...new Set(rows.map(e => e.errand_id).filter(Boolean))];
+    const personIds = [...new Set(rows.map(e => e.person_id).filter(Boolean))];
+    const entityIds = [...new Set(rows.map(e => e.entity_id).filter(Boolean))];
+
+    const [caseResult, errandResult, personResult, entityResult] = await Promise.all([
+      caseIds.length ? supabase.from('cases').select('id, case_number, title').in('id', caseIds) : Promise.resolve({ data: [] }),
+      errandIds.length ? supabase.from('errands').select('id, errand_number, title').in('id', errandIds) : Promise.resolve({ data: [] }),
+      personIds.length ? supabase.from('persons').select('id, first_name, last_name, first_name_ar, last_name_ar').in('id', personIds) : Promise.resolve({ data: [] }),
+      entityIds.length ? supabase.from('entities').select('id, company_name, company_name_ar').in('id', entityIds) : Promise.resolve({ data: [] }),
+    ]);
+
+    const caseMap = new Map((caseResult.data || []).map((item: any) => [item.id, item]));
+    const errandMap = new Map((errandResult.data || []).map((item: any) => [item.id, item]));
+    const personMap = new Map((personResult.data || []).map((item: any) => [item.id, item]));
+    const entityMap = new Map((entityResult.data || []).map((item: any) => [item.id, item]));
+    const entries = rows.map(entry => ({
+      ...entry,
+      cases: entry.case_id ? caseMap.get(entry.case_id) || null : null,
+      errands: entry.errand_id ? errandMap.get(entry.errand_id) || null : null,
+      person: entry.person_id ? personMap.get(entry.person_id) || null : null,
+      entity: entry.entity_id ? entityMap.get(entry.entity_id) || null : null,
+    }));
+
     setEntries(entries);
     setSelectedIds(new Set());
 
