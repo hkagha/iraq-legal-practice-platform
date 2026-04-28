@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -7,38 +7,42 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { User, KeyRound, Save, Loader2 } from 'lucide-react';
+import { KeyRound, Save, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 
 export default function PortalProfilePage() {
-  const { profile, getFullName, getInitials, refreshProfile } = useAuth() as any;
+  const { portalUser, getFullName, getInitials, refreshIdentity } = useAuth();
   const { language } = useLanguage();
   const isEN = language === 'en';
 
-  const [firstName, setFirstName] = useState(profile?.first_name || '');
-  const [lastName, setLastName] = useState(profile?.last_name || '');
-  const [firstNameAr, setFirstNameAr] = useState(profile?.first_name_ar || '');
-  const [lastNameAr, setLastNameAr] = useState(profile?.last_name_ar || '');
-  const [phone, setPhone] = useState(profile?.phone || '');
+  const [fullName, setFullName] = useState(portalUser?.full_name || '');
+  const [fullNameAr, setFullNameAr] = useState(portalUser?.full_name_ar || '');
+  const [phone, setPhone] = useState(portalUser?.phone || '');
   const [savingProfile, setSavingProfile] = useState(false);
 
-  const [currentPwd, setCurrentPwd] = useState('');
   const [newPwd, setNewPwd] = useState('');
   const [confirmPwd, setConfirmPwd] = useState('');
   const [savingPwd, setSavingPwd] = useState(false);
 
+  useEffect(() => {
+    setFullName(portalUser?.full_name || '');
+    setFullNameAr(portalUser?.full_name_ar || '');
+    setPhone(portalUser?.phone || '');
+  }, [portalUser?.full_name, portalUser?.full_name_ar, portalUser?.phone]);
+
   async function saveProfile() {
-    if (!profile?.id) return;
+    if (!portalUser?.id) return;
     setSavingProfile(true);
-    const { error } = await supabase.from('profiles').update({
-      first_name: firstName, last_name: lastName,
-      first_name_ar: firstNameAr || null, last_name_ar: lastNameAr || null,
+    const { error } = await supabase.from('portal_users').update({
+      full_name: fullName.trim() || null,
+      full_name_ar: fullNameAr.trim() || null,
       phone: phone || null,
-    }).eq('id', profile.id);
+      preferred_language: language,
+    }).eq('id', portalUser.id);
     setSavingProfile(false);
     if (error) { toast.error(error.message); return; }
     toast.success(isEN ? 'Profile updated' : 'تم تحديث الملف الشخصي');
-    refreshProfile?.();
+    await refreshIdentity();
   }
 
   async function changePassword() {
@@ -49,13 +53,7 @@ export default function PortalProfilePage() {
     setSavingPwd(false);
     if (error) { toast.error(error.message); return; }
     toast.success(isEN ? 'Password updated' : 'تم تحديث كلمة المرور');
-    setCurrentPwd(''); setNewPwd(''); setConfirmPwd('');
-    // Clear admin-set flag
-    if ((profile as any)?.password_set_by_admin) {
-      await supabase.from('profiles').update({ password_set_by_admin: false } as any).eq('id', profile.id);
-      sessionStorage.setItem('qanuni_password_reminder_dismissed', 'true');
-      refreshProfile?.();
-    }
+    setNewPwd(''); setConfirmPwd('');
   }
 
   return (
@@ -74,26 +72,18 @@ export default function PortalProfilePage() {
           </Avatar>
           <div>
             <div className="text-heading-md font-semibold text-primary">{getFullName()}</div>
-            <div className="text-body-sm text-muted-foreground">{profile?.email}</div>
+            <div className="text-body-sm text-muted-foreground">{portalUser?.email}</div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div>
-            <Label>{isEN ? 'First name' : 'الاسم الأول'}</Label>
-            <Input value={firstName} onChange={(e) => setFirstName(e.target.value)} />
+          <div className="md:col-span-2">
+            <Label>{isEN ? 'Full name' : 'الاسم الكامل'}</Label>
+            <Input value={fullName} onChange={(e) => setFullName(e.target.value)} />
           </div>
-          <div>
-            <Label>{isEN ? 'Last name' : 'الاسم الأخير'}</Label>
-            <Input value={lastName} onChange={(e) => setLastName(e.target.value)} />
-          </div>
-          <div>
-            <Label>{isEN ? 'First name (Arabic)' : 'الاسم الأول (عربي)'}</Label>
-            <Input value={firstNameAr} onChange={(e) => setFirstNameAr(e.target.value)} dir="rtl" />
-          </div>
-          <div>
-            <Label>{isEN ? 'Last name (Arabic)' : 'الاسم الأخير (عربي)'}</Label>
-            <Input value={lastNameAr} onChange={(e) => setLastNameAr(e.target.value)} dir="rtl" />
+          <div className="md:col-span-2">
+            <Label>{isEN ? 'Full name (Arabic)' : 'الاسم الكامل (عربي)'}</Label>
+            <Input value={fullNameAr} onChange={(e) => setFullNameAr(e.target.value)} dir="rtl" />
           </div>
           <div className="md:col-span-2">
             <Label>{isEN ? 'Phone' : 'الهاتف'}</Label>
