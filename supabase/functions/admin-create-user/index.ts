@@ -146,14 +146,25 @@ serve(async (req) => {
     if (!targetUserId) return jsonResponse({ error: "Failed to obtain user id" }, 500);
 
     if (role === "client") {
-      // Clients should NOT have a staff profile row. The handle_new_user trigger
-      // may have inserted one — remove it so AuthContext routes them to the portal.
-      const { error: deleteProfileError } = await adminClient
-        .from("profiles")
-        .delete()
-        .eq("id", targetUserId);
-      if (deleteProfileError) {
-        console.error("Failed to clean staff profile for client:", deleteProfileError);
+      // Keep a lightweight role=client profile so shared tables with profile FKs
+      // (for example documents.uploaded_by) can still reference portal users.
+      // AuthContext ignores role=client profiles and resolves portal_users next.
+      const { error: clientProfileError } = await adminClient.from("profiles").upsert(
+        {
+          id: targetUserId,
+          email,
+          organization_id,
+          role: "client",
+          first_name: first_name || "",
+          last_name: last_name || "",
+          phone: phone || null,
+          is_active: true,
+        },
+        { onConflict: "id" },
+      );
+      if (clientProfileError) {
+        console.error("Client profile upsert failed:", clientProfileError);
+        return jsonResponse({ error: `Client profile setup failed: ${clientProfileError.message}` }, 500);
       }
     } else {
       const { error: profileError } = await adminClient.from("profiles").upsert(
