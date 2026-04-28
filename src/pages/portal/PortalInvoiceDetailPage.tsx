@@ -40,7 +40,7 @@ export default function PortalInvoiceDetailPage() {
       if (!inv) return null;
       const [{ data: lineItems }, { data: payments }] = await Promise.all([
         supabase.from('invoice_line_items').select('*').eq('invoice_id', inv.id).order('sort_order'),
-        supabase.from('payments').select('id, amount, payment_date, payment_method, reference_number').eq('invoice_id', inv.id).order('payment_date'),
+        supabase.from('payments').select('id, amount, payment_date, payment_method, reference').eq('invoice_id', inv.id).order('payment_date'),
       ]);
       return { ...inv, line_items: lineItems ?? [], payments: payments ?? [] };
     },
@@ -231,7 +231,7 @@ export default function PortalInvoiceDetailPage() {
             <div className="space-y-1 text-body-sm">
               {payments.map((p: any) => (
                 <div key={p.id} className="flex justify-between border-b py-2">
-                  <span>{p.payment_date} · {p.payment_method}{p.reference_number ? ` · ${p.reference_number}` : ''}</span>
+                  <span>{p.payment_date} · {p.payment_method}{p.reference ? ` · ${p.reference}` : ''}</span>
                   <span className="font-medium">{formatMoney(Number(p.amount), invoice.currency, language)}</span>
                 </div>
               ))}
