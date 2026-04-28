@@ -108,7 +108,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
         case_id: opts.case_id || null,
         errand_id: opts.errand_id || null,
         date: now.toISOString().split('T')[0],
-        duration_minutes: 0,
+        duration_minutes: 1,
         is_billable: opts.is_billable ?? true,
         is_timer_running: true,
         timer_started_at: now.toISOString(),
@@ -151,7 +151,7 @@ export function TimerProvider({ children }: { children: ReactNode }) {
   const pauseTimer = useCallback(async () => {
     if (!activeTimer) return;
     const startMs = new Date(activeTimer.timer_started_at).getTime();
-    const minutes = Math.max(0, Math.round((Date.now() - startMs) / 60000));
+    const minutes = Math.max(1, Math.round((Date.now() - startMs) / 60000));
     const { error } = await supabase
       .from('time_entries')
       .update({
