@@ -16,6 +16,7 @@ interface SearchHit {
   type: 'case' | 'errand' | 'client' | 'invoice';
   title: string;
   subtitle?: string;
+  partyType?: 'person' | 'entity';
 }
 
 /**
@@ -102,11 +103,13 @@ export default function CommandPalette() {
             ? `${p.first_name || ''} ${p.last_name || ''}`.trim()
             : `${p.first_name_ar || p.first_name || ''} ${p.last_name_ar || p.last_name || ''}`.trim(),
           subtitle: isEN ? 'Person' : 'شخص',
+          partyType: 'person' as const,
         }))),
         ...((entities.data || []).map((en: any) => ({
           id: en.id, type: 'client' as const,
           title: isEN ? en.company_name : (en.company_name_ar || en.company_name),
           subtitle: isEN ? 'Company' : 'شركة',
+          partyType: 'entity' as const,
         }))),
         ...((invoices.data || []).map((iv: any) => ({
           id: iv.id, type: 'invoice' as const,
@@ -165,7 +168,8 @@ export default function CommandPalette() {
                   value={`${h.type}-${h.id}-${h.title}`}
                   onSelect={() => {
                     const map = { case: '/cases/', errand: '/errands/', client: '/clients/', invoice: '/billing/' };
-                    go(`${map[h.type]}${h.id}`);
+                    const query = h.type === 'client' && h.partyType ? `?type=${h.partyType}` : '';
+                    go(`${map[h.type]}${h.id}${query}`);
                   }}
                 >
                   <Search className="me-2 h-4 w-4 text-muted-foreground" />
