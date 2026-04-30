@@ -117,7 +117,9 @@ export default function InvoiceFormPage() {
         .select('case_id, cases!inner(id, case_number, title, title_ar, status)')
         .eq(party.partyType === 'person' ? 'person_id' : 'entity_id', (party.partyType === 'person' ? party.personId : party.entityId)!);
       const seen = new Set<string>();
-      return (ps ?? []).map((r: any) => r.cases).filter((c: any) => c && !seen.has(c.id) && seen.add(c.id));
+      return (ps ?? [])
+        .map((r: any) => r.cases)
+        .filter((c: any) => c && c.status !== 'pending_conflict_review' && !seen.has(c.id) && seen.add(c.id));
     },
     enabled: !!party,
   });
