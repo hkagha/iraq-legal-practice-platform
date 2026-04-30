@@ -89,6 +89,16 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     return () => clearInterval(interval);
   }, [activeTimer?.timer_started_at]);
 
+  useEffect(() => {
+    if (!activeTimer) return;
+    const warnBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warnBeforeUnload);
+    return () => window.removeEventListener('beforeunload', warnBeforeUnload);
+  }, [activeTimer]);
+
   const startTimer = useCallback(async (opts: StartTimerOpts) => {
     if (!profile?.id || !profile?.organization_id) {
       toast.error('Not signed in');
@@ -97,6 +107,10 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     if (activeTimer) {
       toast.error('A timer is already running. Stop it first.');
       return { ok: false, error: 'A timer is already running. Stop it first.' };
+    }
+    if (!opts.case_id && !opts.errand_id) {
+      toast.error('Select a case or errand before starting the timer.');
+      return { ok: false, error: 'Select a case or errand before starting the timer.' };
     }
     const now = new Date();
     const { data, error } = await supabase

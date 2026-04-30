@@ -100,6 +100,10 @@ export default function LogTimeModal(props: Props) {
       toast.error(t('Description is required', 'الوصف مطلوب'));
       return;
     }
+    if (!caseId && !errandId) {
+      toast.error(t('Select a case or errand for this time entry', 'اختر قضية أو معاملة لسجل الوقت'));
+      return;
+    }
 
     setSaving(true);
     const payload = {
@@ -158,11 +162,27 @@ export default function LogTimeModal(props: Props) {
           </div>
           <div>
             <Label className="text-body-sm">{t('Case', 'القضية')}</Label>
-            <FormSearchSelect value={caseId} onChange={setCaseId} options={cases.map((c) => ({ value: c.id, label: `${c.case_number} — ${c.title}` }))} placeholder={t('None', 'بدون')} />
+            <FormSearchSelect
+              value={caseId}
+              onChange={(value) => {
+                setCaseId(value);
+                if (value) setErrandId('');
+              }}
+              options={cases.map((c) => ({ value: c.id, label: `${c.case_number} — ${c.title}` }))}
+              placeholder={t('Select a case', 'اختر قضية')}
+            />
           </div>
           <div>
             <Label className="text-body-sm">{t('Errand', 'المعاملة')}</Label>
-            <FormSearchSelect value={errandId} onChange={setErrandId} options={errands.map((e) => ({ value: e.id, label: `${e.errand_number} — ${e.title}` }))} placeholder={t('None', 'بدون')} />
+            <FormSearchSelect
+              value={errandId}
+              onChange={(value) => {
+                setErrandId(value);
+                if (value) setCaseId('');
+              }}
+              options={errands.map((e) => ({ value: e.id, label: `${e.errand_number} — ${e.title}` }))}
+              placeholder={t('Select an errand', 'اختر معاملة')}
+            />
           </div>
           <div className="flex items-center justify-between rounded-md border p-3">
             <Label className="text-body-sm">{t('Billable', 'قابل للفوترة')}</Label>

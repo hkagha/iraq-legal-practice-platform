@@ -43,6 +43,10 @@ export default function StartTimerPopover() {
       toast.error(t('You already have a timer running. Stop it first.', 'لديك مؤقت يعمل بالفعل. أوقفه أولاً.'));
       return;
     }
+    if (!caseId && !errandId) {
+      toast.error(t('Select a case or errand before starting the timer.', 'اختر قضية أو معاملة قبل بدء المؤقت.'));
+      return;
+    }
     setStarting(true);
     const result = await startTimer({
       description: description || t('Timer', 'مؤقت'),
@@ -81,18 +85,24 @@ export default function StartTimerPopover() {
             <Label className="text-body-sm">{t('Case', 'القضية')}</Label>
             <FormSearchSelect
               value={caseId}
-              onChange={setCaseId}
+              onChange={(value) => {
+                setCaseId(value);
+                if (value) setErrandId('');
+              }}
               options={cases.map(c => ({ value: c.id, label: `${c.case_number} — ${c.title}` }))}
-              placeholder={t('None', 'بدون')}
+              placeholder={t('Select a case', 'اختر قضية')}
             />
           </div>
           <div>
             <Label className="text-body-sm">{t('Errand', 'المعاملة')}</Label>
             <FormSearchSelect
               value={errandId}
-              onChange={setErrandId}
+              onChange={(value) => {
+                setErrandId(value);
+                if (value) setCaseId('');
+              }}
               options={errands.map(e => ({ value: e.id, label: `${e.errand_number} — ${e.title}` }))}
-              placeholder={t('None', 'بدون')}
+              placeholder={t('Select an errand', 'اختر معاملة')}
             />
           </div>
           <Button onClick={handleStart} disabled={starting} className="w-full bg-accent text-accent-foreground hover:bg-accent/90">
