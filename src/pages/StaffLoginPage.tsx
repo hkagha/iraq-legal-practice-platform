@@ -61,9 +61,13 @@ const StaffLoginPage = forwardRef<HTMLDivElement>((_props, _ref) => {
     if (result.error) {
       setLoading(false);
       setError(
-        language === 'en'
-          ? 'Invalid email or password. If your password was recently reset by an administrator, use "Forgot password?" below to set a new one.'
-          : 'البريد الإلكتروني أو كلمة المرور غير صحيحة. إذا قام المسؤول بإعادة تعيين كلمة المرور مؤخراً، استخدم "نسيت كلمة المرور؟" أدناه لتعيين كلمة جديدة.'
+        result.code === 'email_not_confirmed'
+          ? language === 'en'
+            ? 'Please confirm your email address before signing in. Check your inbox for the Qanuni verification link.'
+            : 'يرجى تأكيد بريدك الإلكتروني قبل تسجيل الدخول. تحقق من صندوق الوارد لرابط التحقق من قانوني.'
+          : language === 'en'
+            ? 'Invalid email or password. If your password was recently reset by an administrator, use "Forgot password?" below to set a new one.'
+            : 'البريد الإلكتروني أو كلمة المرور غير صحيحة. إذا قام المسؤول بإعادة تعيين كلمة المرور مؤخراً، استخدم "نسيت كلمة المرور؟" أدناه لتعيين كلمة جديدة.'
       );
     }
     // If sign-in succeeded, the useEffect above will validate the role and either
