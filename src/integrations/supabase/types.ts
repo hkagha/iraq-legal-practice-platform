@@ -4193,6 +4193,10 @@ export type Database = {
         }
         Returns: string
       }
+      entity_has_active_representative: {
+        Args: { _entity_id: string }
+        Returns: boolean
+      }
       get_org_ai_key: { Args: { _org_id: string }; Returns: string }
       get_organization_safe: {
         Args: { org_id: string }
