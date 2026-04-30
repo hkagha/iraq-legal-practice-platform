@@ -177,6 +177,99 @@ const TABS: TabContent[] = [
       { en: 'AI-analysed dashboard insights tailored to your firm.', ar: 'رؤى لوحة التحكم المُحلَّلة بالذكاء الاصطناعي ومخصصة لمكتبك.' },
     ],
   },
+  {
+    key: 'manual',
+    icon: BookOpen,
+    title: { en: 'User Manual', ar: 'دليل الاستخدام' },
+    lede: {
+      en: 'A practical, role-by-role guide to working in Qanuni — how to log in, manage matters, collaborate, bill clients, and use the AI assistant safely.',
+      ar: 'دليل عملي لكل دور في قانوني — كيفية تسجيل الدخول، وإدارة القضايا والمعاملات، والتعاون، وفوترة العملاء، واستخدام المساعد الذكي بأمان.',
+    },
+    sections: [
+      {
+        heading: { en: '1. Signing in', ar: '١. تسجيل الدخول' },
+        items: [
+          { en: 'Staff sign in at "Law Firm Staff" using the credentials issued by your firm administrator. Forgotten passwords are reset by the firm admin or via "Forgot password".', ar: 'يدخل الموظفون من بوابة "موظفو المكتب" باستخدام بيانات الاعتماد الصادرة من مدير المكتب. تُعاد كلمة السر بطلب من المدير أو عبر "نسيت كلمة السر".' },
+          { en: 'Clients sign in at "Client Portal". After login, choose your access capacity: as yourself, or as a representative of a specific company.', ar: 'يدخل العملاء من "بوابة العملاء". بعد الدخول، اختر صفة الوصول: شخصياً، أو ممثلاً عن جهة محددة.' },
+          { en: 'Platform administrators sign in via the discreet link at the bottom of the page; the area is fully isolated from tenant data.', ar: 'يدخل مدراء المنصة عبر الرابط المخصص في أسفل الصفحة؛ هذه البيئة معزولة كلياً عن بيانات المكاتب.' },
+        ],
+      },
+      {
+        heading: { en: '2. Managing cases & errands', ar: '٢. إدارة القضايا والمعاملات' },
+        items: [
+          { en: 'Create a case from "Cases → New". Fill the bilingual title, court, parties, lead attorney, and team. The case is auto-numbered (CASE-YYYY-NNNN).', ar: 'أنشئ قضية من "القضايا ← جديدة". املأ العنوان الثنائي، المحكمة، الأطراف، المحامي المسؤول، والفريق. تُرقّم القضية تلقائياً (CASE-YYYY-NNNN).' },
+          { en: 'Add hearings from the case detail page. When you complete a hearing, Qanuni prompts you for the outcome and can auto-generate the next hearing.', ar: 'أضف الجلسات من صفحة تفاصيل القضية. عند إكمال الجلسة يطلب قانوني نتيجتها ويمكنه إنشاء الجلسة التالية تلقائياً.' },
+          { en: 'For non-litigation work (registrations, licences, passports), use "Errands". Pick a system template or build steps manually; mark sub-steps as completed to track bottlenecks.', ar: 'لغير المنازعات (تسجيلات، إجازات، جوازات) استخدم "المعاملات". اختر قالباً جاهزاً أو ابنِ الخطوات يدوياً، وأكمل الخطوات الفرعية لتحديد الاختناقات.' },
+          { en: 'Statuses are confirmed via dialogs (Closed, Won, Lost, etc.). Closing a matter requires an outcome summary.', ar: 'تُؤكَّد الحالات عبر نوافذ تأكيد (مُغلقة، مكسوبة، مخسورة...). إغلاق الملف يتطلب ملخص نتيجة.' },
+        ],
+      },
+      {
+        heading: { en: '3. Clients, parties & conflicts', ar: '٣. العملاء والأطراف وتعارض المصالح' },
+        items: [
+          { en: 'Create clients as Individual or Company. Companies can have one or more contact persons / representatives.', ar: 'أنشئ العملاء كأفراد أو شركات. يمكن للشركة أن تضم شخصاً أو أكثر من جهات الاتصال أو الممثلين.' },
+          { en: 'Run the Conflict Checker before opening a matter; it scans existing parties and flags potential conflicts.', ar: 'شغّل "فاحص التعارض" قبل فتح أي ملف؛ يفحص الأطراف القائمة وينبّه على التعارض المحتمل.' },
+          { en: 'Phone numbers default to +964; addresses use the 18 Iraqi governorates list.', ar: 'تستخدم الأرقام مفتاح +964 افتراضياً، وتستخدم العناوين قائمة المحافظات العراقية الثماني عشرة.' },
+        ],
+      },
+      {
+        heading: { en: '4. Documents & templates', ar: '٤. المستندات والقوالب' },
+        items: [
+          { en: 'Upload from any matter, client, or the Documents page. Use AI auto-categorisation to suggest a category on upload.', ar: 'الرفع متاح من أي قضية أو عميل أو صفحة المستندات. استخدم التصنيف الذكي لاقتراح التصنيف عند الرفع.' },
+          { en: 'New uploads with the same name create a new version automatically; only the latest is shown by default, older versions remain accessible.', ar: 'إعادة الرفع بنفس الاسم تنشئ إصداراً جديداً تلقائياً؛ يُعرض الأحدث افتراضياً وتبقى الإصدارات السابقة متاحة.' },
+          { en: 'Documents are never permanently deleted — "delete" archives them. Recover archived items from "Documents → Archived".', ar: 'لا تُحذف المستندات نهائياً — يقوم الحذف بأرشفتها. يمكن استرجاعها من "المستندات ← المؤرشفة".' },
+          { en: 'Use HTML templates with {{placeholders}} to generate documents in one click. Mark items as "visible to client" to publish them to the portal.', ar: 'استخدم القوالب بصيغة HTML مع متغيرات {{}} لتوليد المستندات بنقرة. علّم العنصر "مرئي للعميل" لنشره في البوابة.' },
+        ],
+      },
+      {
+        heading: { en: '5. Tasks, calendar & time tracking', ar: '٥. المهام والتقويم وتتبع الوقت' },
+        items: [
+          { en: 'Tasks live on a Kanban board (To Do, In Progress, In Review, Completed) and can be linked to a case, errand, or client.', ar: 'تظهر المهام على لوحة كانبان (للقيام، قيد التنفيذ، قيد المراجعة، مكتملة) ويمكن ربطها بقضية أو معاملة أو عميل.' },
+          { en: 'The unified calendar aggregates hearings, errand deadlines, tasks, internal events, and invoice due dates.', ar: 'يجمع التقويم الموحد الجلسات ومواعيد المعاملات والمهام والفعاليات الداخلية ومواعيد الفواتير.' },
+          { en: 'Start the global timer from any matter — it persists across pages and reloads. You can also log time on the weekly grid.', ar: 'شغّل المؤقت العام من أي ملف — يستمر عبر الصفحات وإعادة التحميل. يمكنك أيضاً تسجيل الوقت من الشبكة الأسبوعية.' },
+        ],
+      },
+      {
+        heading: { en: '6. Billing & trust accounting', ar: '٦. الفوترة وحسابات الأمانة' },
+        items: [
+          { en: 'Choose the engagement model on the case (hourly, fixed fee, retainer, contingency, pro bono). Rates use a hierarchy: User-on-case → Case → User → Organisation default.', ar: 'اختر نموذج الارتباط على مستوى القضية (بالساعة، رسم ثابت، أتعاب مقدمة، نسبة من النتيجة، تطوعي). تتبع الأسعار التسلسل: المستخدم على القضية ← القضية ← المستخدم ← الافتراضي للمؤسسة.' },
+          { en: 'Generate invoices from un-invoiced time or expenses; previews are bilingual and show "PAID" watermark when settled.', ar: 'أصدر الفواتير من الوقت أو المصاريف غير المُفوترة؛ المعاينات ثنائية اللغة وتظهر علامة "مدفوعة" عند السداد.' },
+          { en: 'Overdue invoices transition automatically; receivables aged 90+ days enter a write-off workflow.', ar: 'تتحول الفواتير المتأخرة تلقائياً؛ تدخل الذمم التي تجاوزت 90 يوماً مسار الشطب.' },
+          { en: 'Trust accounting separates client funds from operating funds and tracks every movement.', ar: 'تفصل حسابات الأمانة أموال العملاء عن أموال التشغيل وتُسجَّل كل حركة فيها.' },
+        ],
+      },
+      {
+        heading: { en: '7. Client portal — what your clients see', ar: '٧. بوابة العميل — ما يراه عملاؤك' },
+        items: [
+          { en: 'Clients only see items explicitly marked "visible to client". Nothing else is exposed.', ar: 'لا يرى العميل سوى ما تم تحديده صراحة "مرئي للعميل". لا تُعرض أي بيانات أخرى.' },
+          { en: 'Messaging is matter-scoped: each conversation is tied to a case or errand the client has access to.', ar: 'المراسلات مرتبطة بالملف: كل محادثة مرتبطة بقضية أو معاملة يصل إليها العميل.' },
+          { en: 'Invoices are viewable in the portal; Qanuni records the timestamp when the client opens them.', ar: 'الفواتير متاحة للعرض في البوابة، ويسجّل قانوني وقت اطلاع العميل عليها.' },
+        ],
+      },
+      {
+        heading: { en: '8. AI assistant — safe usage', ar: '٨. المساعد الذكي — الاستخدام الآمن' },
+        items: [
+          { en: 'The floating chat panel is context-aware: it knows which case, client, or document you have open.', ar: 'لوحة المحادثة العائمة مدركة للسياق: تعرف القضية أو العميل أو المستند المفتوح لديك.' },
+          { en: 'Use AI for drafting, summarising, translation (AR ↔ EN), risk flagging, and Iraqi-law-aware research.', ar: 'استخدم الذكاء الاصطناعي للصياغة، التلخيص، الترجمة (عربي ↔ إنجليزي)، تنبيه المخاطر، والبحث المُدرك للقانون العراقي.' },
+          { en: 'AI output is a draft — review it. Final responsibility for legal advice always rests with the lawyer.', ar: 'مخرجات الذكاء الاصطناعي مسوّدة — راجعها. تبقى المسؤولية النهائية عن الرأي القانوني على عاتق المحامي.' },
+        ],
+      },
+      {
+        heading: { en: '9. Settings & administration', ar: '٩. الإعدادات والإدارة' },
+        items: [
+          { en: 'Firm admins manage members, roles (Admin, Lawyer, Paralegal, Secretary, Accountant), and invitations from "Settings → Team".', ar: 'يدير مدراء المكتب الأعضاء والأدوار (مدير، محامٍ، مساعد، سكرتير، محاسب) والدعوات من "الإعدادات ← الفريق".' },
+          { en: 'Invitations are token-based and expire after 7 days. Roles control what each user can see and do.', ar: 'الدعوات قائمة على رمز وتنتهي خلال 7 أيام. تتحكم الأدوار بما يراه كل مستخدم وما يستطيع فعله.' },
+          { en: 'Configure language, branding, default currency, work week, taxes, and AI provider from Settings.', ar: 'تُضبط اللغة والهوية البصرية والعملة الافتراضية وأسبوع العمل والضرائب ومزود الذكاء الاصطناعي من الإعدادات.' },
+        ],
+      },
+      {
+        heading: { en: '10. Help & support', ar: '١٠. المساعدة والدعم' },
+        items: [
+          { en: 'Most pages include contextual help. Use the command palette (Ctrl/⌘+K) to jump anywhere quickly.', ar: 'تتضمن معظم الصفحات مساعدة سياقية. استخدم لوحة الأوامر (Ctrl/⌘+K) للتنقل السريع.' },
+          { en: 'For account or billing questions, contact your firm administrator. For platform-wide issues, the platform administrator can be reached through the same support channel.', ar: 'للأسئلة المتعلقة بالحساب أو الفوترة، تواصل مع مدير المكتب. وللمشكلات على مستوى المنصة يتواصل مدير المنصة عبر القناة نفسها.' },
+        ],
+      },
+    ],
+  },
 ];
 
 export default function LoginSelectorPage() {
@@ -399,68 +492,147 @@ export default function LoginSelectorPage() {
             </h2>
           </div>
 
-          {/* Tab strip */}
+          {/* Tab strip — About and Manual are visually separated as "Information" tabs */}
           <div className="border-b border-border overflow-x-auto">
-            <div className="flex min-w-max gap-1">
-              {TABS.map((tab) => {
-                const Icon = tab.icon;
-                const active = tab.key === activeTab;
-                return (
-                  <button
-                    key={tab.key}
-                    onClick={() => setActiveTab(tab.key)}
-                    className={`relative flex items-center gap-2 px-4 py-3.5 text-[13px] tracking-tight transition-colors whitespace-nowrap ${
-                      active
-                        ? 'text-primary font-semibold'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    <Icon className="h-4 w-4" strokeWidth={1.5} />
-                    <span>{isEN ? tab.title.en : tab.title.ar}</span>
-                    {active && (
-                      <span className="absolute inset-x-0 -bottom-px h-[2px] bg-accent" />
-                    )}
-                  </button>
+            <div className="flex min-w-max items-stretch gap-1">
+              {(() => {
+                const aboutTab = TABS.find((t) => t.key === 'about')!;
+                const manualTab = TABS.find((t) => t.key === 'manual')!;
+                const featureTabs = TABS.filter(
+                  (t) => t.key !== 'about' && t.key !== 'manual',
                 );
-              })}
+                const renderTab = (tab: TabContent, variant: 'info' | 'feature') => {
+                  const Icon = tab.icon;
+                  const active = tab.key === activeTab;
+                  const isInfo = variant === 'info';
+                  return (
+                    <button
+                      key={tab.key}
+                      onClick={() => setActiveTab(tab.key)}
+                      className={`relative flex items-center gap-2 px-4 py-3.5 text-[13px] tracking-tight transition-colors whitespace-nowrap ${
+                        active
+                          ? isInfo
+                            ? 'text-accent-dark font-semibold'
+                            : 'text-primary font-semibold'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" strokeWidth={1.5} />
+                      <span
+                        className={isInfo ? 'uppercase tracking-[0.18em] text-[11px]' : ''}
+                      >
+                        {isEN ? tab.title.en : tab.title.ar}
+                      </span>
+                      {active && (
+                        <span
+                          className={`absolute inset-x-0 -bottom-px h-[2px] ${
+                            isInfo ? 'bg-accent-dark' : 'bg-accent'
+                          }`}
+                        />
+                      )}
+                    </button>
+                  );
+                };
+                return (
+                  <>
+                    {renderTab(aboutTab, 'info')}
+                    <span aria-hidden className="self-center mx-2 h-5 w-px bg-border" />
+                    {featureTabs.map((t) => renderTab(t, 'feature'))}
+                    <span aria-hidden className="self-center mx-2 h-5 w-px bg-border" />
+                    {renderTab(manualTab, 'info')}
+                  </>
+                );
+              })()}
             </div>
           </div>
 
           {/* Tab body */}
-          <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 mt-12">
-            <div className="lg:col-span-5">
-              <div className="inline-flex items-center justify-center h-12 w-12 bg-primary text-primary-foreground mb-6">
-                <current.icon className="h-5 w-5" strokeWidth={1.5} />
-              </div>
-              <h3
-                className="text-[26px] lg:text-[30px] leading-tight tracking-tight text-primary font-semibold"
-                style={{ fontFamily: isEN ? 'var(--font-display)' : 'var(--font-display-ar)' }}
-              >
-                {isEN ? current.title.en : current.title.ar}
-              </h3>
-              <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
-                {isEN ? current.lede.en : current.lede.ar}
-              </p>
-            </div>
-
-            <div className="lg:col-span-7">
-              <ul className="space-y-5">
-                {current.bullets.map((b, i) => (
-                  <li
-                    key={i}
-                    className="flex gap-4 pb-5 border-b border-border last:border-b-0 last:pb-0"
+          {(() => {
+            const CurrentIcon = current.icon;
+            const isInfoTab = current.key === 'about' || current.key === 'manual';
+            return (
+              <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 mt-12">
+                <div className="lg:col-span-5">
+                  <div
+                    className={`inline-flex items-center justify-center h-12 w-12 mb-6 ${
+                      isInfoTab
+                        ? 'bg-accent text-accent-foreground'
+                        : 'bg-primary text-primary-foreground'
+                    }`}
                   >
-                    <span className="flex-shrink-0 mt-0.5">
-                      <CheckCircle2 className="h-4 w-4 text-accent-dark" strokeWidth={1.75} />
-                    </span>
-                    <p className="text-[14px] leading-relaxed text-foreground/85">
-                      {isEN ? b.en : b.ar}
+                    <CurrentIcon className="h-5 w-5" strokeWidth={1.5} />
+                  </div>
+                  {isInfoTab && (
+                    <p className="eyebrow text-[10px] tracking-[0.3em] uppercase text-accent-dark font-semibold mb-3">
+                      {current.key === 'about'
+                        ? isEN
+                          ? 'Information'
+                          : 'معلومات'
+                        : isEN
+                          ? 'User Manual'
+                          : 'دليل الاستخدام'}
                     </p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+                  )}
+                  <h3
+                    className="text-[26px] lg:text-[30px] leading-tight tracking-tight text-primary font-semibold"
+                    style={{ fontFamily: isEN ? 'var(--font-display)' : 'var(--font-display-ar)' }}
+                  >
+                    {isEN ? current.title.en : current.title.ar}
+                  </h3>
+                  <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
+                    {isEN ? current.lede.en : current.lede.ar}
+                  </p>
+                </div>
+
+                <div className="lg:col-span-7">
+                  {current.bullets && (
+                    <ul className="space-y-5">
+                      {current.bullets.map((b, i) => (
+                        <li
+                          key={i}
+                          className="flex gap-4 pb-5 border-b border-border last:border-b-0 last:pb-0"
+                        >
+                          <span className="flex-shrink-0 mt-0.5">
+                            <CheckCircle2 className="h-4 w-4 text-accent-dark" strokeWidth={1.75} />
+                          </span>
+                          <p className="text-[14px] leading-relaxed text-foreground/85">
+                            {isEN ? b.en : b.ar}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {current.sections && (
+                    <div className="space-y-10">
+                      {current.sections.map((s, si) => (
+                        <div key={si}>
+                          <h4
+                            className="text-[15px] font-semibold text-primary mb-4 pb-2 border-b border-border"
+                            style={{ fontFamily: isEN ? 'var(--font-display)' : 'var(--font-display-ar)' }}
+                          >
+                            {isEN ? s.heading.en : s.heading.ar}
+                          </h4>
+                          <ul className="space-y-3">
+                            {s.items.map((it, ii) => (
+                              <li key={ii} className="flex gap-3">
+                                <span className="flex-shrink-0 mt-1">
+                                  <span className="block h-1.5 w-1.5 rounded-full bg-accent-dark" />
+                                </span>
+                                <p className="text-[14px] leading-relaxed text-foreground/85">
+                                  {isEN ? it.en : it.ar}
+                                </p>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </section>
 
