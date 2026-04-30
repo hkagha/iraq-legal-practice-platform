@@ -15,7 +15,7 @@ interface Props {
   partyType: PartyType;
   /** person_id or entity_id depending on partyType */
   partyId: string;
-  /** Optional case context — when set, messages are scoped to this case thread. */
+  /** Required case context for staff-client matter messages. */
   caseId?: string;
 }
 
@@ -140,13 +140,17 @@ export default function ClientMessagesThread({ partyType, partyId, caseId }: Pro
 
   const sendMessage = async () => {
     if (!draft.trim() || !orgId || !profile?.id) return;
+    if (!caseId) {
+      toast.error(isAR ? 'افتح محادثة مرتبطة بقضية لإرسال رسالة.' : 'Open a case message thread before sending.');
+      return;
+    }
     setSending(true);
     const payload: any = {
       organization_id: orgId,
       party_type: partyType,
       person_id: partyType === 'person' ? partyId : null,
       entity_id: partyType === 'entity' ? partyId : null,
-      case_id: caseId || null,
+      case_id: caseId,
       sender_id: profile.id,
       sender_type: 'staff',
       content: draft.trim(),
