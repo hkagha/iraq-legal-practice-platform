@@ -98,7 +98,7 @@ export default function ClientLayout() {
         </div>
 
         <div className="flex items-center gap-2">
-          {/* Organization switcher */}
+          {/* Firm/capacity switcher */}
           {hasMultipleOrgs && activeOrg && (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
@@ -109,22 +109,22 @@ export default function ClientLayout() {
                     <Building className="h-4 w-4 text-muted-foreground" />
                   )}
                   <span className="text-body-sm font-medium text-foreground max-w-[120px] truncate hidden sm:inline">
-                    {language === 'ar' && activeOrg.name_ar ? activeOrg.name_ar : activeOrg.name}
+                  {language === 'ar' && activeOrg.name_ar ? activeOrg.name_ar : activeOrg.name}
                   </span>
                   <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" />
                 </button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align={isRTL ? 'start' : 'end'} className="w-64">
                 <p className="px-2 py-1.5 text-body-sm font-medium text-muted-foreground">
-                  {t('portal.orgSwitcher.yourOrganizations')}
+                  {isEN ? 'Your access contexts' : 'سياقات الوصول'}
                 </p>
                 <DropdownMenuSeparator />
                 {linkedOrgs.map(org => {
-                  const isActive = activeOrg.id === org.id;
+                  const isActive = activeOrg.context_id === org.context_id;
                   return (
                     <DropdownMenuItem
-                      key={org.id}
-                      onClick={() => switchOrg(org.id)}
+                      key={org.context_id}
+                      onClick={() => switchOrg(org.context_id)}
                       className="flex items-center gap-3 py-2.5"
                     >
                       {org.logo_url ? (
@@ -134,8 +134,13 @@ export default function ClientLayout() {
                           <Building className="h-3.5 w-3.5 text-accent" />
                         </div>
                       )}
-                      <span className="flex-1 text-body-sm font-medium truncate">
-                        {language === 'ar' && org.name_ar ? org.name_ar : org.name}
+                      <span className="flex-1 min-w-0">
+                        <span className="block text-body-sm font-medium truncate">
+                          {language === 'ar' && org.name_ar ? org.name_ar : org.name}
+                        </span>
+                        <span className="block text-body-xs text-muted-foreground truncate">
+                          {language === 'ar' ? (org.context_label_ar || org.context_label) : org.context_label}
+                        </span>
                       </span>
                       {isActive && <Check className="h-4 w-4 text-accent shrink-0" />}
                     </DropdownMenuItem>

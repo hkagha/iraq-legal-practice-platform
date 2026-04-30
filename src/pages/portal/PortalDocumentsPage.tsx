@@ -29,19 +29,33 @@ export default function PortalDocumentsPage() {
   const orgId = activeOrg?.id || null;
 
   const { data: docs, isLoading } = useQuery({
-    queryKey: ['portal-documents', orgId],
-    enabled: !!orgId,
+    queryKey: ['portal-documents', activeOrg?.context_id],
+    enabled: !!orgId && !!activeOrg,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('documents')
-        .select('id, file_name, file_name_ar, title, title_ar, file_size_bytes, file_type, file_path, created_at, case_id')
+        .select('id, file_name, file_name_ar, title, title_ar, file_size_bytes, file_type, file_path, created_at, case_id, party_type, person_id, entity_id')
         .eq('organization_id', orgId!)
         .eq('is_visible_to_client', true)
         .eq('status', 'active')
         .eq('is_latest_version', true)
         .order('created_at', { ascending: false });
       if (error) throw error;
-      return data ?? [];
+      const allDocs = data ?? [];
+      const directDocs = allDocs.filter((d: any) => {
+        if (activeOrg!.context_type === 'person') return d.party_type === 'person' && d.person_id === activeOrg!.person_id;
+        return d.party_type === 'entity' && d.entity_id === activeOrg!.entity_id;
+      });
+      const caseIds = [...new Set(allDocs.map((d: any) => d.case_id).filter(Boolean))];
+      if (caseIds.length === 0) return directDocs;
+      const { data: parties } = await supabase
+        .from('case_parties')
+        .select('case_id')
+        .in('case_id', caseIds)
+        .eq('role', 'client')
+        .eq(activeOrg!.context_type === 'person' ? 'person_id' : 'entity_id', activeOrg!.context_type === 'person' ? activeOrg!.person_id : activeOrg!.entity_id!);
+      const allowedCases = new Set((parties || []).map((p: any) => p.case_id));
+      return allDocs.filter((d: any) => directDocs.some((direct: any) => direct.id === d.id) || (d.case_id && allowedCases.has(d.case_id)));
     },
   });
 

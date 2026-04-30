@@ -19,13 +19,15 @@ export default function PortalErrandsPage() {
   const orgId = activeOrg?.id || null;
 
   const { data: errands, isLoading } = useQuery({
-    queryKey: ['portal-errands', orgId],
-    enabled: !!orgId,
+    queryKey: ['portal-errands', activeOrg?.context_id],
+    enabled: !!orgId && !!activeOrg,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('errands')
         .select('id, errand_number, title, title_ar, status, errand_type, due_date, completed_steps, total_steps, updated_at')
         .eq('organization_id', orgId!)
+        .eq('party_type', activeOrg!.context_type)
+        .eq(activeOrg!.context_type === 'person' ? 'person_id' : 'entity_id', activeOrg!.context_type === 'person' ? activeOrg!.person_id : activeOrg!.entity_id!)
         .order('updated_at', { ascending: false });
       if (error) throw error;
       return data ?? [];

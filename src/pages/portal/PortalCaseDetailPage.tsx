@@ -21,7 +21,6 @@ export default function PortalCaseDetailPage() {
         .from('cases')
         .select('*')
         .eq('id', id!)
-        .eq('is_visible_to_client', true)
         .maybeSingle();
       if (error) throw error;
       return data;

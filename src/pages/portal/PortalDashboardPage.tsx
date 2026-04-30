@@ -24,25 +24,43 @@ export default function PortalDashboardPage() {
   const orgId = activeOrg?.id || null;
 
   const { data, isLoading } = useQuery({
-    queryKey: ['portal-dashboard', orgId],
-    enabled: !!orgId,
+    queryKey: ['portal-dashboard', activeOrg?.context_id],
+    enabled: !!orgId && !!activeOrg,
     queryFn: async () => {
       const today = new Date().toISOString().slice(0, 10);
-      const [casesRes, errandsRes, invoicesRes, hearingsRes, messagesRes] = await Promise.all([
-        supabase.from('cases').select('id, case_number, title, title_ar, status, updated_at, organization_id')
-          .eq('organization_id', orgId!)
-          .eq('is_visible_to_client', true).order('updated_at', { ascending: false }).limit(5),
+      const [casePartiesRes, errandsRes, invoicesRes, messagesRes] = await Promise.all([
+        supabase.from('case_parties')
+          .select('cases!inner(id, case_number, title, title_ar, status, updated_at, organization_id)')
+          .eq('role', 'client')
+          .eq(activeOrg!.context_type === 'person' ? 'person_id' : 'entity_id', activeOrg!.context_type === 'person' ? activeOrg!.person_id : activeOrg!.entity_id!)
+          .eq('cases.organization_id', orgId!)
+          .limit(50),
         supabase.from('errands').select('id, errand_number, title, title_ar, status, updated_at, completed_steps, total_steps, organization_id')
           .eq('organization_id', orgId!)
-          .eq('is_visible_to_client', true).order('updated_at', { ascending: false }).limit(5),
+          .eq('party_type', activeOrg!.context_type)
+          .eq(activeOrg!.context_type === 'person' ? 'person_id' : 'entity_id', activeOrg!.context_type === 'person' ? activeOrg!.person_id : activeOrg!.entity_id!)
+          .order('updated_at', { ascending: false }).limit(5),
         supabase.from('invoices').select('id, invoice_number, currency, total_amount, amount_paid, due_date, status, organization_id')
           .eq('organization_id', orgId!)
+          .eq('party_type', activeOrg!.context_type)
+          .eq(activeOrg!.context_type === 'person' ? 'person_id' : 'entity_id', activeOrg!.context_type === 'person' ? activeOrg!.person_id : activeOrg!.entity_id!)
           .neq('status', 'draft'),
-        supabase.from('case_hearings').select('id, hearing_date, hearing_time, hearing_type, case_id, organization_id, cases(case_number, title, title_ar)')
-          .eq('organization_id', orgId!)
-          .eq('is_visible_to_client', true).gte('hearing_date', today).order('hearing_date').limit(5),
-        supabase.from('client_messages').select('id').eq('organization_id', orgId!).eq('is_read', false).eq('sender_type', 'staff'),
+        supabase.from('client_messages').select('id').eq('organization_id', orgId!).eq('is_read', false).eq('sender_type', 'staff')
+          .eq('party_type', activeOrg!.context_type)
+          .eq(activeOrg!.context_type === 'person' ? 'person_id' : 'entity_id', activeOrg!.context_type === 'person' ? activeOrg!.person_id : activeOrg!.entity_id!),
       ]);
+      const seen = new Set<string>();
+      const cases = (casePartiesRes.data ?? [])
+        .map((row: any) => row.cases)
+        .filter((c: any) => c && !seen.has(c.id) && seen.add(c.id))
+        .sort((a: any, b: any) => String(b.updated_at).localeCompare(String(a.updated_at)));
+      const caseIds = cases.map((c: any) => c.id);
+      const hearingsRes = caseIds.length > 0
+        ? await supabase.from('case_hearings').select('id, hearing_date, hearing_time, hearing_type, case_id, organization_id, cases(case_number, title, title_ar)')
+          .eq('organization_id', orgId!)
+          .in('case_id', caseIds)
+          .eq('is_visible_to_client', true).gte('hearing_date', today).order('hearing_date').limit(5)
+        : { data: [] as any[] };
       const invoices = invoicesRes.data ?? [];
       const outstandingByCcy: Record<string, number> = {};
       for (const i of invoices) {
@@ -50,12 +68,12 @@ export default function PortalDashboardPage() {
         if (bal > 0) outstandingByCcy[i.currency] = (outstandingByCcy[i.currency] || 0) + bal;
       }
       return {
-        cases: casesRes.data ?? [],
+        cases: cases.slice(0, 5),
         errands: errandsRes.data ?? [],
         hearings: hearingsRes.data ?? [],
         unreadMessages: messagesRes.data?.length ?? 0,
         outstandingByCcy,
-        casesCount: (casesRes.data ?? []).length,
+        casesCount: cases.length,
         errandsCount: (errandsRes.data ?? []).length,
       };
     },

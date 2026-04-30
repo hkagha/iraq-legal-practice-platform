@@ -31,13 +31,15 @@ export default function PortalInvoicesPage() {
   const orgId = activeOrg?.id || null;
 
   const { data: invoices, isLoading } = useQuery({
-    queryKey: ['portal-invoices', orgId],
-    enabled: !!orgId,
+    queryKey: ['portal-invoices', activeOrg?.context_id],
+    enabled: !!orgId && !!activeOrg,
     queryFn: async () => {
       const { data, error } = await supabase
         .from('invoices')
         .select('id, invoice_number, status, issue_date, due_date, currency, total_amount, amount_paid')
         .eq('organization_id', orgId!)
+        .eq('party_type', activeOrg!.context_type)
+        .eq(activeOrg!.context_type === 'person' ? 'person_id' : 'entity_id', activeOrg!.context_type === 'person' ? activeOrg!.person_id : activeOrg!.entity_id!)
         .neq('status', 'draft')
         .order('issue_date', { ascending: false });
       if (error) throw error;

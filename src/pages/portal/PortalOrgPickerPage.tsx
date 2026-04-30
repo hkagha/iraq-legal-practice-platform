@@ -21,11 +21,11 @@ export default function PortalOrgPickerPage() {
   const navigate = useNavigate();
   const isAR = language === 'ar';
 
-  // If only one org → auto-pick and forward
+  // If only one context → auto-pick and forward
   useEffect(() => {
     if (loading) return;
     if (linkedOrgs.length === 1 && !activeOrg) {
-      switchOrg(linkedOrgs[0].id).then(() => navigate('/portal/dashboard', { replace: true }));
+      switchOrg(linkedOrgs[0].context_id).then(() => navigate('/portal/dashboard', { replace: true }));
     }
   }, [loading, linkedOrgs, activeOrg, switchOrg, navigate]);
 
@@ -36,8 +36,8 @@ export default function PortalOrgPickerPage() {
     }
   }, [loading, activeOrg, navigate]);
 
-  const handlePick = async (orgId: string) => {
-    await switchOrg(orgId);
+  const handlePick = async (contextId: string) => {
+    await switchOrg(contextId);
     navigate('/portal/dashboard', { replace: true });
   };
 
@@ -111,8 +111,8 @@ export default function PortalOrgPickerPage() {
             </h1>
             <p className="text-body-md text-muted-foreground mt-3">
               {isAR
-                ? 'أنت موكّل لدى أكثر من مكتب محاماة. اختر المكتب الذي تريد الدخول إلى بوابته.'
-                : 'You are a client of more than one law firm. Choose which one you would like to access.'}
+              ? 'اختر المكتب والصفة التي تريد الدخول بها.'
+                : 'Choose the firm and capacity you want to access.'}
             </p>
           </div>
 
@@ -122,8 +122,8 @@ export default function PortalOrgPickerPage() {
               const subtitle = isAR ? org.name : org.name_ar;
               return (
                 <button
-                  key={org.id}
-                  onClick={() => handlePick(org.id)}
+                  key={org.context_id}
+                  onClick={() => handlePick(org.context_id)}
                   disabled={isSwitching}
                   className="group bg-card rounded-2xl border border-border hover:border-accent hover:shadow-md transition-all p-5 flex items-center gap-4 text-start disabled:opacity-60 disabled:cursor-not-allowed"
                 >
@@ -143,6 +143,9 @@ export default function PortalOrgPickerPage() {
                     {subtitle && subtitle !== name && (
                       <p className="text-body-sm text-muted-foreground truncate mt-0.5">{subtitle}</p>
                     )}
+                    <p className="text-body-xs text-accent truncate mt-1">
+                      {isAR ? (org.context_label_ar || org.context_label) : org.context_label}
+                    </p>
                   </div>
                   <div className="flex items-center gap-2 text-accent shrink-0">
                     <span className="text-body-sm font-semibold opacity-0 group-hover:opacity-100 transition-opacity">
@@ -157,8 +160,8 @@ export default function PortalOrgPickerPage() {
 
           <p className="text-center text-body-sm text-muted-foreground mt-8">
             {isAR
-              ? 'يمكنك التبديل بين المكاتب لاحقاً من قائمة الحساب.'
-              : 'You can switch between firms later from the account menu.'}
+              ? 'يمكنك التبديل بين المكاتب والصفات لاحقاً من قائمة الحساب.'
+              : 'You can switch between firms and capacities later from the account menu.'}
           </p>
         </div>
       </main>

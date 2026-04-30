@@ -19,19 +19,19 @@ export default function PortalCasesPage() {
   const orgId = activeOrg?.id || null;
 
   const { data: cases, isLoading } = useQuery({
-    queryKey: ['portal-cases', orgId],
-    enabled: !!orgId,
+    queryKey: ['portal-cases', activeOrg?.context_id],
+    enabled: !!orgId && !!activeOrg,
     queryFn: async () => {
-      // RLS filters by the portal user's party relationship to the case.
-      // We additionally scope by organization_id so a multi-firm client only
-      // sees the firm they currently selected.
       const { data, error } = await supabase
-        .from('cases')
-        .select('id, case_number, title, title_ar, status, case_type, court_name, court_name_ar, filing_date, updated_at')
-        .eq('organization_id', orgId!)
-        .order('updated_at', { ascending: false });
+        .from('case_parties')
+        .select('cases!inner(id, case_number, title, title_ar, status, case_type, court_name, court_name_ar, filing_date, updated_at, organization_id)')
+        .eq('role', 'client')
+        .eq(activeOrg!.context_type === 'person' ? 'person_id' : 'entity_id', activeOrg!.context_type === 'person' ? activeOrg!.person_id : activeOrg!.entity_id!)
+        .eq('cases.organization_id', orgId!)
+        .order('created_at', { ascending: false });
       if (error) throw error;
-      return data ?? [];
+      const seen = new Set<string>();
+      return (data ?? []).map((row: any) => row.cases).filter((c: any) => c && !seen.has(c.id) && seen.add(c.id));
     },
   });
 
