@@ -14,25 +14,79 @@ import {
   ShieldCheck,
   Languages,
   CheckCircle2,
+  Info,
+  BookOpen,
 } from 'lucide-react';
 
 type TabKey =
+  | 'about'
   | 'cases'
   | 'clients'
   | 'billing'
   | 'ai'
   | 'documents'
-  | 'reports';
+  | 'reports'
+  | 'manual';
+
+interface Section {
+  heading: { en: string; ar: string };
+  items: { en: string; ar: string }[];
+}
 
 interface TabContent {
   key: TabKey;
   icon: React.ComponentType<{ className?: string; strokeWidth?: number | string }>;
   title: { en: string; ar: string };
   lede: { en: string; ar: string };
-  bullets: { en: string; ar: string }[];
+  bullets?: { en: string; ar: string }[];
+  sections?: Section[];
 }
 
 const TABS: TabContent[] = [
+  {
+    key: 'about',
+    icon: Info,
+    title: { en: 'About Qanuni', ar: 'عن قانوني' },
+    lede: {
+      en: 'Qanuni is a complete legal practice management platform for solo lawyers, small firms, and large law firms — designed first for the realities of legal practice in Iraq, while supporting other Arab jurisdictions through configurable settings.',
+      ar: 'قانوني منصة متكاملة لإدارة الممارسة القانونية للمحامين المنفردين والمكاتب الصغيرة والكبيرة — مصممة أولاً لواقع الممارسة القانونية في العراق، مع دعم سائر الدول العربية عبر إعدادات قابلة للتخصيص.',
+    },
+    sections: [
+      {
+        heading: { en: 'What Qanuni does', ar: 'ماذا يقدم قانوني' },
+        items: [
+          { en: 'Case management — contentious court matters from intake through judgment, appeal, and enforcement.', ar: 'إدارة القضايا — القضايا المتنازع عليها من فتح الملف حتى الحكم والاستئناف والتنفيذ.' },
+          { en: 'Errand management — non-contentious legal/administrative matters such as company registration, factory licenses, passports, and government filings.', ar: 'إدارة المعاملات — الأعمال غير المتنازع عليها كتسجيل الشركات وإجازات المصانع والجوازات والمعاملات الرسمية.' },
+          { en: 'Clients & parties — persons and entities, with representatives, conflict checking, and merge of duplicates.', ar: 'العملاء والأطراف — أشخاص وجهات اعتبارية مع الممثلين، فحص تعارض المصالح، ودمج المكرر.' },
+          { en: 'Documents, archive, OCR & AI indexing — versioned, searchable across Arabic and English.', ar: 'مستندات وأرشيف وOCR وفهرسة ذكية — بإصدارات وبحث متقدم بالعربية والإنجليزية.' },
+          { en: 'Tasks, calendar, and time tracking linked to matters — with a persistent global timer.', ar: 'مهام وتقويم وتتبع وقت مرتبط بالقضايا — مع مؤقت عام دائم.' },
+          { en: 'Billing, invoicing, and trust accounting — multi-currency with bilingual invoices.', ar: 'الفوترة والإصدار وإدارة حسابات الأمانة — بعملات متعددة وفواتير ثنائية اللغة.' },
+          { en: 'Client portal — capacity-aware access for personal and corporate clients.', ar: 'بوابة العملاء — وصول يراعي صفة العميل (شخصي أو ممثلاً عن جهة).' },
+          { en: 'AI legal assistant — drafting, summarising, translation, research, and risk assessment.', ar: 'مساعد قانوني ذكي — صياغة وتلخيص وترجمة وبحث وتقييم مخاطر.' },
+          { en: 'Reports, dashboards, and exports — role-aware analytics for the firm and the individual.', ar: 'تقارير ولوحات تحكم وتصديرات — تحليلات تراعي الصلاحيات للمكتب والفرد.' },
+        ],
+      },
+      {
+        heading: { en: 'Who it serves', ar: 'لمن يخدم' },
+        items: [
+          { en: 'Staff — firm admins, lawyers, paralegals, secretaries, and accountants working inside a law firm.', ar: 'الموظفون — مدراء المكاتب والمحامون والمساعدون والسكرتارية والمحاسبون داخل المكتب.' },
+          { en: 'Portal clients — natural persons accessing their own matters, or acting as representatives of one or more entities.', ar: 'عملاء البوابة — أشخاص طبيعيون يصلون إلى قضاياهم، أو يعملون ممثلين عن جهة أو أكثر.' },
+          { en: 'Platform — super administrators with unrestricted access, and sales administrators limited to non-confidential tenant data.', ar: 'المنصة — مدراء منصة بصلاحيات كاملة، ومدراء مبيعات بصلاحيات محدودة لا تشمل البيانات السرية.' },
+        ],
+      },
+      {
+        heading: { en: 'Core principles', ar: 'المبادئ الأساسية' },
+        items: [
+          { en: 'Case-centred staff workflow with errands as full parallel matters.', ar: 'سير عمل يتمحور حول القضايا، والمعاملات كأعمال موازية كاملة.' },
+          { en: 'Formal bilingual English/Arabic interface in formal Iraqi legal Arabic.', ar: 'واجهة رسمية ثنائية اللغة بعربية قانونية عراقية فصيحة.' },
+          { en: 'Matter-assignment-based permissions and a complete audit trail.', ar: 'صلاحيات مبنية على إسناد القضايا وسجل تدقيق كامل.' },
+          { en: 'No permanent deletion of legal documents — preserved in archive.', ar: 'لا حذف نهائي للمستندات القانونية — تُحفظ في الأرشيف.' },
+          { en: 'Mobile-friendly daily workflows; PWA-installable.', ar: 'تجربة يومية ممتازة على الجوال؛ قابلة للتثبيت كتطبيق PWA.' },
+          { en: 'All modules enabled by default — free in the first year.', ar: 'جميع الوحدات مُفعّلة افتراضياً — مجانية في السنة الأولى.' },
+        ],
+      },
+    ],
+  },
   {
     key: 'cases',
     icon: Scale,
