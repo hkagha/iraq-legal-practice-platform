@@ -122,8 +122,13 @@ export default function DocumentDetailSlideOver({ documentId, isOpen, onClose, o
 
   const handleDelete = async () => {
     if (!doc) return;
-    await supabase.from('documents').update({ status: 'deleted' } as any).eq('id', doc.id);
-    toast.success(t('documents.messages.deleted'));
+    await supabase.from('documents').update({
+      status: 'archived',
+      case_id: null,
+      errand_id: null,
+      is_visible_to_client: false,
+    } as any).eq('id', doc.id);
+    toast.success(t('documents.messages.archived'));
     setDeleteConfirm(false); onClose(); onRefresh();
   };
 

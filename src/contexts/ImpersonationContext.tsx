@@ -50,8 +50,8 @@ export function ImpersonationProvider({ children }: { children: ReactNode }) {
   const startImpersonation = useCallback(
     async (orgId: string, orgName: string, targetUserId: string) => {
       if (!user || !profile) return { error: 'Not authenticated' };
-      if (profile.role !== 'super_admin' && profile.role !== 'sales_admin') {
-        return { error: 'Only platform admins can impersonate' };
+      if (profile.role !== 'super_admin') {
+        return { error: 'Only platform super admins can impersonate' };
       }
 
       const realOrgId = profile.organization_id ?? null;

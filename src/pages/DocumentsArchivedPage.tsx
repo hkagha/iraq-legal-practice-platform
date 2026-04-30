@@ -10,10 +10,9 @@ import { EmptyState } from '@/components/ui/EmptyState';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
-import { Search, Archive, RotateCcw, Trash2, Download, FileText, MoreVertical } from 'lucide-react';
+import { Search, Archive, RotateCcw, Download, FileText, MoreVertical } from 'lucide-react';
 import DocumentDetailSlideOver from '@/components/documents/DocumentDetailSlideOver';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 
 interface DocRow {
   id: string;
@@ -43,7 +42,6 @@ export default function DocumentsArchivedPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [detailId, setDetailId] = useState<string | null>(null);
-  const [confirmDelete, setConfirmDelete] = useState<DocRow | null>(null);
 
   const load = useCallback(async () => {
     if (!orgId) return;
@@ -73,17 +71,6 @@ export default function DocumentsArchivedPage() {
     else { toast.success(isAR ? 'تمت الاستعادة' : 'Restored'); load(); }
   };
 
-  const handleDelete = async () => {
-    if (!confirmDelete) return;
-    // Soft delete + remove storage object
-    const { error } = await supabase.from('documents').update({ status: 'deleted' } as any).eq('id', confirmDelete.id);
-    if (error) { toast.error(error.message); return; }
-    await supabase.storage.from('documents').remove([confirmDelete.file_path]).catch(() => null);
-    toast.success(isAR ? 'تم الحذف نهائياً' : 'Permanently deleted');
-    setConfirmDelete(null);
-    load();
-  };
-
   const handleDownload = async (d: DocRow) => {
     const { data } = await supabase.storage.from('documents').createSignedUrl(d.file_path, 60);
     if (data?.signedUrl) {
@@ -98,8 +85,8 @@ export default function DocumentsArchivedPage() {
       <PageHeader
         title="Archived Documents"
         titleAr="المستندات المؤرشفة"
-        subtitle="Documents you've archived. Restore or delete permanently."
-        subtitleAr="المستندات التي قمت بأرشفتها. استعدها أو احذفها نهائياً."
+        subtitle="Documents removed from active matters remain preserved here."
+        subtitleAr="تبقى المستندات المزالة من القضايا والمعاملات محفوظة هنا."
         helpKey="documents"
         breadcrumbs={[
           { label: 'Dashboard', labelAr: 'لوحة التحكم', href: '/dashboard' },
@@ -160,9 +147,6 @@ export default function DocumentsArchivedPage() {
                   <DropdownMenuItem onClick={() => handleDownload(d)}>
                     <Download className="h-3.5 w-3.5 me-2" />{isAR ? 'تحميل' : 'Download'}
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="text-destructive" onClick={() => setConfirmDelete(d)}>
-                    <Trash2 className="h-3.5 w-3.5 me-2" />{isAR ? 'حذف نهائي' : 'Delete permanently'}
-                  </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
             </div>
@@ -177,18 +161,6 @@ export default function DocumentsArchivedPage() {
         onRefresh={load}
       />
 
-      <ConfirmDialog
-        isOpen={!!confirmDelete}
-        onClose={() => setConfirmDelete(null)}
-        title="Delete permanently?"
-        titleAr="حذف نهائي؟"
-        message="This document and its stored file will be permanently removed. This cannot be undone."
-        messageAr="سيتم حذف هذا المستند والملف من التخزين بشكل دائم. لا يمكن التراجع."
-        confirmLabel="Delete permanently"
-        confirmLabelAr="حذف نهائي"
-        type="danger"
-        onConfirm={handleDelete}
-      />
     </div>
   );
 }

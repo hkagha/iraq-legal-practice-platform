@@ -22,9 +22,10 @@ interface OrgWithStats {
 
 export default function AdminOrganizationsPage() {
   const { language } = useLanguage();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { startImpersonation } = useImpersonation();
   const isEN = language === 'en';
+  const canImpersonate = profile?.role === 'super_admin';
   const navigate = useNavigate();
   const [orgs, setOrgs] = useState<OrgWithStats[]>([]);
   const [loading, setLoading] = useState(true);
@@ -175,7 +176,9 @@ export default function AdminOrganizationsPage() {
                   <DropdownMenuContent align="end">
                     <DropdownMenuItem onClick={() => navigate(`/admin/organizations/${org.id}`)}><Eye className="h-4 w-4 me-2" />{isEN ? 'View Details' : 'عرض التفاصيل'}</DropdownMenuItem>
                     <DropdownMenuItem onClick={() => setEditOrgId(org.id)}><Pencil className="h-4 w-4 me-2" />{isEN ? 'Edit' : 'تعديل'}</DropdownMenuItem>
-                    <DropdownMenuItem onClick={() => handleImpersonate(org)}><LogIn className="h-4 w-4 me-2" />{isEN ? 'Login as Admin' : 'الدخول كمسؤول'}</DropdownMenuItem>
+                    {canImpersonate && (
+                      <DropdownMenuItem onClick={() => handleImpersonate(org)}><LogIn className="h-4 w-4 me-2" />{isEN ? 'Login as Admin' : 'الدخول كمسؤول'}</DropdownMenuItem>
+                    )}
                     <DropdownMenuItem onClick={() => toggleOrgActive(org)}><Power className="h-4 w-4 me-2" />{org.is_active ? (isEN ? 'Deactivate' : 'تعطيل') : (isEN ? 'Activate' : 'تفعيل')}</DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => setDeleteOrg(org)} className="text-destructive"><Trash2 className="h-4 w-4 me-2" />{isEN ? 'Delete' : 'حذف'}</DropdownMenuItem>

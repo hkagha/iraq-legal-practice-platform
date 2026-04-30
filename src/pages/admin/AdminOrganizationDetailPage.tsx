@@ -28,9 +28,10 @@ export default function AdminOrganizationDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { language } = useLanguage();
-  const { user } = useAuth();
+  const { user, profile } = useAuth();
   const { startImpersonation } = useImpersonation();
   const isEN = language === 'en';
+  const canImpersonate = profile?.role === 'super_admin';
 
   const [org, setOrg] = useState<OrgDetail | null>(null);
   const [loading, setLoading] = useState(true);
@@ -116,7 +117,9 @@ export default function AdminOrganizationDetailPage() {
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={() => setShowEdit(true)}><Pencil className="h-4 w-4 me-2" />{isEN ? 'Edit' : 'تعديل'}</Button>
-          <Button variant="outline" className="border-warning text-warning hover:bg-warning/10" onClick={handleImpersonate}><LogIn className="h-4 w-4 me-2" />{isEN ? 'Login as Admin' : 'الدخول كمسؤول'}</Button>
+          {canImpersonate && (
+            <Button variant="outline" className="border-warning text-warning hover:bg-warning/10" onClick={handleImpersonate}><LogIn className="h-4 w-4 me-2" />{isEN ? 'Login as Admin' : 'الدخول كمسؤول'}</Button>
+          )}
         </div>
       </div>
 
