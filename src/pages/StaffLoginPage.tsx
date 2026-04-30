@@ -60,8 +60,11 @@ const StaffLoginPage = forwardRef<HTMLDivElement>((_props, _ref) => {
 
     if (result.error) {
       setLoading(false);
+      const isUnconfirmedEmail =
+        result.code === 'email_not_confirmed' ||
+        result.error.toLowerCase().includes('email not confirmed');
       setError(
-        result.code === 'email_not_confirmed'
+        isUnconfirmedEmail
           ? language === 'en'
             ? 'Please confirm your email address before signing in. Check your inbox for the Qanuni verification link.'
             : 'يرجى تأكيد بريدك الإلكتروني قبل تسجيل الدخول. تحقق من صندوق الوارد لرابط التحقق من قانوني.'

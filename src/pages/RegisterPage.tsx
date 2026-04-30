@@ -26,7 +26,6 @@ export default function RegisterPage() {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
 
   const set = (key: string) => (e: React.ChangeEvent<HTMLInputElement>) =>
@@ -37,7 +36,6 @@ export default function RegisterPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setSuccess('');
 
     if (!form.orgName) { setError(t('auth.orgNameRequired')); return; }
     if (!form.firstName) { setError(t('auth.firstNameRequired')); return; }
@@ -60,12 +58,6 @@ export default function RegisterPage() {
 
     if (result.error) {
       setError(result.error);
-    } else if (result.needsEmailConfirmation) {
-      setSuccess(
-        language === 'en'
-          ? 'Account created. Please confirm your email address, then sign in from the Staff login page.'
-          : 'تم إنشاء الحساب. يرجى تأكيد بريدك الإلكتروني، ثم تسجيل الدخول من صفحة دخول الموظفين.'
-      );
     } else {
       navigate('/dashboard');
     }
@@ -124,10 +116,6 @@ export default function RegisterPage() {
 
             {error && (
               <div className="mb-4 p-3 rounded-button bg-error-light text-error text-body-md border border-error/20">{error}</div>
-            )}
-
-            {success && (
-              <div className="mb-4 p-3 rounded-button bg-success-light text-success text-body-md border border-success/20">{success}</div>
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4">

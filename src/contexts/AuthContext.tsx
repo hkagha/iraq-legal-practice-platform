@@ -52,7 +52,7 @@ interface AuthContextType {
   /** True once we've finished checking BOTH profiles and portal_users for the current session. */
   identityResolved: boolean;
   signIn: (email: string, password: string) => Promise<{ error: string | null; code?: string }>;
-  signUp: (data: SignUpData) => Promise<{ error: string | null; needsEmailConfirmation?: boolean }>;
+  signUp: (data: SignUpData) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<void>;
   /** Re-fetch profile/organization for the current session. Used by impersonation to pick up org swaps. */
@@ -335,7 +335,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     if (error) return { error: error.message };
     if (!authData.user) return { error: 'Registration failed' };
-    const needsEmailConfirmation = !authData.session;
 
     // Create organization
     const slug = data.organizationName
@@ -368,10 +367,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       .eq('id', authData.user.id);
 
-    if (!needsEmailConfirmation) {
-      await fetchProfile(authData.user.id);
-    }
-    return { error: null, needsEmailConfirmation };
+    await fetchProfile(authData.user.id);
+    return { error: null };
   };
 
   const signOut = async () => {
