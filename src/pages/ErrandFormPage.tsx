@@ -18,7 +18,7 @@ import { PageLoader } from '@/components/ui/PageLoader';
 import type { PartyRef } from '@/types/parties';
 
 const ERRAND_TYPES = ['government_registration', 'license_renewal', 'document_authentication', 'court_filing', 'permit_application', 'tax_filing', 'other'];
-const STATUSES = ['new', 'in_progress', 'awaiting_documents', 'submitted_to_government', 'under_review_by_government', 'additional_requirements', 'approved', 'rejected', 'completed', 'cancelled'];
+const STATUSES = ['intake', 'in_progress', 'waiting_on_client', 'waiting_on_authority', 'completed', 'cancelled', 'archived'];
 const PRIORITIES = ['low', 'normal', 'high', 'urgent'];
 
 export default function ErrandFormPage() {
@@ -42,7 +42,7 @@ export default function ErrandFormPage() {
     description: '',
     description_ar: '',
     errand_type: 'other',
-    status: 'new',
+    status: 'intake',
     priority: 'normal',
     due_date: undefined as Date | undefined,
     case_id: '',
@@ -92,9 +92,32 @@ export default function ErrandFormPage() {
       toast.error(lang === 'ar' ? 'العنوان مطلوب' : 'Title is required');
       return;
     }
+    if (!party) {
+      toast.error(lang === 'ar' ? 'يجب اختيار موكل للمعاملة' : 'Select a client for this errand');
+      return;
+    }
     if (!profile?.organization_id) return;
     setSaving(true);
     try {
+      if (party.partyType === 'entity' && party.entityId) {
+        const { data: rep, error: repErr } = await supabase
+          .from('entity_representatives')
+          .select('id')
+          .eq('entity_id', party.entityId)
+          .or(`end_date.is.null,end_date.gte.${new Date().toISOString().slice(0, 10)}`)
+          .limit(1)
+          .maybeSingle();
+        if (repErr) throw repErr;
+        if (!rep) {
+          toast.error(
+            lang === 'ar'
+              ? `لا يمكن إضافة ${party.displayName} كموكل دون ممثل بشري`
+              : `${party.displayName} must have at least one human representative before it can be a client`,
+          );
+          return;
+        }
+      }
+
       const payload: any = {
         title: form.title,
         title_ar: form.title_ar || null,
@@ -106,7 +129,7 @@ export default function ErrandFormPage() {
         due_date: form.due_date ? form.due_date.toISOString().slice(0, 10) : null,
         case_id: form.case_id || null,
         assigned_to: form.assigned_to || null,
-        is_visible_to_client: form.is_visible_to_client,
+        is_visible_to_client: true,
         party_type: party?.partyType || null,
         person_id: party?.partyType === 'person' ? party.personId : null,
         entity_id: party?.partyType === 'entity' ? party.entityId : null,

@@ -61,6 +61,24 @@ export function CasePartiesEditor({ caseId, organizationId }: Props) {
     if (!pickedRef) return;
     setAdding(true);
     try {
+      if (pickedRole === 'client' && pickedRef.partyType === 'entity' && pickedRef.entityId) {
+        const { data: rep, error: repErr } = await supabase
+          .from('entity_representatives')
+          .select('id')
+          .eq('entity_id', pickedRef.entityId)
+          .or(`end_date.is.null,end_date.gte.${new Date().toISOString().slice(0, 10)}`)
+          .limit(1)
+          .maybeSingle();
+        if (repErr) throw repErr;
+        if (!rep) {
+          toast.error(
+            language === 'ar'
+              ? `لا يمكن إضافة ${pickedRef.displayName} كموكل دون ممثل بشري`
+              : `${pickedRef.displayName} must have at least one human representative before it can be a client`,
+          );
+          return;
+        }
+      }
       const { error } = await supabase.from('case_parties').insert({
         case_id: caseId,
         organization_id: organizationId,
@@ -83,6 +101,11 @@ export function CasePartiesEditor({ caseId, organizationId }: Props) {
   };
 
   const handleRemove = async (id: string) => {
+    const target = rows.find((r) => r.id === id);
+    if (target?.role === 'client' && rows.filter((r) => r.role === 'client').length <= 1) {
+      toast.error(language === 'ar' ? 'يجب أن تبقى القضية مرتبطة بموكل واحد على الأقل' : 'A case must keep at least one client party');
+      return;
+    }
     if (!confirm(language === 'ar' ? 'إزالة هذا الطرف؟' : 'Remove this party?')) return;
     const { error } = await supabase.from('case_parties').delete().eq('id', id);
     if (error) toast.error(error.message);
@@ -101,6 +124,28 @@ export function CasePartiesEditor({ caseId, organizationId }: Props) {
   };
 
   const handleRoleChange = async (id: string, role: string) => {
+    const current = rows.find((r) => r.id === id);
+    if (current?.role === 'client' && role !== 'client' && rows.filter((r) => r.role === 'client').length <= 1) {
+      toast.error(language === 'ar' ? 'يجب أن تبقى القضية مرتبطة بموكل واحد على الأقل' : 'A case must keep at least one client party');
+      return;
+    }
+    if (role === 'client' && current?.party_type === 'entity' && current.entity_id) {
+      const { data: rep, error: repErr } = await supabase
+        .from('entity_representatives')
+        .select('id')
+        .eq('entity_id', current.entity_id)
+        .or(`end_date.is.null,end_date.gte.${new Date().toISOString().slice(0, 10)}`)
+        .limit(1)
+        .maybeSingle();
+      if (repErr) {
+        toast.error(repErr.message);
+        return;
+      }
+      if (!rep) {
+        toast.error(language === 'ar' ? 'لا يمكن جعل شركة موكلاً دون ممثل بشري' : 'An entity needs a human representative before it can be a client');
+        return;
+      }
+    }
     const { error } = await supabase.from('case_parties').update({ role }).eq('id', id);
     if (error) toast.error(error.message);
     else void load();
