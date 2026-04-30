@@ -14,15 +14,19 @@ import {
   ShieldCheck,
   Languages,
   CheckCircle2,
+  Info,
+  BookOpen,
 } from 'lucide-react';
 
 type TabKey =
+  | 'about'
   | 'cases'
   | 'clients'
   | 'billing'
   | 'ai'
   | 'documents'
-  | 'reports';
+  | 'reports'
+  | 'manual';
 
 interface TabContent {
   key: TabKey;
