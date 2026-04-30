@@ -22,14 +22,13 @@ export default function PortalCasesPage() {
     queryKey: ['portal-cases', orgId],
     enabled: !!orgId,
     queryFn: async () => {
-      // RLS filters via portal_user_can_access_case + is_visible_to_client.
+      // RLS filters by the portal user's party relationship to the case.
       // We additionally scope by organization_id so a multi-firm client only
       // sees the firm they currently selected.
       const { data, error } = await supabase
         .from('cases')
         .select('id, case_number, title, title_ar, status, case_type, court_name, court_name_ar, filing_date, updated_at')
         .eq('organization_id', orgId!)
-        .eq('is_visible_to_client', true)
         .order('updated_at', { ascending: false });
       if (error) throw error;
       return data ?? [];

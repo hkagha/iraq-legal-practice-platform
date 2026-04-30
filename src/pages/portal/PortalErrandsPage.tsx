@@ -26,7 +26,6 @@ export default function PortalErrandsPage() {
         .from('errands')
         .select('id, errand_number, title, title_ar, status, errand_type, due_date, completed_steps, total_steps, updated_at')
         .eq('organization_id', orgId!)
-        .eq('is_visible_to_client', true)
         .order('updated_at', { ascending: false });
       if (error) throw error;
       return data ?? [];
