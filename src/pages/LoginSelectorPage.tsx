@@ -26,7 +26,7 @@ type TabKey =
 
 interface TabContent {
   key: TabKey;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.ComponentType<{ className?: string; strokeWidth?: number | string }>;
   title: { en: string; ar: string };
   lede: { en: string; ar: string };
   bullets: { en: string; ar: string }[];
