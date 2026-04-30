@@ -492,68 +492,147 @@ export default function LoginSelectorPage() {
             </h2>
           </div>
 
-          {/* Tab strip */}
+          {/* Tab strip — About and Manual are visually separated as "Information" tabs */}
           <div className="border-b border-border overflow-x-auto">
-            <div className="flex min-w-max gap-1">
-              {TABS.map((tab) => {
-                const Icon = tab.icon;
-                const active = tab.key === activeTab;
-                return (
-                  <button
-                    key={tab.key}
-                    onClick={() => setActiveTab(tab.key)}
-                    className={`relative flex items-center gap-2 px-4 py-3.5 text-[13px] tracking-tight transition-colors whitespace-nowrap ${
-                      active
-                        ? 'text-primary font-semibold'
-                        : 'text-muted-foreground hover:text-foreground'
-                    }`}
-                  >
-                    <Icon className="h-4 w-4" strokeWidth={1.5} />
-                    <span>{isEN ? tab.title.en : tab.title.ar}</span>
-                    {active && (
-                      <span className="absolute inset-x-0 -bottom-px h-[2px] bg-accent" />
-                    )}
-                  </button>
+            <div className="flex min-w-max items-stretch gap-1">
+              {(() => {
+                const aboutTab = TABS.find((t) => t.key === 'about')!;
+                const manualTab = TABS.find((t) => t.key === 'manual')!;
+                const featureTabs = TABS.filter(
+                  (t) => t.key !== 'about' && t.key !== 'manual',
                 );
-              })}
+                const renderTab = (tab: TabContent, variant: 'info' | 'feature') => {
+                  const Icon = tab.icon;
+                  const active = tab.key === activeTab;
+                  const isInfo = variant === 'info';
+                  return (
+                    <button
+                      key={tab.key}
+                      onClick={() => setActiveTab(tab.key)}
+                      className={`relative flex items-center gap-2 px-4 py-3.5 text-[13px] tracking-tight transition-colors whitespace-nowrap ${
+                        active
+                          ? isInfo
+                            ? 'text-accent-dark font-semibold'
+                            : 'text-primary font-semibold'
+                          : 'text-muted-foreground hover:text-foreground'
+                      }`}
+                    >
+                      <Icon className="h-4 w-4" strokeWidth={1.5} />
+                      <span
+                        className={isInfo ? 'uppercase tracking-[0.18em] text-[11px]' : ''}
+                      >
+                        {isEN ? tab.title.en : tab.title.ar}
+                      </span>
+                      {active && (
+                        <span
+                          className={`absolute inset-x-0 -bottom-px h-[2px] ${
+                            isInfo ? 'bg-accent-dark' : 'bg-accent'
+                          }`}
+                        />
+                      )}
+                    </button>
+                  );
+                };
+                return (
+                  <>
+                    {renderTab(aboutTab, 'info')}
+                    <span aria-hidden className="self-center mx-2 h-5 w-px bg-border" />
+                    {featureTabs.map((t) => renderTab(t, 'feature'))}
+                    <span aria-hidden className="self-center mx-2 h-5 w-px bg-border" />
+                    {renderTab(manualTab, 'info')}
+                  </>
+                );
+              })()}
             </div>
           </div>
 
           {/* Tab body */}
-          <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 mt-12">
-            <div className="lg:col-span-5">
-              <div className="inline-flex items-center justify-center h-12 w-12 bg-primary text-primary-foreground mb-6">
-                <current.icon className="h-5 w-5" strokeWidth={1.5} />
-              </div>
-              <h3
-                className="text-[26px] lg:text-[30px] leading-tight tracking-tight text-primary font-semibold"
-                style={{ fontFamily: isEN ? 'var(--font-display)' : 'var(--font-display-ar)' }}
-              >
-                {isEN ? current.title.en : current.title.ar}
-              </h3>
-              <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
-                {isEN ? current.lede.en : current.lede.ar}
-              </p>
-            </div>
-
-            <div className="lg:col-span-7">
-              <ul className="space-y-5">
-                {current.bullets.map((b, i) => (
-                  <li
-                    key={i}
-                    className="flex gap-4 pb-5 border-b border-border last:border-b-0 last:pb-0"
+          {(() => {
+            const CurrentIcon = current.icon;
+            const isInfoTab = current.key === 'about' || current.key === 'manual';
+            return (
+              <div className="grid lg:grid-cols-12 gap-10 lg:gap-16 mt-12">
+                <div className="lg:col-span-5">
+                  <div
+                    className={`inline-flex items-center justify-center h-12 w-12 mb-6 ${
+                      isInfoTab
+                        ? 'bg-accent text-accent-foreground'
+                        : 'bg-primary text-primary-foreground'
+                    }`}
                   >
-                    <span className="flex-shrink-0 mt-0.5">
-                      <CheckCircle2 className="h-4 w-4 text-accent-dark" strokeWidth={1.75} />
-                    </span>
-                    <p className="text-[14px] leading-relaxed text-foreground/85">
-                      {isEN ? b.en : b.ar}
+                    <CurrentIcon className="h-5 w-5" strokeWidth={1.5} />
+                  </div>
+                  {isInfoTab && (
+                    <p className="eyebrow text-[10px] tracking-[0.3em] uppercase text-accent-dark font-semibold mb-3">
+                      {current.key === 'about'
+                        ? isEN
+                          ? 'Information'
+                          : 'معلومات'
+                        : isEN
+                          ? 'User Manual'
+                          : 'دليل الاستخدام'}
                     </p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          </div>
+                  )}
+                  <h3
+                    className="text-[26px] lg:text-[30px] leading-tight tracking-tight text-primary font-semibold"
+                    style={{ fontFamily: isEN ? 'var(--font-display)' : 'var(--font-display-ar)' }}
+                  >
+                    {isEN ? current.title.en : current.title.ar}
+                  </h3>
+                  <p className="mt-4 text-[15px] leading-relaxed text-muted-foreground">
+                    {isEN ? current.lede.en : current.lede.ar}
+                  </p>
+                </div>
+
+                <div className="lg:col-span-7">
+                  {current.bullets && (
+                    <ul className="space-y-5">
+                      {current.bullets.map((b, i) => (
+                        <li
+                          key={i}
+                          className="flex gap-4 pb-5 border-b border-border last:border-b-0 last:pb-0"
+                        >
+                          <span className="flex-shrink-0 mt-0.5">
+                            <CheckCircle2 className="h-4 w-4 text-accent-dark" strokeWidth={1.75} />
+                          </span>
+                          <p className="text-[14px] leading-relaxed text-foreground/85">
+                            {isEN ? b.en : b.ar}
+                          </p>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+
+                  {current.sections && (
+                    <div className="space-y-10">
+                      {current.sections.map((s, si) => (
+                        <div key={si}>
+                          <h4
+                            className="text-[15px] font-semibold text-primary mb-4 pb-2 border-b border-border"
+                            style={{ fontFamily: isEN ? 'var(--font-display)' : 'var(--font-display-ar)' }}
+                          >
+                            {isEN ? s.heading.en : s.heading.ar}
+                          </h4>
+                          <ul className="space-y-3">
+                            {s.items.map((it, ii) => (
+                              <li key={ii} className="flex gap-3">
+                                <span className="flex-shrink-0 mt-1">
+                                  <span className="block h-1.5 w-1.5 rounded-full bg-accent-dark" />
+                                </span>
+                                <p className="text-[14px] leading-relaxed text-foreground/85">
+                                  {isEN ? it.en : it.ar}
+                                </p>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       </section>
 
