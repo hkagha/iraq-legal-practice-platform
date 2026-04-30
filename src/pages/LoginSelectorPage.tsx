@@ -71,7 +71,7 @@ const TABS: TabContent[] = [
         items: [
           { en: 'Staff — firm admins, lawyers, paralegals, secretaries, and accountants working inside a law firm.', ar: 'الموظفون — مدراء المكاتب والمحامون والمساعدون والسكرتارية والمحاسبون داخل المكتب.' },
           { en: 'Portal clients — natural persons accessing their own matters, or acting as representatives of one or more entities.', ar: 'عملاء البوابة — أشخاص طبيعيون يصلون إلى قضاياهم، أو يعملون ممثلين عن جهة أو أكثر.' },
-          { en: 'Platform — super administrators with unrestricted access, and sales administrators limited to non-confidential tenant data.', ar: 'المنصة — مدراء منصة بصلاحيات كاملة، ومدراء مبيعات بصلاحيات محدودة لا تشمل البيانات السرية.' },
+          { en: '\n', ar: '\n' },
         ],
       },
       {
