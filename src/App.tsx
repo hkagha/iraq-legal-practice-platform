@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
 import { LanguageProvider } from "@/contexts/LanguageContext";
 import { TimerProvider } from "@/contexts/TimerContext";
-import { AuthProvider } from "@/contexts/AuthContext";
+import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ImpersonationProvider } from "@/contexts/ImpersonationContext";
 import ProtectedRoute from "@/components/auth/ProtectedRoute";
 import { PortalOrgProvider } from '@/contexts/PortalOrgContext';
@@ -109,6 +109,11 @@ const MessagesPage = () => <Navigate to="/dashboard" replace />;
 /** Empty Outlet wrapper used as the parent route element for the portal. */
 const PortalRoot = () => <Outlet />;
 const TeamPage = () => <Navigate to="/settings" replace />;
+
+const SuperAdminOnly = ({ children }: { children: React.ReactNode }) => {
+  const { profile } = useAuth();
+  return profile?.role === 'super_admin' ? <>{children}</> : <Navigate to="/admin/dashboard" replace />;
+};
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -213,15 +218,15 @@ const App = () => (
                   <Route index element={<Navigate to="/admin/dashboard" replace />} />
                   <Route path="dashboard" element={<AdminDashboardPage />} />
                   <Route path="organizations" element={<AdminOrganizationsPage />} />
-                  <Route path="users" element={<AdminUsersPage />} />
-                  <Route path="backups" element={<AdminBackupsPage />} />
+                  <Route path="users" element={<SuperAdminOnly><AdminUsersPage /></SuperAdminOnly>} />
+                  <Route path="backups" element={<SuperAdminOnly><AdminBackupsPage /></SuperAdminOnly>} />
                   <Route path="analytics" element={<AdminAnalyticsPage />} />
-                  <Route path="audit-log" element={<AdminAuditLogPage />} />
-                  <Route path="announcements" element={<AdminAnnouncementsPage />} />
-                  <Route path="settings" element={<AdminSettingsPage />} />
-                  <Route path="organizations/:id" element={<AdminOrganizationDetailPage />} />
+                  <Route path="audit-log" element={<SuperAdminOnly><AdminAuditLogPage /></SuperAdminOnly>} />
+                  <Route path="announcements" element={<SuperAdminOnly><AdminAnnouncementsPage /></SuperAdminOnly>} />
+                  <Route path="settings" element={<SuperAdminOnly><AdminSettingsPage /></SuperAdminOnly>} />
+                  <Route path="organizations/:id" element={<SuperAdminOnly><AdminOrganizationDetailPage /></SuperAdminOnly>} />
                   <Route path="revenue" element={<AdminRevenuePage />} />
-                  <Route path="system-health" element={<AdminSystemHealthPage />} />
+                  <Route path="system-health" element={<SuperAdminOnly><AdminSystemHealthPage /></SuperAdminOnly>} />
                 </Route>
 
                 <Route path="*" element={<NotFound />} />

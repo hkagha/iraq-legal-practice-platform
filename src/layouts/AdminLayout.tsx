@@ -13,27 +13,31 @@ const adminNavItems = [
   { key: 'dashboard', path: '/admin/dashboard', icon: LayoutDashboard, label: 'Dashboard', labelAr: 'لوحة التحكم' },
   { key: 'divider1', divider: true },
   { key: 'organizations', path: '/admin/organizations', icon: Building, label: 'Organizations', labelAr: 'المؤسسات' },
-  { key: 'users', path: '/admin/users', icon: Users, label: 'Users', labelAr: 'المستخدمون' },
+  { key: 'users', path: '/admin/users', icon: Users, label: 'Users', labelAr: 'المستخدمون', superAdminOnly: true },
   { key: 'divider2', divider: true },
   { key: 'analytics', path: '/admin/analytics', icon: BarChart3, label: 'Analytics', labelAr: 'التحليلات' },
   { key: 'revenue', path: '/admin/revenue', icon: DollarSign, label: 'Revenue', labelAr: 'الإيرادات' },
   { key: 'divider3', divider: true },
-  { key: 'backups', path: '/admin/backups', icon: Database, label: 'Backups', labelAr: 'النسخ الاحتياطي' },
+  { key: 'backups', path: '/admin/backups', icon: Database, label: 'Backups', labelAr: 'النسخ الاحتياطي', superAdminOnly: true },
   { key: 'divider4', divider: true },
-  { key: 'announcements', path: '/admin/announcements', icon: Megaphone, label: 'Announcements', labelAr: 'الإعلانات' },
-  { key: 'audit', path: '/admin/audit-log', icon: ClipboardList, label: 'Audit Log', labelAr: 'سجل المراجعة' },
-  { key: 'settings', path: '/admin/settings', icon: Settings, label: 'Platform Settings', labelAr: 'إعدادات المنصة' },
+  { key: 'announcements', path: '/admin/announcements', icon: Megaphone, label: 'Announcements', labelAr: 'الإعلانات', superAdminOnly: true },
+  { key: 'audit', path: '/admin/audit-log', icon: ClipboardList, label: 'Audit Log', labelAr: 'سجل المراجعة', superAdminOnly: true },
+  { key: 'settings', path: '/admin/settings', icon: Settings, label: 'Platform Settings', labelAr: 'إعدادات المنصة', superAdminOnly: true },
   { key: 'divider5', divider: true },
-  { key: 'health', path: '/admin/system-health', icon: Server, label: 'System Health', labelAr: 'صحة النظام' },
+  { key: 'health', path: '/admin/system-health', icon: Server, label: 'System Health', labelAr: 'صحة النظام', superAdminOnly: true },
 ];
 
 export default function AdminLayout() {
   const { language, setLanguage, isRTL } = useLanguage();
-  const { signOut, getInitials } = useAuth();
+  const { signOut, getInitials, profile } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const isEN = language === 'en';
+  const isSuperAdmin = profile?.role === 'super_admin';
+  const visibleNavItems = adminNavItems
+    .filter((item) => item.divider || !item.superAdminOnly || isSuperAdmin)
+    .filter((item, index, items) => !item.divider || (index > 0 && index < items.length - 1 && !items[index - 1].divider));
 
   const CollapseIcon = isRTL ? (collapsed ? ChevronLeft : ChevronRight) : (collapsed ? ChevronRight : ChevronLeft);
 
@@ -61,7 +65,7 @@ export default function AdminLayout() {
 
         {/* Nav */}
         <nav className="flex-1 overflow-y-auto py-3 space-y-0.5">
-          {adminNavItems.map(item => {
+          {visibleNavItems.map(item => {
             if ((item as any).divider) {
               return <div key={item.key} className="h-px bg-primary-foreground/10 mx-4 my-2" />;
             }
@@ -100,7 +104,9 @@ export default function AdminLayout() {
             <div className="flex items-center gap-2 px-2 mb-2">
               <div className="h-8 w-8 rounded-full bg-accent/20 text-accent flex items-center justify-center text-body-sm font-semibold">{getInitials()}</div>
               <div className="min-w-0">
-                <p className="text-body-sm text-primary-foreground truncate">Super Admin</p>
+                <p className="text-body-sm text-primary-foreground truncate">
+                  {profile?.role === 'sales_admin' ? 'Sales Admin' : 'Super Admin'}
+                </p>
                 <button onClick={handleSignOut} className="text-body-sm text-primary-foreground/50 hover:text-primary-foreground/80 transition-colors flex items-center gap-1">
                   <LogOut className="h-3 w-3" /> {isEN ? 'Sign Out' : 'خروج'}
                 </button>
