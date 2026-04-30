@@ -51,8 +51,8 @@ interface AuthContextType {
   isLoading: boolean;
   /** True once we've finished checking BOTH profiles and portal_users for the current session. */
   identityResolved: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: string | null }>;
-  signUp: (data: SignUpData) => Promise<{ error: string | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: string | null; code?: string }>;
+  signUp: (data: SignUpData) => Promise<{ error: string | null; needsEmailConfirmation?: boolean }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<void>;
   /** Re-fetch profile/organization for the current session. Used by impersonation to pick up org swaps. */
@@ -317,7 +317,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     authDebug('signIn:start', { email });
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     authDebug('signIn:result', { email, error: error?.message ?? null });
-    if (error) return { error: error.message };
+    if (error) return { error: error.message, code: (error as { code?: string }).code };
     return { error: null };
   };
 
@@ -335,6 +335,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     if (error) return { error: error.message };
     if (!authData.user) return { error: 'Registration failed' };
+    const needsEmailConfirmation = !authData.session;
 
     // Create organization
     const slug = data.organizationName
@@ -367,8 +368,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       .eq('id', authData.user.id);
 
-    await fetchProfile(authData.user.id);
-    return { error: null };
+    if (!needsEmailConfirmation) {
+      await fetchProfile(authData.user.id);
+    }
+    return { error: null, needsEmailConfirmation };
   };
 
   const signOut = async () => {
