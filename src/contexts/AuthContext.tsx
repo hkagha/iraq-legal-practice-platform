@@ -51,7 +51,7 @@ interface AuthContextType {
   isLoading: boolean;
   /** True once we've finished checking BOTH profiles and portal_users for the current session. */
   identityResolved: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: string | null }>;
+  signIn: (email: string, password: string) => Promise<{ error: string | null; code?: string }>;
   signUp: (data: SignUpData) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<void>;
@@ -317,7 +317,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     authDebug('signIn:start', { email });
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     authDebug('signIn:result', { email, error: error?.message ?? null });
-    if (error) return { error: error.message };
+    if (error) return { error: error.message, code: (error as { code?: string }).code };
     return { error: null };
   };
 
