@@ -4177,6 +4177,10 @@ export type Database = {
         Args: { p_invoice_id: string }
         Returns: undefined
       }
+      create_case_with_parties: {
+        Args: { _case: Json; _parties: Json }
+        Returns: string
+      }
       create_notification: {
         Args: {
           p_actor_id?: string
