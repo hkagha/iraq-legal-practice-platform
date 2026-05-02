@@ -13,6 +13,7 @@ import { ar as arLocale } from 'date-fns/locale';
 import {
   Download, Eye, EyeOff, FileText, File, Image, Sheet, FileType,
   Scale, FileCheck, User, Upload, MoreVertical, Archive, Trash2, Loader2,
+  CheckCircle2, AlertTriangle,
 } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
@@ -132,6 +133,21 @@ export default function DocumentDetailSlideOver({ documentId, isOpen, onClose, o
     setDeleteConfirm(false); onClose(); onRefresh();
   };
 
+  const handleApproveReview = async () => {
+    if (!doc) return;
+    const { error } = await supabase
+      .from('documents')
+      .update({ review_status: 'approved' } as any)
+      .eq('id', doc.id);
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+    setDoc((prev: any) => ({ ...prev, review_status: 'approved', reviewed_at: new Date().toISOString(), reviewed_by: profile?.id }));
+    toast.success(language === 'ar' ? 'تمت مراجعة المستند' : 'Document reviewed');
+    onRefresh();
+  };
+
   if (!doc && loading) {
     return <SlideOver isOpen={isOpen} onClose={onClose} title="" titleAr="" width="xl">
       <div className="flex items-center justify-center h-40"><Loader2 className="animate-spin text-muted-foreground" size={24} /></div>
@@ -162,6 +178,12 @@ export default function DocumentDetailSlideOver({ documentId, isOpen, onClose, o
         width="xl"
         footer={
           <div className="flex items-center gap-2 w-full justify-end">
+            {doc.review_status === 'pending_review' && (
+              <Button variant="outline" onClick={handleApproveReview}>
+                <CheckCircle2 size={14} className="me-1.5" />
+                {language === 'ar' ? 'اعتماد المراجعة' : 'Mark reviewed'}
+              </Button>
+            )}
             <Button onClick={handleDownload} className="bg-accent text-accent-foreground hover:bg-accent/90"><Download size={14} className="me-1.5" />{language === 'ar' ? 'تحميل' : 'Download'}</Button>
             <DropdownMenu>
               <DropdownMenuTrigger asChild><Button variant="outline" size="icon"><MoreVertical size={16} /></Button></DropdownMenuTrigger>
@@ -240,6 +262,21 @@ export default function DocumentDetailSlideOver({ documentId, isOpen, onClose, o
               <div><span className="text-body-sm text-muted-foreground block">{t('documents.fields.uploadedAt')}</span><span className="text-body-md">{format(new Date(doc.created_at), 'dd/MM/yyyy HH:mm')}</span></div>
               <div><span className="text-body-sm text-muted-foreground block">{t('documents.fields.size')}</span><span className="text-body-md">{formatFileSize(doc.file_size_bytes)}</span></div>
               <div><span className="text-body-sm text-muted-foreground block">{t('documents.fields.version')}</span><span className="text-body-md">v{doc.version}</span></div>
+              <div><span className="text-body-sm text-muted-foreground block">{language === 'ar' ? 'حالة المراجعة' : 'Review status'}</span>
+                {doc.review_status === 'pending_review' ? (
+                  <span className="inline-flex items-center gap-1 text-xs font-medium rounded-badge px-2.5 py-0.5 bg-warning-light text-warning">
+                    <AlertTriangle size={12} /> {language === 'ar' ? 'بانتظار مراجعة الموظفين' : 'Pending staff review'}
+                  </span>
+                ) : doc.review_status === 'needs_changes' ? (
+                  <span className="inline-flex items-center gap-1 text-xs font-medium rounded-badge px-2.5 py-0.5 bg-error-light text-error">
+                    <AlertTriangle size={12} /> {language === 'ar' ? 'يحتاج تعديلات' : 'Needs changes'}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 text-xs font-medium rounded-badge px-2.5 py-0.5 bg-success-light text-success">
+                    <CheckCircle2 size={12} /> {language === 'ar' ? 'تمت المراجعة' : 'Reviewed'}
+                  </span>
+                )}
+              </div>
               <div className="flex items-center justify-between">
                 <span className="text-body-sm text-muted-foreground">{t('documents.fields.visibleToClient')}</span>
                 <Switch checked={doc.is_visible_to_client} onCheckedChange={toggleVisibility} />

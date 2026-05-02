@@ -1493,6 +1493,9 @@ export type Database = {
           parent_document_id: string | null
           party_type: string | null
           person_id: string | null
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
           search_tsv: unknown
           status: string
           tags: string[] | null
@@ -1549,6 +1552,9 @@ export type Database = {
           parent_document_id?: string | null
           party_type?: string | null
           person_id?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           search_tsv?: unknown
           status?: string
           tags?: string[] | null
@@ -1605,6 +1611,9 @@ export type Database = {
           parent_document_id?: string | null
           party_type?: string | null
           person_id?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           search_tsv?: unknown
           status?: string
           tags?: string[] | null
