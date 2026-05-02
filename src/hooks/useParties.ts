@@ -90,7 +90,7 @@ export function useParties(opts: UsePartiesOptions = {}) {
       const personsById = new Map((personsResult.data as PersonRow[]).map((p) => [p.id, p]));
       const entitiesById = new Map((entitiesResult.data as EntityRow[]).map((e) => [e.id, e]));
 
-      return rows.flatMap((row) => {
+      return rows.flatMap<UnifiedPartyRow>((row) => {
         if (row.party_type === 'person') {
           const person = personsById.get(row.id);
           return person ? [{ id: row.id, partyType: 'person' as const, person, status: person.status, createdAt: person.created_at }] : [];
