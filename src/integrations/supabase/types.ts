@@ -4396,7 +4396,54 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      v_parties_unified: {
+        Row: {
+          company_registration_number: string | null
+          created_at: string | null
+          display_name: string | null
+          display_name_ar: string | null
+          email: string | null
+          id: string | null
+          national_id_number: string | null
+          organization_id: string | null
+          party_type: string | null
+          phone: string | null
+          status: string | null
+          tax_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          company_registration_number?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          display_name_ar?: string | null
+          email?: string | null
+          id?: string | null
+          national_id_number?: string | null
+          organization_id?: string | null
+          party_type?: string | null
+          phone?: string | null
+          status?: string | null
+          tax_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          company_registration_number?: string | null
+          created_at?: string | null
+          display_name?: string | null
+          display_name_ar?: string | null
+          email?: string | null
+          id?: string | null
+          national_id_number?: string | null
+          organization_id?: string | null
+          party_type?: string | null
+          phone?: string | null
+          status?: string | null
+          tax_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       _ai_key_passphrase: { Args: never; Returns: string }

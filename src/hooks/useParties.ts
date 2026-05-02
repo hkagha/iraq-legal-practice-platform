@@ -22,9 +22,18 @@ export interface UnifiedPartyRow {
   createdAt: string;
 }
 
+type UnifiedPartyViewRow = {
+  id: string;
+  party_type: 'person' | 'entity';
+  status: string;
+  created_at: string;
+  updated_at: string;
+};
+
 /**
- * Returns persons + entities in the org, unified into a single sortable list.
- * No SQL UNION needed — two queries client-side, merged.
+ * Returns persons + entities in one org-scoped, searchable, consistently ordered list.
+ * The database view handles the union/search/order; follow-up table fetches keep the
+ * existing row shape used by party pickers and client pages.
  */
 export function useParties(opts: UsePartiesOptions = {}) {
   const { profile } = useAuth();
@@ -35,48 +44,61 @@ export function useParties(opts: UsePartiesOptions = {}) {
     queryKey: ['parties', orgId, search, type, status, limit],
     enabled: !!orgId && enabled,
     queryFn: async (): Promise<UnifiedPartyRow[]> => {
-      const promises: Array<PromiseLike<unknown>> = [];
+      let q = supabase
+        .from('v_parties_unified')
+        .select('id, party_type, status, created_at, updated_at')
+        .eq('organization_id', orgId!)
+        .order('updated_at', { ascending: false })
+        .limit(limit);
 
-      if (type === 'all' || type === 'person') {
-        let q = supabase.from('persons').select('*').eq('organization_id', orgId!).limit(limit);
-        if (status) q = q.eq('status', status);
-        if (search) {
-          const s = `%${search}%`;
-          q = q.or(
-            `first_name.ilike.${s},last_name.ilike.${s},first_name_ar.ilike.${s},last_name_ar.ilike.${s},email.ilike.${s},phone.ilike.${s}`,
-          );
-        }
-        promises.push(q.order('updated_at', { ascending: false }).then((r) => r));
-      }
-      if (type === 'all' || type === 'entity') {
-        let q = supabase.from('entities').select('*').eq('organization_id', orgId!).limit(limit);
-        if (status) q = q.eq('status', status);
-        if (search) {
-          const s = `%${search}%`;
-          q = q.or(`company_name.ilike.${s},company_name_ar.ilike.${s},email.ilike.${s},phone.ilike.${s}`);
-        }
-        promises.push(q.order('updated_at', { ascending: false }).then((r) => r));
-      }
-
-      const results = await Promise.all(promises);
-      const merged: UnifiedPartyRow[] = [];
-
-      let idx = 0;
-      if (type === 'all' || type === 'person') {
-        const r = results[idx++] as { data: PersonRow[] | null };
-        for (const p of r.data || []) {
-          merged.push({ id: p.id, partyType: 'person', person: p, status: p.status, createdAt: p.created_at });
-        }
-      }
-      if (type === 'all' || type === 'entity') {
-        const r = results[idx++] as { data: EntityRow[] | null };
-        for (const e of r.data || []) {
-          merged.push({ id: e.id, partyType: 'entity', entity: e, status: e.status, createdAt: e.created_at });
-        }
+      if (type !== 'all') q = q.eq('party_type', type);
+      if (status) q = q.eq('status', status);
+      if (search.trim()) {
+        const s = `%${search.trim()}%`;
+        q = q.or(
+          [
+            `display_name.ilike.${s}`,
+            `display_name_ar.ilike.${s}`,
+            `email.ilike.${s}`,
+            `phone.ilike.${s}`,
+            `national_id_number.ilike.${s}`,
+            `company_registration_number.ilike.${s}`,
+            `tax_id.ilike.${s}`,
+          ].join(','),
+        );
       }
 
-      // Sort newest first, regardless of source
-      return merged.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+      const { data: indexRows, error } = await q;
+      if (error) throw error;
+
+      const rows = (indexRows ?? []) as UnifiedPartyViewRow[];
+      const personIds = rows.filter((r) => r.party_type === 'person').map((r) => r.id);
+      const entityIds = rows.filter((r) => r.party_type === 'entity').map((r) => r.id);
+
+      const [personsResult, entitiesResult] = await Promise.all([
+        personIds.length
+          ? supabase.from('persons').select('*').in('id', personIds)
+          : Promise.resolve({ data: [] as PersonRow[], error: null }),
+        entityIds.length
+          ? supabase.from('entities').select('*').in('id', entityIds)
+          : Promise.resolve({ data: [] as EntityRow[], error: null }),
+      ]);
+
+      if (personsResult.error) throw personsResult.error;
+      if (entitiesResult.error) throw entitiesResult.error;
+
+      const personsById = new Map((personsResult.data as PersonRow[]).map((p) => [p.id, p]));
+      const entitiesById = new Map((entitiesResult.data as EntityRow[]).map((e) => [e.id, e]));
+
+      return rows.flatMap((row) => {
+        if (row.party_type === 'person') {
+          const person = personsById.get(row.id);
+          return person ? [{ id: row.id, partyType: 'person' as const, person, status: person.status, createdAt: person.created_at }] : [];
+        }
+
+        const entity = entitiesById.get(row.id);
+        return entity ? [{ id: row.id, partyType: 'entity' as const, entity, status: entity.status, createdAt: entity.created_at }] : [];
+      });
     },
   });
 }
