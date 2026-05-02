@@ -16,6 +16,12 @@ import { Check } from 'lucide-react';
 
 const EVENT_TYPES = ['meeting', 'appointment', 'deadline', 'reminder', 'court_date', 'consultation', 'conference', 'training', 'personal', 'other'];
 const COLORS = ['#C9A84C', '#3B82F6', '#EF4444', '#10B981', '#8B5CF6', '#F59E0B', '#EC4899', '#6B7280'];
+const NONE_VALUE = '__none__';
+
+type MatterOption = {
+  id: string;
+  label: string;
+};
 
 interface EventFormModalProps {
   isOpen: boolean;
@@ -41,6 +47,10 @@ export default function EventFormModal({ isOpen, onClose, onSaved, editEvent, de
   const [location, setLocation] = useState('');
   const [isVirtual, setIsVirtual] = useState(false);
   const [virtualLink, setVirtualLink] = useState('');
+  const [caseId, setCaseId] = useState('');
+  const [errandId, setErrandId] = useState('');
+  const [cases, setCases] = useState<MatterOption[]>([]);
+  const [errands, setErrands] = useState<MatterOption[]>([]);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -57,6 +67,8 @@ export default function EventFormModal({ isOpen, onClose, onSaved, editEvent, de
       setLocation(editEvent.location || '');
       setIsVirtual(editEvent.is_virtual || false);
       setVirtualLink(editEvent.virtual_link || '');
+      setCaseId(editEvent.case_id || '');
+      setErrandId(editEvent.errand_id || '');
     } else {
       setTitle('');
       setDescription('');
@@ -70,8 +82,63 @@ export default function EventFormModal({ isOpen, onClose, onSaved, editEvent, de
       setLocation('');
       setIsVirtual(false);
       setVirtualLink('');
+      setCaseId('');
+      setErrandId('');
     }
   }, [editEvent, defaultDate, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen || !profile?.organization_id) return;
+
+    const loadMatters = async () => {
+      const [caseResult, errandResult] = await Promise.all([
+        supabase
+          .from('cases')
+          .select('id, case_number, title, title_ar')
+          .eq('organization_id', profile.organization_id)
+          .order('created_at', { ascending: false })
+          .limit(100),
+        supabase
+          .from('errands')
+          .select('id, errand_number, title, title_ar')
+          .eq('organization_id', profile.organization_id)
+          .order('created_at', { ascending: false })
+          .limit(100),
+      ]);
+
+      if (caseResult.error) {
+        toast.error(caseResult.error.message);
+      } else {
+        setCases((caseResult.data ?? []).map((matter: any) => ({
+          id: matter.id,
+          label: [matter.case_number, language === 'ar' ? (matter.title_ar || matter.title) : matter.title].filter(Boolean).join(' - '),
+        })));
+      }
+
+      if (errandResult.error) {
+        toast.error(errandResult.error.message);
+      } else {
+        setErrands((errandResult.data ?? []).map((matter: any) => ({
+          id: matter.id,
+          label: [matter.errand_number, language === 'ar' ? (matter.title_ar || matter.title) : matter.title].filter(Boolean).join(' - '),
+        })));
+      }
+    };
+
+    loadMatters();
+  }, [isOpen, language, profile?.organization_id]);
+
+  const handleCaseChange = (value: string) => {
+    const nextValue = value === NONE_VALUE ? '' : value;
+    setCaseId(nextValue);
+    if (nextValue) setErrandId('');
+  };
+
+  const handleErrandChange = (value: string) => {
+    const nextValue = value === NONE_VALUE ? '' : value;
+    setErrandId(nextValue);
+    if (nextValue) setCaseId('');
+  };
 
   const handleSubmit = async () => {
     if (!title.trim() || !startDate || !profile?.organization_id || !user) return;
@@ -92,6 +159,8 @@ export default function EventFormModal({ isOpen, onClose, onSaved, editEvent, de
       is_virtual: isVirtual,
       virtual_link: isVirtual ? virtualLink.trim() || null : null,
       organization_id: profile.organization_id,
+      case_id: caseId || null,
+      errand_id: errandId || null,
     };
 
     let error;
@@ -147,6 +216,32 @@ export default function EventFormModal({ isOpen, onClose, onSaved, editEvent, de
                   </button>
                 ))}
               </div>
+            </div>
+          </div>
+
+          {/* Matter link */}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label className="text-label mb-1.5 block">{language === 'ar' ? 'القضية المرتبطة' : 'Linked case'}</Label>
+              <FormSelect
+                value={caseId || NONE_VALUE}
+                onValueChange={handleCaseChange}
+                options={[
+                  { value: NONE_VALUE, label: language === 'ar' ? 'بدون قضية' : 'No case' },
+                  ...cases.map(matter => ({ value: matter.id, label: matter.label })),
+                ]}
+              />
+            </div>
+            <div>
+              <Label className="text-label mb-1.5 block">{language === 'ar' ? 'المعاملة المرتبطة' : 'Linked errand'}</Label>
+              <FormSelect
+                value={errandId || NONE_VALUE}
+                onValueChange={handleErrandChange}
+                options={[
+                  { value: NONE_VALUE, label: language === 'ar' ? 'بدون معاملة' : 'No errand' },
+                  ...errands.map(matter => ({ value: matter.id, label: matter.label })),
+                ]}
+              />
             </div>
           </div>
 

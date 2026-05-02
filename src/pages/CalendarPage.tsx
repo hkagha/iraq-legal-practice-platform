@@ -57,7 +57,7 @@ export default function CalendarPage() {
         supabase.from('errands').select('id, title, title_ar, due_date').eq('organization_id', orgId!).gte('due_date', from).lte('due_date', to),
         supabase.from('tasks').select('id, title, title_ar, due_date, status').eq('organization_id', orgId!).gte('due_date', from).lte('due_date', to).neq('status', 'completed'),
         supabase.from('invoices').select('id, invoice_number, due_date, status').eq('organization_id', orgId!).gte('due_date', from).lte('due_date', to).not('status', 'in', '(paid,cancelled,written_off,draft)'),
-        supabase.from('calendar_events').select('id, title, title_ar, start_date, start_time').eq('organization_id', orgId!).gte('start_date', from).lte('start_date', to),
+        supabase.from('calendar_events').select('id, title, title_ar, start_date, start_time, case_id, errand_id').eq('organization_id', orgId!).gte('start_date', from).lte('start_date', to),
       ]);
 
       const hearingCaseIds = [...new Set((hearings.data ?? []).map(h => h.case_id))];
@@ -81,7 +81,15 @@ export default function CalendarPage() {
         ...(errands.data ?? []).map((e: any) => ({ id: e.id, type: 'errand' as const, title: e.title, title_ar: e.title_ar, date: e.due_date, link: `/errands/${e.id}` })),
         ...(tasks.data ?? []).map((t: any) => ({ id: t.id, type: 'task' as const, title: t.title, title_ar: t.title_ar, date: t.due_date, link: `/tasks` })),
         ...(invoices.data ?? []).map((i: any) => ({ id: i.id, type: 'invoice' as const, title: i.invoice_number, title_ar: i.invoice_number, date: i.due_date, link: `/billing/${i.id}` })),
-        ...(events.data ?? []).map((e: any) => ({ id: e.id, type: 'event' as const, title: e.title, title_ar: e.title_ar, date: e.start_date, time: e.start_time, link: `/calendar` })),
+        ...(events.data ?? []).map((e: any) => ({
+          id: e.id,
+          type: 'event' as const,
+          title: e.title,
+          title_ar: e.title_ar,
+          date: e.start_date,
+          time: e.start_time,
+          link: e.case_id ? `/cases/${e.case_id}` : e.errand_id ? `/errands/${e.errand_id}` : '/calendar',
+        })),
       ];
     },
   });
