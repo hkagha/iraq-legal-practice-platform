@@ -3425,6 +3425,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          ai_features_disabled: boolean
           avatar_url: string | null
           created_at: string
           email: string
@@ -3453,6 +3454,7 @@ export type Database = {
           whatsapp_number: string | null
         }
         Insert: {
+          ai_features_disabled?: boolean
           avatar_url?: string | null
           created_at?: string
           email?: string
@@ -3481,6 +3483,7 @@ export type Database = {
           whatsapp_number?: string | null
         }
         Update: {
+          ai_features_disabled?: boolean
           avatar_url?: string | null
           created_at?: string
           email?: string
