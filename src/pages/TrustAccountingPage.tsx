@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { useLanguage } from '@/contexts/LanguageContext';
 import {
   listTrustAccounts,
   createTrustAccount,
@@ -20,17 +21,20 @@ import SEO from '@/components/SEO';
 import { toast } from 'sonner';
 import { Plus, Wallet } from 'lucide-react';
 
-const TX_TYPES: { value: TrustTxType; label: string }[] = [
-  { value: 'deposit', label: 'Deposit' },
-  { value: 'withdrawal', label: 'Withdrawal' },
-  { value: 'invoice_application', label: 'Apply to Invoice' },
-  { value: 'refund', label: 'Refund' },
-  { value: 'adjustment', label: 'Adjustment' },
-  { value: 'transfer', label: 'Transfer' },
+const TX_TYPES: { value: TrustTxType; label: string; labelAr: string }[] = [
+  { value: 'deposit', label: 'Deposit', labelAr: 'إيداع' },
+  { value: 'withdrawal', label: 'Withdrawal', labelAr: 'سحب' },
+  { value: 'invoice_application', label: 'Apply to Invoice', labelAr: 'تسوية على فاتورة' },
+  { value: 'refund', label: 'Refund', labelAr: 'استرداد' },
+  { value: 'adjustment', label: 'Adjustment', labelAr: 'تسوية' },
+  { value: 'transfer', label: 'Transfer', labelAr: 'تحويل' },
 ];
 
 export default function TrustAccountingPage() {
   const { profile } = useAuth();
+  const { language } = useLanguage();
+  const isAR = language === 'ar';
+  const t = (en: string, ar: string) => (isAR ? ar : en);
   const orgId = profile?.organization_id || '';
   const [accounts, setAccounts] = useState<TrustAccount[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -59,7 +63,7 @@ export default function TrustAccountingPage() {
       setAccounts(list);
       if (!selectedId && list.length) setSelectedId(list[0].id);
     } catch (e: any) {
-      toast.error(e.message || 'Failed to load trust accounts');
+      toast.error(e.message || t('Failed to load trust accounts', 'تعذر تحميل حسابات الأمانات'));
     } finally {
       setLoading(false);
     }
@@ -85,20 +89,20 @@ export default function TrustAccountingPage() {
         currency: acctCurrency,
         created_by: profile?.id,
       });
-      toast.success('Trust account created');
+      toast.success(t('Trust account created', 'تم إنشاء حساب الأمانات'));
       setOpenAcct(false);
       setAcctName('');
       await refresh();
       setSelectedId(a.id);
     } catch (e: any) {
-      toast.error(e.message || 'Failed to create account');
+      toast.error(e.message || t('Failed to create account', 'تعذر إنشاء الحساب'));
     }
   }
 
   async function handleCreateTx() {
     if (!selected || !orgId) return;
     const amt = parseFloat(txAmount);
-    if (!amt || amt <= 0) { toast.error('Enter a valid amount'); return; }
+    if (!amt || amt <= 0) { toast.error(t('Enter a valid amount', 'أدخل مبلغاً صحيحاً')); return; }
     try {
       await createTrustTransaction({
         organization_id: orgId,
@@ -110,14 +114,14 @@ export default function TrustAccountingPage() {
         notes: txNotes || null,
         created_by: profile?.id,
       });
-      toast.success('Transaction recorded');
+      toast.success(t('Transaction recorded', 'تم تسجيل الحركة'));
       setOpenTx(false);
       setTxAmount(''); setTxRef(''); setTxNotes('');
       const [list, t] = await Promise.all([listTrustAccounts(), listTrustTransactions(selected.id)]);
       setAccounts(list);
       setTxs(t);
     } catch (e: any) {
-      toast.error(e.message || 'Failed to record transaction');
+      toast.error(e.message || t('Failed to record transaction', 'تعذر تسجيل الحركة'));
     }
   }
 
@@ -125,26 +129,26 @@ export default function TrustAccountingPage() {
 
   return (
     <div className="p-6 space-y-6">
-      <SEO title="Trust Accounting" description="Client retainer trust ledger" />
+      <SEO title={t('Trust Accounting', 'حسابات الأمانات')} description={t('Client retainer trust ledger', 'سجل أمانات العملاء والدفعات المقدمة')} />
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Trust Accounting</h1>
-          <p className="text-sm text-muted-foreground mt-1">Manage client retainer balances and ledger entries</p>
+          <h1 className="text-2xl font-semibold">{t('Trust Accounting', 'حسابات الأمانات')}</h1>
+          <p className="text-sm text-muted-foreground mt-1">{t('Manage client retainer balances and ledger entries', 'إدارة أرصدة أمانات العملاء وحركات السجل')}</p>
         </div>
         <Button onClick={() => setOpenAcct(true)}>
-          <Plus className="h-4 w-4 mr-2" /> New Trust Account
+          <Plus className="h-4 w-4 me-2" /> {t('New Trust Account', 'حساب أمانات جديد')}
         </Button>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
         <Card>
-          <CardHeader><CardTitle className="text-sm">Accounts</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="text-sm">{t('Accounts', 'الحسابات')}</CardTitle></CardHeader>
           <CardContent className="p-2 space-y-1 max-h-[600px] overflow-auto">
-            {loading && <div className="p-3 text-sm text-muted-foreground">Loading…</div>}
+            {loading && <div className="p-3 text-sm text-muted-foreground">{t('Loading...', 'جار التحميل...')}</div>}
             {!loading && accounts.length === 0 && (
               <div className="p-6 text-center text-sm text-muted-foreground">
                 <Wallet className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                No trust accounts yet.
+                {t('No trust accounts yet.', 'لا توجد حسابات أمانات بعد.')}
               </div>
             )}
             {accounts.map((a) => (
@@ -166,7 +170,7 @@ export default function TrustAccountingPage() {
         <Card>
           <CardHeader className="flex-row items-center justify-between">
             <div>
-              <CardTitle className="text-base">{selected?.name || 'Select an account'}</CardTitle>
+              <CardTitle className="text-base">{selected?.name || t('Select an account', 'اختر حساباً')}</CardTitle>
               {selected && (
                 <div className="text-2xl font-semibold mt-1 font-mono">
                   {fmt(Number(selected.balance || 0), selected.currency)}
@@ -175,30 +179,30 @@ export default function TrustAccountingPage() {
             </div>
             {selected && (
               <Button size="sm" onClick={() => setOpenTx(true)}>
-                <Plus className="h-4 w-4 mr-2" /> New Transaction
+                <Plus className="h-4 w-4 me-2" /> {t('New Transaction', 'حركة جديدة')}
               </Button>
             )}
           </CardHeader>
           <CardContent>
             {!selected ? (
               <div className="p-12 text-center text-sm text-muted-foreground">
-                Pick a trust account to view its ledger.
+                {t('Pick a trust account to view its ledger.', 'اختر حساب أمانات لعرض سجله.')}
               </div>
             ) : (
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Type</TableHead>
-                    <TableHead>Reference</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
+                    <TableHead>{t('Date', 'التاريخ')}</TableHead>
+                    <TableHead>{t('Type', 'النوع')}</TableHead>
+                    <TableHead>{t('Reference', 'المرجع')}</TableHead>
+                    <TableHead className="text-end">{t('Amount', 'المبلغ')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {txs.length === 0 && (
                     <TableRow>
                       <TableCell colSpan={4} className="text-center text-sm text-muted-foreground py-8">
-                        No transactions yet.
+                        {t('No transactions yet.', 'لا توجد حركات بعد.')}
                       </TableCell>
                     </TableRow>
                   )}
@@ -207,9 +211,9 @@ export default function TrustAccountingPage() {
                     return (
                       <TableRow key={t.id}>
                         <TableCell className="font-mono text-xs">{t.transaction_date}</TableCell>
-                        <TableCell className="capitalize">{t.transaction_type.replace('_', ' ')}</TableCell>
+                        <TableCell>{TX_TYPES.find((type) => type.value === t.transaction_type)?.[isAR ? 'labelAr' : 'label'] || t.transaction_type.replace('_', ' ')}</TableCell>
                         <TableCell className="text-sm text-muted-foreground">{t.reference || '—'}</TableCell>
-                        <TableCell className={`text-right font-mono ${sign > 0 ? 'text-green-600' : 'text-destructive'}`}>
+                        <TableCell className={`text-end font-mono ${sign > 0 ? 'text-green-600' : 'text-destructive'}`}>
                           {sign > 0 ? '+' : '-'}{fmt(Number(t.amount), t.currency)}
                         </TableCell>
                       </TableRow>
@@ -225,25 +229,25 @@ export default function TrustAccountingPage() {
       {/* New account dialog */}
       <Dialog open={openAcct} onOpenChange={setOpenAcct}>
         <DialogContent>
-          <DialogHeader><DialogTitle>New Trust Account</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t('New Trust Account', 'حساب أمانات جديد')}</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Account Name</Label>
-              <Input value={acctName} onChange={(e) => setAcctName(e.target.value)} placeholder="Client name or matter" />
+              <Label>{t('Account Name', 'اسم الحساب')}</Label>
+              <Input value={acctName} onChange={(e) => setAcctName(e.target.value)} placeholder={t('Client name or matter', 'اسم العميل أو الملف')} />
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <Label>Client Type</Label>
+                <Label>{t('Client Type', 'نوع العميل')}</Label>
                 <Select value={acctParty} onValueChange={(v) => setAcctParty(v as any)}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="person">Person</SelectItem>
-                    <SelectItem value="entity">Entity</SelectItem>
+                    <SelectItem value="person">{t('Person', 'شخص')}</SelectItem>
+                    <SelectItem value="entity">{t('Entity', 'شركة / جهة اعتبارية')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
               <div>
-                <Label>Currency</Label>
+                <Label>{t('Currency', 'العملة')}</Label>
                 <Select value={acctCurrency} onValueChange={setAcctCurrency}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
@@ -256,8 +260,8 @@ export default function TrustAccountingPage() {
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenAcct(false)}>Cancel</Button>
-            <Button onClick={handleCreateAccount}>Create</Button>
+            <Button variant="outline" onClick={() => setOpenAcct(false)}>{t('Cancel', 'إلغاء')}</Button>
+            <Button onClick={handleCreateAccount}>{t('Create', 'إنشاء')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
@@ -265,33 +269,33 @@ export default function TrustAccountingPage() {
       {/* New tx dialog */}
       <Dialog open={openTx} onOpenChange={setOpenTx}>
         <DialogContent>
-          <DialogHeader><DialogTitle>New Trust Transaction</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle>{t('New Trust Transaction', 'حركة أمانات جديدة')}</DialogTitle></DialogHeader>
           <div className="space-y-4">
             <div>
-              <Label>Type</Label>
+              <Label>{t('Type', 'النوع')}</Label>
               <Select value={txType} onValueChange={(v) => setTxType(v as TrustTxType)}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>
-                  {TX_TYPES.map((t) => <SelectItem key={t.value} value={t.value}>{t.label}</SelectItem>)}
+                  {TX_TYPES.map((type) => <SelectItem key={type.value} value={type.value}>{isAR ? type.labelAr : type.label}</SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Label>Amount ({selected?.currency})</Label>
+              <Label>{t('Amount', 'المبلغ')} ({selected?.currency})</Label>
               <Input type="number" step="0.01" value={txAmount} onChange={(e) => setTxAmount(e.target.value)} />
             </div>
             <div>
-              <Label>Reference</Label>
-              <Input value={txRef} onChange={(e) => setTxRef(e.target.value)} placeholder="Receipt #, wire ref, etc." />
+              <Label>{t('Reference', 'المرجع')}</Label>
+              <Input value={txRef} onChange={(e) => setTxRef(e.target.value)} placeholder={t('Receipt #, wire ref, etc.', 'رقم الوصل أو مرجع التحويل...')} />
             </div>
             <div>
-              <Label>Notes</Label>
+              <Label>{t('Notes', 'ملاحظات')}</Label>
               <Input value={txNotes} onChange={(e) => setTxNotes(e.target.value)} />
             </div>
           </div>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setOpenTx(false)}>Cancel</Button>
-            <Button onClick={handleCreateTx}>Record</Button>
+            <Button variant="outline" onClick={() => setOpenTx(false)}>{t('Cancel', 'إلغاء')}</Button>
+            <Button onClick={handleCreateTx}>{t('Record', 'تسجيل')}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
