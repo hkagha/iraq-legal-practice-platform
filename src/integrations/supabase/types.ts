@@ -1454,6 +1454,10 @@ export type Database = {
           ai_summary: string | null
           ai_tags: string[] | null
           case_id: string | null
+          corrected_text: string | null
+          corrected_text_updated_at: string | null
+          corrected_text_updated_by: string | null
+          corrected_text_version: number
           created_at: string
           description: string | null
           description_ar: string | null
@@ -1482,6 +1486,9 @@ export type Database = {
           parent_document_id: string | null
           party_type: string | null
           person_id: string | null
+          review_status: string
+          reviewed_at: string | null
+          reviewed_by: string | null
           search_tsv: unknown
           status: string
           tags: string[] | null
@@ -1506,6 +1513,10 @@ export type Database = {
           ai_summary?: string | null
           ai_tags?: string[] | null
           case_id?: string | null
+          corrected_text?: string | null
+          corrected_text_updated_at?: string | null
+          corrected_text_updated_by?: string | null
+          corrected_text_version?: number
           created_at?: string
           description?: string | null
           description_ar?: string | null
@@ -1534,6 +1545,9 @@ export type Database = {
           parent_document_id?: string | null
           party_type?: string | null
           person_id?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           search_tsv?: unknown
           status?: string
           tags?: string[] | null
@@ -1558,6 +1572,10 @@ export type Database = {
           ai_summary?: string | null
           ai_tags?: string[] | null
           case_id?: string | null
+          corrected_text?: string | null
+          corrected_text_updated_at?: string | null
+          corrected_text_updated_by?: string | null
+          corrected_text_version?: number
           created_at?: string
           description?: string | null
           description_ar?: string | null
@@ -1586,6 +1604,9 @@ export type Database = {
           parent_document_id?: string | null
           party_type?: string | null
           person_id?: string | null
+          review_status?: string
+          reviewed_at?: string | null
+          reviewed_by?: string | null
           search_tsv?: unknown
           status?: string
           tags?: string[] | null
@@ -1602,6 +1623,13 @@ export type Database = {
             columns: ["case_id"]
             isOneToOne: false
             referencedRelation: "cases"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_corrected_text_updated_by_fkey"
+            columns: ["corrected_text_updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -1644,6 +1672,13 @@ export type Database = {
             columns: ["person_id"]
             isOneToOne: false
             referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
