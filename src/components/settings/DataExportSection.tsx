@@ -41,10 +41,14 @@ function formatBytes(bytes: number): string {
 }
 
 const ALL_TABLES = [
-  'clients', 'client_contacts', 'cases', 'case_hearings', 'case_notes',
-  'errands', 'errand_steps', 'errand_notes', 'documents',
-  'time_entries', 'invoices', 'invoice_line_items', 'payments',
-  'tasks', 'task_comments', 'calendar_events', 'billing_rates',
+  'persons', 'entities', 'entity_representatives',
+  'cases', 'case_parties', 'case_team_members', 'case_hearings', 'case_notes', 'case_activities',
+  'errands', 'errand_team_members', 'errand_steps', 'errand_notes', 'errand_activities',
+  'documents', 'document_comments', 'document_activities',
+  'time_entries', 'billing_rates', 'invoices', 'invoice_line_items', 'payments',
+  'trust_accounts', 'trust_transactions',
+  'tasks', 'task_comments', 'calendar_events', 'portal_user_links', 'client_messages',
+  'conflict_checks', 'ai_usage_log',
 ];
 
 export default function DataExportSection() {
@@ -66,6 +70,19 @@ export default function DataExportSection() {
     }
   }, [organization?.id]);
 
+  const auditExport = async (details: Record<string, any>) => {
+    if (!organization?.id || !user?.id) return;
+    await supabase.from('firm_audit_log' as any).insert({
+      organization_id: organization.id,
+      actor_id: user.id,
+      event_type: 'export',
+      target_table: details.table_name || 'system_backups',
+      target_id: details.backup_id || null,
+      target_name: details.filename || details.backup_name || null,
+      details,
+    });
+  };
+
   const exportTable = async (table: string, filename: string) => {
     if (!organization?.id) return;
     setLoading(table);
@@ -77,6 +94,7 @@ export default function DataExportSection() {
         .limit(10000);
       if (error) throw error;
       downloadCSV(data || [], filename);
+      await auditExport({ table_name: table, filename, format: 'csv', row_count: (data || []).length });
       toast({ title: language === 'ar' ? 'تم التصدير بنجاح' : 'Exported successfully' });
     } catch {
       toast({ title: language === 'ar' ? 'فشل التصدير' : 'Export failed', variant: 'destructive' });
@@ -114,8 +132,8 @@ export default function DataExportSection() {
       const recordCounts: Record<string, number> = {};
 
       for (const t of ALL_TABLES) {
-        const { data } = await supabase.from(t as any).select('*').eq('organization_id', organization.id).limit(10000);
-        if (data) { results[t] = data; recordCounts[t] = data.length; }
+        const { data, error } = await supabase.from(t as any).select('*').eq('organization_id', organization.id).limit(10000);
+        if (!error && data) { results[t] = data; recordCounts[t] = data.length; }
       }
 
       const jsonStr = JSON.stringify({
@@ -132,6 +150,15 @@ export default function DataExportSection() {
         data_file_path: filePath, data_size_bytes: jsonStr.length, record_counts: recordCounts,
       } as any).eq('id', (backup as any).id);
 
+      await auditExport({
+        backup_id: (backup as any).id,
+        backup_name: backupName,
+        format: 'json',
+        includes_database: true,
+        includes_storage: false,
+        record_counts: recordCounts,
+      });
+
       toast({ title: language === 'ar' ? 'اكتمل النسخ الاحتياطي!' : 'Backup completed!' });
       // Refresh
       const { data: refreshed } = await supabase.from('system_backups').select('*').eq('organization_id', organization.id).order('created_at', { ascending: false }).limit(10);
@@ -146,6 +173,12 @@ export default function DataExportSection() {
     if (!b.data_file_path) return;
     const { data } = await supabase.storage.from('system-backups').createSignedUrl(b.data_file_path, 3600);
     if (data?.signedUrl) {
+      await auditExport({
+        backup_id: b.id,
+        backup_name: b.backup_name,
+        format: 'json',
+        action: 'download_backup',
+      });
       const a = document.createElement('a');
       a.href = data.signedUrl;
       a.download = `qanuni-backup-${new Date(b.created_at).toISOString().split('T')[0]}.json`;
@@ -154,7 +187,8 @@ export default function DataExportSection() {
   };
 
   const exports = [
-    { key: 'clients', icon: Users, label: language === 'ar' ? 'تصدير العملاء (CSV)' : 'Export Clients (CSV)', file: 'clients.csv' },
+    { key: 'persons', icon: Users, label: language === 'ar' ? 'تصدير الأشخاص (CSV)' : 'Export Persons (CSV)', file: 'persons.csv' },
+    { key: 'entities', icon: Users, label: language === 'ar' ? 'تصدير الشركات والجهات (CSV)' : 'Export Entities (CSV)', file: 'entities.csv' },
     { key: 'cases', icon: Scale, label: language === 'ar' ? 'تصدير القضايا (CSV)' : 'Export Cases (CSV)', file: 'cases.csv' },
     { key: 'errands', icon: FileCheck, label: language === 'ar' ? 'تصدير المعاملات (CSV)' : 'Export Errands (CSV)', file: 'errands.csv' },
     { key: 'time_entries', icon: Clock, label: language === 'ar' ? 'تصدير سجلات الوقت (CSV)' : 'Export Time Entries (CSV)', file: 'time_entries.csv' },
