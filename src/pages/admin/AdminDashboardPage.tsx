@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import {
@@ -30,7 +31,9 @@ interface PlatformStats {
 
 export default function AdminDashboardPage() {
   const { language } = useLanguage();
+  const { profile } = useAuth();
   const isEN = language === 'en';
+  const isSuperAdmin = profile?.role === 'super_admin';
   const navigate = useNavigate();
   const [stats, setStats] = useState<PlatformStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -63,8 +66,12 @@ export default function AdminDashboardPage() {
       supabase.from('cases').select('id, organization_id'),
       supabase.from('errands').select('id, organization_id'),
       supabase.from('documents').select('id, organization_id'),
-      supabase.from('case_activities').select('id, title, description, created_at, organization_id').order('created_at', { ascending: false }).limit(10),
-      supabase.from('errand_activities').select('id, title, description, created_at, organization_id').order('created_at', { ascending: false }).limit(10),
+      isSuperAdmin
+        ? supabase.from('case_activities').select('id, title, description, created_at, organization_id').order('created_at', { ascending: false }).limit(10)
+        : Promise.resolve({ data: [], error: null }),
+      isSuperAdmin
+        ? supabase.from('errand_activities').select('id, title, description, created_at, organization_id').order('created_at', { ascending: false }).limit(10)
+        : Promise.resolve({ data: [], error: null }),
     ]);
 
     const orgs = orgsCountRes.data || [];
@@ -159,11 +166,15 @@ export default function AdminDashboardPage() {
     setTopOrgs(orgActivity);
 
     // Recent platform activity
-    const allActivities = [
-      ...(recentCaseActs.data || []).map((a: any) => ({ ...a, source: 'case' })),
-      ...(recentErrandActs.data || []).map((a: any) => ({ ...a, source: 'errand' })),
-    ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 15);
-    setRecentActivity(allActivities);
+    if (isSuperAdmin) {
+      const allActivities = [
+        ...(recentCaseActs.data || []).map((a: any) => ({ ...a, source: 'case' })),
+        ...(recentErrandActs.data || []).map((a: any) => ({ ...a, source: 'errand' })),
+      ].sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime()).slice(0, 15);
+      setRecentActivity(allActivities);
+    } else {
+      setRecentActivity([]);
+    }
 
     setLoading(false);
   }
@@ -244,15 +255,19 @@ export default function AdminDashboardPage() {
         <button onClick={() => navigate('/admin/organizations')} className="flex items-center gap-2 px-4 h-9 rounded-lg border border-border bg-card text-body-sm hover:bg-muted transition-colors">
           <Plus className="h-4 w-4" /> {isEN ? 'New Organization' : 'مؤسسة جديدة'}
         </button>
-        <button onClick={() => navigate('/admin/users')} className="flex items-center gap-2 px-4 h-9 rounded-lg border border-border bg-card text-body-sm hover:bg-muted transition-colors">
-          <UserPlus className="h-4 w-4" /> {isEN ? 'Manage Users' : 'إدارة المستخدمين'}
-        </button>
-        <button onClick={() => navigate('/admin/backups')} className="flex items-center gap-2 px-4 h-9 rounded-lg border border-border bg-card text-body-sm hover:bg-muted transition-colors">
-          <Database className="h-4 w-4" /> {isEN ? 'Create Backup' : 'نسخ احتياطي'}
-        </button>
-        <button onClick={() => navigate('/admin/announcements')} className="flex items-center gap-2 px-4 h-9 rounded-lg border border-border bg-card text-body-sm hover:bg-muted transition-colors">
-          <Megaphone className="h-4 w-4" /> {isEN ? 'Send Announcement' : 'إرسال إعلان'}
-        </button>
+        {isSuperAdmin && (
+          <>
+            <button onClick={() => navigate('/admin/users')} className="flex items-center gap-2 px-4 h-9 rounded-lg border border-border bg-card text-body-sm hover:bg-muted transition-colors">
+              <UserPlus className="h-4 w-4" /> {isEN ? 'Manage Users' : 'إدارة المستخدمين'}
+            </button>
+            <button onClick={() => navigate('/admin/backups')} className="flex items-center gap-2 px-4 h-9 rounded-lg border border-border bg-card text-body-sm hover:bg-muted transition-colors">
+              <Database className="h-4 w-4" /> {isEN ? 'Create Backup' : 'نسخ احتياطي'}
+            </button>
+            <button onClick={() => navigate('/admin/announcements')} className="flex items-center gap-2 px-4 h-9 rounded-lg border border-border bg-card text-body-sm hover:bg-muted transition-colors">
+              <Megaphone className="h-4 w-4" /> {isEN ? 'Send Announcement' : 'إرسال إعلان'}
+            </button>
+          </>
+        )}
       </div>
 
       {/* KPI Row 1 */}
@@ -339,31 +354,32 @@ export default function AdminDashboardPage() {
         </div>
       </div>
 
-      {/* Recent Activity */}
-      <div className="bg-card border rounded-lg p-5">
-        <h3 className="text-heading-sm text-foreground mb-4 flex items-center gap-2">
-          <Activity className="h-4 w-4" />
-          {isEN ? 'Recent Platform Activity' : 'النشاط الأخير على المنصة'}
-        </h3>
-        <div className="space-y-3">
-          {recentActivity.map((act: any) => (
-            <div key={`${act.source}-${act.id}`} className="flex items-start gap-3 text-body-sm">
-              <div className={`h-2 w-2 rounded-full mt-1.5 shrink-0 ${act.source === 'case' ? 'bg-info' : 'bg-purple-500'}`} />
-              <div className="flex-1 min-w-0">
-                <p className="text-foreground truncate">{act.title || act.description || '—'}</p>
-                <div className="flex items-center gap-2 text-muted-foreground text-[12px]">
-                  <span>{orgMap[act.organization_id] || 'Unknown'}</span>
-                  <span>·</span>
-                  <span>{timeAgo(act.created_at)}</span>
+      {isSuperAdmin && (
+        <div className="bg-card border rounded-lg p-5">
+          <h3 className="text-heading-sm text-foreground mb-4 flex items-center gap-2">
+            <Activity className="h-4 w-4" />
+            {isEN ? 'Recent Platform Activity' : 'النشاط الأخير على المنصة'}
+          </h3>
+          <div className="space-y-3">
+            {recentActivity.map((act: any) => (
+              <div key={`${act.source}-${act.id}`} className="flex items-start gap-3 text-body-sm">
+                <div className={`h-2 w-2 rounded-full mt-1.5 shrink-0 ${act.source === 'case' ? 'bg-info' : 'bg-purple-500'}`} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-foreground truncate">{act.title || act.description || '—'}</p>
+                  <div className="flex items-center gap-2 text-muted-foreground text-[12px]">
+                    <span>{orgMap[act.organization_id] || 'Unknown'}</span>
+                    <span>·</span>
+                    <span>{timeAgo(act.created_at)}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-          {recentActivity.length === 0 && (
-            <p className="text-muted-foreground text-body-sm">{isEN ? 'No recent activity' : 'لا يوجد نشاط حديث'}</p>
-          )}
+            ))}
+            {recentActivity.length === 0 && (
+              <p className="text-muted-foreground text-body-sm">{isEN ? 'No recent activity' : 'لا يوجد نشاط حديث'}</p>
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }
