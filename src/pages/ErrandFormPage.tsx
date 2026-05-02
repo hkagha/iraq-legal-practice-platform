@@ -144,11 +144,11 @@ export default function ErrandFormPage() {
       } else {
         payload.created_by = profile.id;
         payload.errand_number = '';
-        const { data, error } = await supabase.from('errands').insert(payload).select('id').single();
+        const { data, error } = await supabase.rpc('create_errand_with_team' as any, { _errand: payload });
         if (error) throw error;
         qc.invalidateQueries({ queryKey: ['errands'] });
         toast.success(lang === 'ar' ? 'تم الإنشاء' : 'Created');
-        navigate(`/errands/${data!.id}`);
+        navigate(`/errands/${data}`);
       }
     } catch (e: any) {
       toast.error(e?.message || 'Failed to save');
