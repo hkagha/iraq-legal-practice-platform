@@ -14,7 +14,8 @@ import { FormTextarea } from '@/components/ui/FormTextarea';
 import { FormSelect } from '@/components/ui/FormSelect';
 import { PhoneInput } from '@/components/ui/PhoneInput';
 import { GovernorateSelect } from '@/components/ui/GovernorateSelect';
-import { CitySelect } from '@/components/ui/CitySelect';import { CountrySelect } from '@/components/ui/CountrySelect';
+import { CitySelect } from '@/components/ui/CitySelect';
+import { CountrySelect } from '@/components/ui/CountrySelect';
 import type { EntityRow, PartyRef } from '@/types/parties';
 import { resolveEntityName } from '@/lib/parties';
 
@@ -103,6 +104,33 @@ export default function EntityFormSlideOver({ isOpen, onClose, entity, onSaved }
     if (!profile?.organization_id) return;
     setSubmitting(true);
     try {
+      const { data: duplicateRows, error: duplicateError } = await supabase.rpc('check_party_duplicates' as any, {
+        _party_type: 'entity',
+        _payload: values as any,
+        _exclude_id: entity?.id || null,
+      });
+      if (duplicateError) throw duplicateError;
+      const duplicates = (duplicateRows || []) as any[];
+      const direct = duplicates.filter((d) => d.severity === 'direct');
+      if (direct.length > 0) {
+        toast.error(language === 'ar'
+          ? 'توجد شركة بنفس رقم التسجيل أو البريد الإلكتروني داخل هذه المؤسسة.'
+          : 'A company with the same registration number or email already exists in this firm.');
+        return;
+      }
+      if (!isEdit && duplicates.length > 0 && profile.role !== 'firm_admin') {
+        toast.error(language === 'ar'
+          ? 'توجد سجلات مشابهة. اطلب من مسؤول المكتب مراجعتها قبل إنشاء سجل جديد.'
+          : 'Similar records exist. Ask a firm admin to review them before creating a new record.');
+        return;
+      }
+      if (!isEdit && duplicates.length > 0 && profile.role === 'firm_admin') {
+        const names = duplicates.slice(0, 3).map((d) => d.display_name).join(', ');
+        const proceed = window.confirm(language === 'ar'
+          ? `توجد سجلات مشابهة: ${names}. هل تريد إنشاء سجل جديد رغم ذلك؟`
+          : `Similar records exist: ${names}. Create a new record anyway?`);
+        if (!proceed) return;
+      }
       const payload: any = {
         ...values,
         email: values.email || null,

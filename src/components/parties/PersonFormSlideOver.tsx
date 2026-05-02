@@ -104,6 +104,33 @@ export default function PersonFormSlideOver({ isOpen, onClose, person, onSaved }
     if (!profile?.organization_id) return;
     setSubmitting(true);
     try {
+      const { data: duplicateRows, error: duplicateError } = await supabase.rpc('check_party_duplicates' as any, {
+        _party_type: 'person',
+        _payload: values as any,
+        _exclude_id: person?.id || null,
+      });
+      if (duplicateError) throw duplicateError;
+      const duplicates = (duplicateRows || []) as any[];
+      const direct = duplicates.filter((d) => d.severity === 'direct');
+      if (direct.length > 0) {
+        toast.error(language === 'ar'
+          ? 'يوجد شخص بنفس الرقم الوطني أو البريد الإلكتروني داخل هذه المؤسسة.'
+          : 'A person with the same national ID or email already exists in this firm.');
+        return;
+      }
+      if (!isEdit && duplicates.length > 0 && profile.role !== 'firm_admin') {
+        toast.error(language === 'ar'
+          ? 'توجد سجلات مشابهة. اطلب من مسؤول المكتب مراجعتها قبل إنشاء سجل جديد.'
+          : 'Similar records exist. Ask a firm admin to review them before creating a new record.');
+        return;
+      }
+      if (!isEdit && duplicates.length > 0 && profile.role === 'firm_admin') {
+        const names = duplicates.slice(0, 3).map((d) => d.display_name).join(', ');
+        const proceed = window.confirm(language === 'ar'
+          ? `توجد سجلات مشابهة: ${names}. هل تريد إنشاء سجل جديد رغم ذلك؟`
+          : `Similar records exist: ${names}. Create a new record anyway?`);
+        if (!proceed) return;
+      }
       const payload: any = {
         ...values,
         email: values.email || null,
