@@ -4345,6 +4345,15 @@ export type Database = {
           tax_id: string
         }[]
       }
+      check_party_duplicates: {
+        Args: { _exclude_id?: string; _party_type: string; _payload: Json }
+        Returns: {
+          display_name: string
+          id: string
+          match_field: string
+          severity: string
+        }[]
+      }
       check_person_duplicates: {
         Args: {
           _email?: string
