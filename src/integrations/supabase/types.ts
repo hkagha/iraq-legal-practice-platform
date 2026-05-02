@@ -283,7 +283,6 @@ export type Database = {
           end_date: string | null
           end_time: string | null
           entity_id: string | null
-          errand_id: string | null
           event_type: string
           id: string
           is_all_day: boolean | null
@@ -314,7 +313,6 @@ export type Database = {
           end_date?: string | null
           end_time?: string | null
           entity_id?: string | null
-          errand_id?: string | null
           event_type?: string
           id?: string
           is_all_day?: boolean | null
@@ -345,7 +343,6 @@ export type Database = {
           end_date?: string | null
           end_time?: string | null
           entity_id?: string | null
-          errand_id?: string | null
           event_type?: string
           id?: string
           is_all_day?: boolean | null
@@ -386,13 +383,6 @@ export type Database = {
             columns: ["entity_id"]
             isOneToOne: false
             referencedRelation: "entities"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "calendar_events_errand_id_fkey"
-            columns: ["errand_id"]
-            isOneToOne: false
-            referencedRelation: "errands"
             referencedColumns: ["id"]
           },
           {
