@@ -1,3 +1,5 @@
+import { supabase } from '@/integrations/supabase/client';
+
 const AI_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/ai-assistant`;
 
 export interface AIStreamOptions {
@@ -15,12 +17,19 @@ export interface AIStreamOptions {
 
 export async function streamAI(options: AIStreamOptions): Promise<void> {
   const { feature, prompt, context, language, caseData, clientData, organizationId, onDelta, onDone, onError } = options;
+  const { data: sessionData, error: sessionError } = await supabase.auth.getSession();
+  const accessToken = sessionData.session?.access_token;
+
+  if (sessionError || !accessToken) {
+    onError?.('Please sign in again before using AI.');
+    return;
+  }
 
   const resp = await fetch(AI_URL, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
-      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      Authorization: `Bearer ${accessToken}`,
     },
     body: JSON.stringify({ feature, prompt, context, language, caseData, clientData, organization_id: organizationId }),
   });

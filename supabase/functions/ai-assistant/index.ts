@@ -241,7 +241,67 @@ serve(async (req) => {
   }
 
   try {
-    const { feature, prompt, context, language, caseData, clientData, organization_id } = await req.json();
+    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    const adminClient = createClient(supabaseUrl, supabaseServiceKey);
+    const authHeader = req.headers.get("Authorization") || "";
+    const token = authHeader.startsWith("Bearer ") ? authHeader.slice(7) : "";
+
+    if (!token) {
+      return new Response(JSON.stringify({ error: "Authentication required." }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { data: authData, error: authError } = await adminClient.auth.getUser(token);
+    if (authError || !authData.user) {
+      return new Response(JSON.stringify({ error: "Invalid or expired session." }), {
+        status: 401,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const { data: profile, error: profileError } = await adminClient
+      .from("profiles")
+      .select("id, organization_id, role, is_active, ai_features_disabled")
+      .eq("id", authData.user.id)
+      .maybeSingle();
+
+    if (profileError || !profile) {
+      return new Response(JSON.stringify({ error: "AI is available to authenticated staff only." }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (profile.is_active === false) {
+      return new Response(JSON.stringify({ error: "This staff account is inactive." }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (profile.ai_features_disabled) {
+      return new Response(JSON.stringify({ error: "AI features are disabled for this staff account." }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    const body = await req.json();
+    const { feature, prompt, context, language, caseData, clientData } = body;
+    const requestedOrgId = body.organization_id as string | undefined;
+    const organization_id = profile.role === "super_admin" && requestedOrgId
+      ? requestedOrgId
+      : profile.organization_id;
+
+    if (!organization_id) {
+      return new Response(JSON.stringify({ error: "No organization is available for this AI request." }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
 
     const systemPrompt = buildSystemPrompt(feature, language, context);
     const userPrompt = buildUserPrompt(feature, prompt || "", caseData, clientData, context);
