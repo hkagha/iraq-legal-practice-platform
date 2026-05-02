@@ -21,7 +21,7 @@ import { CASE_PARTY_ROLES, type PartyRef } from '@/types/parties';
 import PersonFormSlideOver from '@/components/parties/PersonFormSlideOver';
 import EntityFormSlideOver from '@/components/parties/EntityFormSlideOver';
 import { Star, Trash2, Plus } from 'lucide-react';
-import { saveConflictCheck, type ConflictMatch } from '@/lib/conflictChecker';
+import { runConflictCheck, saveConflictCheck, type ConflictMatch } from '@/lib/conflictChecker';
 
 interface DraftParty {
   ref: PartyRef;
@@ -102,55 +102,64 @@ export default function CaseFormPage() {
     setDraftParties((prev) => prev.map((p, i) => (i === idx ? { ...p, role } : p)));
   };
 
-  const findClientConflicts = async (clientParties: DraftParty[]): Promise<ConflictMatch[]> => {
-    const matches: ConflictMatch[] = [];
-    const activeCaseStatuses = ['intake', 'pending_conflict_review', 'active', 'on_hold', 'pending_judgment', 'appeal', 'enforcement'];
+  const buildConflictInput = async (party: DraftParty) => {
+    const base = {
+      organization_id: profile!.organization_id!,
+      query_name: party.ref.displayName,
+    };
 
-    for (const party of clientParties) {
-      const baseQuery = supabase
-        .from('case_parties')
-        .select('id, role, case_id, cases!inner(id, case_number, title, status)')
-        .neq('role', 'client')
-        .eq('organization_id', profile!.organization_id!)
-        .in('cases.status', activeCaseStatuses);
-
-      const { data, error } = party.ref.partyType === 'person'
-        ? await baseQuery.eq('person_id', party.ref.personId!)
-        : await baseQuery.eq('entity_id', party.ref.entityId!);
-
+    if (party.ref.partyType === 'person' && party.ref.personId) {
+      const { data, error } = await supabase
+        .from('persons')
+        .select('first_name, last_name, first_name_ar, last_name_ar, phone, secondary_phone, email, national_id_number')
+        .eq('id', party.ref.personId)
+        .maybeSingle();
       if (error) throw error;
 
-      for (const row of data || []) {
-        const c = (row as any).cases;
-        matches.push({
-          type: 'case_party',
-          id: c?.id || (row as any).case_id,
-          name: party.ref.displayName,
-          detail: c?.case_number || c?.title,
-          match_reason: `${(row as any).role}_on_active_case`,
-          severity: 'direct',
-        });
-      }
+      const storedName = [data?.first_name, data?.last_name].filter(Boolean).join(' ').trim();
+      const storedArabicName = [data?.first_name_ar, data?.last_name_ar].filter(Boolean).join(' ').trim();
 
-      const namePattern = `%${party.ref.displayName}%`;
-      const { data: legacyCases, error: legacyErr } = await supabase
-        .from('cases')
-        .select('id, case_number, title, opposing_party_name, opposing_party_name_ar')
-        .eq('organization_id', profile!.organization_id!)
-        .in('status', activeCaseStatuses)
-        .or(`opposing_party_name.ilike.${namePattern},opposing_party_name_ar.ilike.${namePattern}`)
-        .limit(10);
-      if (legacyErr) throw legacyErr;
+      return {
+        ...base,
+        query_name: storedName || storedArabicName || party.ref.displayName,
+        query_phone: data?.phone || data?.secondary_phone || undefined,
+        query_email: data?.email || undefined,
+        query_national_id: data?.national_id_number || undefined,
+      };
+    }
 
-      for (const c of legacyCases || []) {
-        matches.push({
-          type: 'case_party',
-          id: c.id,
-          name: party.ref.displayName,
-          detail: c.case_number || c.title,
-          match_reason: 'legacy_opposing_party_on_active_case',
-          severity: 'direct',
-        });
+    if (party.ref.partyType === 'entity' && party.ref.entityId) {
+      const { data, error } = await supabase
+        .from('entities')
+        .select('company_name, company_name_ar, phone, email, tax_id, company_registration_number')
+        .eq('id', party.ref.entityId)
+        .maybeSingle();
+      if (error) throw error;
+
+      return {
+        ...base,
+        query_name: data?.company_name || data?.company_name_ar || party.ref.displayName,
+        query_phone: data?.phone || undefined,
+        query_email: data?.email || undefined,
+        query_tax_id: data?.tax_id || undefined,
+        query_company_registration_number: data?.company_registration_number || undefined,
+      };
+    }
+
+    return base;
+  };
+
+  const findClientConflicts = async (clientParties: DraftParty[]): Promise<ConflictMatch[]> => {
+    const matches: ConflictMatch[] = [];
+    const seen = new Set<string>();
+
+    for (const party of clientParties) {
+      const result = await runConflictCheck(await buildConflictInput(party));
+      for (const match of result.matches) {
+        const key = `${match.type}:${match.id}:${match.match_reason}`;
+        if (seen.has(key)) continue;
+        seen.add(key);
+        matches.push(match);
       }
     }
 
