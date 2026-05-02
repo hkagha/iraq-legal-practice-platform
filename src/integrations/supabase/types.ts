@@ -2365,6 +2365,45 @@ export type Database = {
           },
         ]
       }
+      firm_audit_log: {
+        Row: {
+          actor_id: string
+          created_at: string
+          details: Json | null
+          event_type: string
+          id: string
+          ip_address: string | null
+          organization_id: string
+          target_id: string | null
+          target_name: string | null
+          target_table: string | null
+        }
+        Insert: {
+          actor_id: string
+          created_at?: string
+          details?: Json | null
+          event_type: string
+          id?: string
+          ip_address?: string | null
+          organization_id: string
+          target_id?: string | null
+          target_name?: string | null
+          target_table?: string | null
+        }
+        Update: {
+          actor_id?: string
+          created_at?: string
+          details?: Json | null
+          event_type?: string
+          id?: string
+          ip_address?: string | null
+          organization_id?: string
+          target_id?: string | null
+          target_name?: string | null
+          target_table?: string | null
+        }
+        Relationships: []
+      }
       invitations: {
         Row: {
           accepted_at: string | null
