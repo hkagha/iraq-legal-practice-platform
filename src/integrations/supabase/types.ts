@@ -4386,6 +4386,7 @@ export type Database = {
         Args: { _case: Json; _parties: Json }
         Returns: string
       }
+      create_errand_with_team: { Args: { _errand: Json }; Returns: string }
       create_notification: {
         Args: {
           p_actor_id?: string
