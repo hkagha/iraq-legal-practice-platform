@@ -2491,6 +2491,9 @@ export type Database = {
       invoices: {
         Row: {
           amount_paid: number
+          cancellation_reason: string | null
+          cancelled_at: string | null
+          cancelled_by: string | null
           case_id: string | null
           created_at: string
           created_by: string | null
@@ -2517,6 +2520,9 @@ export type Database = {
         }
         Insert: {
           amount_paid?: number
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           case_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -2543,6 +2549,9 @@ export type Database = {
         }
         Update: {
           amount_paid?: number
+          cancellation_reason?: string | null
+          cancelled_at?: string | null
+          cancelled_by?: string | null
           case_id?: string | null
           created_at?: string
           created_by?: string | null
@@ -2568,6 +2577,13 @@ export type Database = {
           viewed_at?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "invoices_cancelled_by_fkey"
+            columns: ["cancelled_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "invoices_case_id_fkey"
             columns: ["case_id"]
