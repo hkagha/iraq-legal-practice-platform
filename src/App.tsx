@@ -20,7 +20,6 @@ import { PageLoader } from '@/components/ui/PageLoader';
 // Static imports (always needed)
 import LoginPage from "@/pages/LoginPage";
 import StaffLoginPage from "@/pages/StaffLoginPage";
-import RegisterPage from "@/pages/RegisterPage";
 import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import NotFound from "./pages/NotFound";
 import InviteAcceptPage from "@/pages/InviteAcceptPage";
@@ -132,7 +131,7 @@ const App = () => (
                 <Route path="/" element={<LoginPage />} />
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/login/staff" element={<StaffLoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/register" element={<Navigate to="/login/staff" replace />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/invite/:token" element={<InviteAcceptPage />} />
                 <Route path="/admin/login" element={<AdminLoginPage />} />
