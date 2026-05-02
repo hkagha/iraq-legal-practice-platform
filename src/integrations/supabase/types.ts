@@ -4323,6 +4323,48 @@ export type Database = {
     }
     Functions: {
       _ai_key_passphrase: { Args: never; Returns: string }
+      check_entity_duplicates: {
+        Args: {
+          _company_name: string
+          _company_registration_number?: string
+          _email?: string
+          _exclude_id?: string
+          _organization_id: string
+          _phone?: string
+          _tax_id?: string
+        }
+        Returns: {
+          company_name: string
+          company_name_ar: string
+          company_registration_number: string
+          email: string
+          id: string
+          match_field: string
+          match_level: string
+          phone: string
+          tax_id: string
+        }[]
+      }
+      check_person_duplicates: {
+        Args: {
+          _email?: string
+          _exclude_id?: string
+          _full_name: string
+          _national_id?: string
+          _organization_id: string
+          _phone?: string
+        }
+        Returns: {
+          email: string
+          full_name: string
+          full_name_ar: string
+          id: string
+          match_field: string
+          match_level: string
+          national_id: string
+          phone: string
+        }[]
+      }
       client_can_access_document_object: {
         Args: { object_name: string }
         Returns: boolean
