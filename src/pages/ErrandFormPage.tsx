@@ -20,6 +20,8 @@ import type { PartyRef } from '@/types/parties';
 const ERRAND_TYPES = ['government_registration', 'license_renewal', 'document_authentication', 'court_filing', 'permit_application', 'tax_filing', 'other'];
 const STATUSES = ['intake', 'in_progress', 'waiting_on_client', 'waiting_on_authority', 'completed', 'cancelled', 'archived'];
 const PRIORITIES = ['low', 'normal', 'high', 'urgent'];
+const BILLING_TYPES = ['fixed_fee', 'hourly', 'retainer', 'contingency', 'pro_bono'];
+const CURRENCIES = ['IQD', 'USD'];
 
 export default function ErrandFormPage() {
   const { id } = useParams<{ id: string }>();
@@ -48,6 +50,13 @@ export default function ErrandFormPage() {
     case_id: '',
     assigned_to: '',
     is_visible_to_client: false,
+    billing_type: 'fixed_fee',
+    hourly_rate: '',
+    fixed_fee_amount: '',
+    retainer_amount: '',
+    contingency_percentage: '',
+    estimated_value: '',
+    estimated_value_currency: 'IQD',
   });
 
   useEffect(() => {
@@ -74,6 +83,13 @@ export default function ErrandFormPage() {
           case_id: data.case_id || '',
           assigned_to: data.assigned_to || '',
           is_visible_to_client: data.is_visible_to_client ?? false,
+          billing_type: data.billing_type || 'fixed_fee',
+          hourly_rate: data.hourly_rate?.toString() || '',
+          fixed_fee_amount: data.fixed_fee_amount?.toString() || '',
+          retainer_amount: data.retainer_amount?.toString() || '',
+          contingency_percentage: data.contingency_percentage?.toString() || '',
+          estimated_value: data.estimated_value?.toString() || '',
+          estimated_value_currency: data.estimated_value_currency || 'IQD',
         });
         if (data.party_type === 'person' && data.person_id) {
           const { data: p } = await supabase.from('persons').select('first_name, first_name_ar, last_name, last_name_ar').eq('id', data.person_id).maybeSingle();
@@ -133,6 +149,13 @@ export default function ErrandFormPage() {
         party_type: party?.partyType || null,
         person_id: party?.partyType === 'person' ? party.personId : null,
         entity_id: party?.partyType === 'entity' ? party.entityId : null,
+        billing_type: form.billing_type,
+        hourly_rate: form.hourly_rate ? parseFloat(form.hourly_rate) : null,
+        fixed_fee_amount: form.fixed_fee_amount ? parseFloat(form.fixed_fee_amount) : null,
+        retainer_amount: form.retainer_amount ? parseFloat(form.retainer_amount) : null,
+        contingency_percentage: form.contingency_percentage ? parseFloat(form.contingency_percentage) : null,
+        estimated_value: form.estimated_value ? parseFloat(form.estimated_value) : null,
+        estimated_value_currency: form.estimated_value_currency,
         organization_id: profile.organization_id,
       };
       if (isEdit) {
@@ -238,6 +261,60 @@ export default function ErrandFormPage() {
             <FormTextarea dir="rtl" value={form.description_ar} onChange={(e) => setForm({ ...form, description_ar: e.target.value })} />
           </FormField>
         </div>
+
+        <section className="space-y-4 pt-2">
+          <h2 className="text-heading-md text-foreground">{lang === 'ar' ? 'الفوترة' : 'Billing'}</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField label={lang === 'ar' ? 'نوع الفوترة' : 'Billing type'}>
+              <FormSelect
+                value={form.billing_type}
+                onValueChange={(v) => setForm({ ...form, billing_type: v })}
+                options={BILLING_TYPES.map((type) => ({
+                  value: type,
+                  label: lang === 'ar'
+                    ? ({
+                        fixed_fee: 'أتعاب مقطوعة',
+                        hourly: 'بالساعة',
+                        retainer: 'دفعة مقدمة',
+                        contingency: 'نسبة من النتيجة',
+                        pro_bono: 'دون أتعاب',
+                      } as Record<string, string>)[type]
+                    : type.replace(/_/g, ' '),
+                }))}
+              />
+            </FormField>
+            <FormField label={lang === 'ar' ? 'عملة القيمة المقدرة' : 'Estimated value currency'}>
+              <FormSelect
+                value={form.estimated_value_currency}
+                onValueChange={(v) => setForm({ ...form, estimated_value_currency: v })}
+                options={CURRENCIES.map((currency) => ({ value: currency, label: currency }))}
+              />
+            </FormField>
+            {form.billing_type === 'hourly' && (
+              <FormField label={lang === 'ar' ? 'سعر الساعة' : 'Hourly rate'}>
+                <FormInput type="number" min="0" step="0.01" value={form.hourly_rate} onChange={(e) => setForm({ ...form, hourly_rate: e.target.value })} />
+              </FormField>
+            )}
+            {form.billing_type === 'fixed_fee' && (
+              <FormField label={lang === 'ar' ? 'الأتعاب المقطوعة' : 'Fixed fee amount'}>
+                <FormInput type="number" min="0" step="0.01" value={form.fixed_fee_amount} onChange={(e) => setForm({ ...form, fixed_fee_amount: e.target.value })} />
+              </FormField>
+            )}
+            {form.billing_type === 'retainer' && (
+              <FormField label={lang === 'ar' ? 'مبلغ الدفعة المقدمة' : 'Retainer amount'}>
+                <FormInput type="number" min="0" step="0.01" value={form.retainer_amount} onChange={(e) => setForm({ ...form, retainer_amount: e.target.value })} />
+              </FormField>
+            )}
+            {form.billing_type === 'contingency' && (
+              <FormField label={lang === 'ar' ? 'النسبة المئوية' : 'Contingency percentage'}>
+                <FormInput type="number" min="0" max="100" step="0.01" value={form.contingency_percentage} onChange={(e) => setForm({ ...form, contingency_percentage: e.target.value })} />
+              </FormField>
+            )}
+            <FormField label={lang === 'ar' ? 'القيمة المقدرة' : 'Estimated value'}>
+              <FormInput type="number" min="0" step="0.01" value={form.estimated_value} onChange={(e) => setForm({ ...form, estimated_value: e.target.value })} />
+            </FormField>
+          </div>
+        </section>
 
         <div className="flex items-center justify-between pt-6 border-t border-border">
           <Button variant="outline" onClick={() => navigate(isEdit ? `/errands/${id}` : '/errands')}>
