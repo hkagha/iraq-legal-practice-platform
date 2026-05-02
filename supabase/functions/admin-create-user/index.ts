@@ -42,7 +42,7 @@ serve(async (req) => {
 
     if (!callerProfile) return jsonResponse({ error: "Profile not found" }, 403);
 
-    if (!["super_admin", "firm_admin"].includes(callerProfile.role)) {
+    if (!["super_admin", "sales_admin", "firm_admin"].includes(callerProfile.role)) {
       return jsonResponse({ error: "Only administrators can create users" }, 403);
     }
 
@@ -68,6 +68,10 @@ serve(async (req) => {
 
     if (callerProfile.role === "firm_admin" && ["super_admin", "sales_admin", "firm_admin"].includes(role)) {
       return jsonResponse({ error: "Insufficient permissions to create this role" }, 403);
+    }
+
+    if (callerProfile.role === "sales_admin" && role !== "firm_admin") {
+      return jsonResponse({ error: "Sales admins can only create the first firm administrator" }, 403);
     }
 
     if (role === "client" && !person_id) {
@@ -140,7 +144,6 @@ serve(async (req) => {
       targetUserId = existingUser.id;
     } else {
       targetUserId = createdUser.user.id;
-      await new Promise((resolve) => setTimeout(resolve, 800));
     }
 
     if (!targetUserId) return jsonResponse({ error: "Failed to obtain user id" }, 500);
@@ -229,7 +232,18 @@ serve(async (req) => {
       }
     }
 
-    if (callerProfile.role === "super_admin") {
+    await adminClient.from("firm_audit_log").insert({
+      organization_id,
+      actor_id: callerProfile.id,
+      actor_role: callerProfile.role,
+      event_type: "user_created",
+      target_table: role === "client" ? "portal_users" : "profiles",
+      target_id: targetUserId,
+      target_name: email,
+      details: { role, person_id: person_id || null, created_by_edge_function: true },
+    });
+
+    if (["super_admin", "sales_admin"].includes(callerProfile.role)) {
       await adminClient.from("admin_audit_log").insert({
         admin_id: callerProfile.id,
         action: "user_created",

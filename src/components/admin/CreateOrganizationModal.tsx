@@ -3,6 +3,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { logAdminAction } from '@/lib/adminAudit';
+import { createUserWithPassword } from '@/lib/passwordService';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { FormField } from '@/components/ui/FormField';
 import { FormInput } from '@/components/ui/FormInput';
@@ -41,33 +42,22 @@ export default function CreateOrganizationModal({ open, onClose, onSuccess }: Pr
       } as any).select().single();
       if (orgError) throw orgError;
 
-      // 2. Create auth user
-      const { data: authData, error: authError } = await supabase.auth.signUp({
-        email: adminEmail, password: tempPassword,
-        options: { data: { first_name: firstName, last_name: lastName, role: 'firm_admin' }, emailRedirectTo: `${window.location.origin}/login` },
+      // 2. Create the first firm admin server-side so the platform admin session is not replaced.
+      const userResult = await createUserWithPassword({
+        email: adminEmail,
+        password: tempPassword,
+        first_name: firstName,
+        last_name: lastName,
+        phone: phone || undefined,
+        role: 'firm_admin',
+        organization_id: (org as any).id,
       });
-      if (authError) {
-        // Rollback org
+      if (!userResult.success) {
         await supabase.from('organizations').delete().eq('id', (org as any).id);
-        throw authError;
+        throw new Error(userResult.error || 'Failed to create firm admin');
       }
 
-      // 3. Update profile with org
-      await new Promise(r => setTimeout(r, 1500));
-      await supabase.from('profiles').update({
-        organization_id: (org as any).id, role: 'firm_admin', first_name: firstName, last_name: lastName, phone: phone || null,
-      } as any).eq('email', adminEmail);
-
-      // 4. Mark password as admin-set
-      if (authData.user?.id) {
-        await supabase.from('profiles').update({
-          password_set_by_admin: true,
-          password_last_changed_at: new Date().toISOString(),
-          password_changed_by: user?.id || null,
-        } as any).eq('id', authData.user.id);
-      }
-
-      // 5. Audit
+      // 3. Audit
       if (user) await logAdminAction(user.id, 'org_created', 'organization', (org as any).id, orgName);
 
       toast.success(isEN ? `Organization "${orgName}" created` : `تم إنشاء المؤسسة "${orgName}"`);
