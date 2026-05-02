@@ -1132,6 +1132,39 @@ export type Database = {
         }
         Relationships: []
       }
+      document_access_audit: {
+        Row: {
+          access_type: string
+          created_at: string
+          document_id: string | null
+          id: string
+          metadata: Json | null
+          organization_id: string
+          user_id: string
+          via_archive: boolean
+        }
+        Insert: {
+          access_type: string
+          created_at?: string
+          document_id?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id: string
+          user_id: string
+          via_archive?: boolean
+        }
+        Update: {
+          access_type?: string
+          created_at?: string
+          document_id?: string | null
+          id?: string
+          metadata?: Json | null
+          organization_id?: string
+          user_id?: string
+          via_archive?: boolean
+        }
+        Relationships: []
+      }
       document_activities: {
         Row: {
           activity_type: string
@@ -3489,6 +3522,7 @@ export type Database = {
       profiles: {
         Row: {
           ai_features_disabled: boolean
+          archive_read: boolean
           avatar_url: string | null
           created_at: string
           email: string
@@ -3518,6 +3552,7 @@ export type Database = {
         }
         Insert: {
           ai_features_disabled?: boolean
+          archive_read?: boolean
           avatar_url?: string | null
           created_at?: string
           email?: string
@@ -3547,6 +3582,7 @@ export type Database = {
         }
         Update: {
           ai_features_disabled?: boolean
+          archive_read?: boolean
           avatar_url?: string | null
           created_at?: string
           email?: string
@@ -4427,6 +4463,7 @@ export type Database = {
       }
       get_user_org_id: { Args: { _user_id: string }; Returns: string }
       get_user_role: { Args: { _user_id: string }; Returns: string }
+      has_archive_access: { Args: { _user_id: string }; Returns: boolean }
       has_org_finance_access: {
         Args: { _org_id: string; _user_id: string }
         Returns: boolean
