@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, useCallback, ReactNode 
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
 import { toast } from 'sonner';
+import { resolveTimeBillingDefaults } from '@/lib/timeBillingDefaults';
 
 interface ActiveTimer {
   id: string;
@@ -113,6 +114,13 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       return { ok: false, error: 'Select a case or errand before starting the timer.' };
     }
     const now = new Date();
+    const billingDefaults = await resolveTimeBillingDefaults({
+      organizationId: profile.organization_id,
+      userId: profile.id,
+      caseId: opts.case_id || null,
+      errandId: opts.errand_id || null,
+    });
+    const isBillable = opts.is_billable ?? billingDefaults.is_billable;
     const { data, error } = await supabase
       .from('time_entries')
       .insert({
@@ -123,7 +131,9 @@ export function TimerProvider({ children }: { children: ReactNode }) {
         errand_id: opts.errand_id || null,
         date: now.toISOString().split('T')[0],
         duration_minutes: 1,
-        is_billable: opts.is_billable ?? true,
+        is_billable: isBillable,
+        billing_rate: isBillable ? billingDefaults.billing_rate : null,
+        billing_rate_currency: billingDefaults.billing_rate_currency,
         is_timer_running: true,
         timer_started_at: now.toISOString(),
         status: 'draft',

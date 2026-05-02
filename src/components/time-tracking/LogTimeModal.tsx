@@ -10,6 +10,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { resolveTimeBillingDefaults } from '@/lib/timeBillingDefaults';
 
 interface Props {
   open?: boolean;
@@ -78,6 +79,22 @@ export default function LogTimeModal(props: Props) {
     });
   }, [isOpen, entryId]);
 
+  useEffect(() => {
+    if (!isOpen || entryId || !profile?.id || !profile?.organization_id || (!caseId && !errandId)) return;
+    let cancelled = false;
+    resolveTimeBillingDefaults({
+      organizationId: profile.organization_id,
+      userId: profile.id,
+      caseId: caseId || null,
+      errandId: errandId || null,
+    }).then((defaults) => {
+      if (cancelled) return;
+      setIsBillable(defaults.is_billable);
+      setBillingRate(defaults.billing_rate ? String(defaults.billing_rate) : '');
+    });
+    return () => { cancelled = true; };
+  }, [isOpen, entryId, profile?.id, profile?.organization_id, caseId, errandId]);
+
   const reset = () => {
     setDate(new Date().toISOString().split('T')[0]);
     setDescription('');
@@ -106,6 +123,13 @@ export default function LogTimeModal(props: Props) {
     }
 
     setSaving(true);
+    const defaults = await resolveTimeBillingDefaults({
+      organizationId: profile.organization_id,
+      userId: profile.id,
+      caseId: caseId || null,
+      errandId: errandId || null,
+    });
+    const rate = isBillable && billingRate ? parseFloat(billingRate) : defaults.billing_rate;
     const payload = {
       organization_id: profile.organization_id,
       user_id: profile.id,
@@ -116,7 +140,8 @@ export default function LogTimeModal(props: Props) {
       errand_id: errandId || null,
       is_billable: isBillable,
       is_timer_running: false,
-      billing_rate: isBillable && billingRate ? parseFloat(billingRate) : null,
+      billing_rate: isBillable ? rate : null,
+      billing_rate_currency: defaults.billing_rate_currency,
       status: 'draft' as const,
     };
 
