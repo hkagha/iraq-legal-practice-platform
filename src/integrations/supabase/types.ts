@@ -2247,9 +2247,11 @@ export type Database = {
       errands: {
         Row: {
           assigned_to: string | null
+          billing_type: string | null
           case_id: string | null
           completed_at: string | null
           completed_steps: number
+          contingency_percentage: number | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -2258,12 +2260,17 @@ export type Database = {
           entity_id: string | null
           errand_number: string
           errand_type: string
+          estimated_value: number | null
+          estimated_value_currency: string | null
+          fixed_fee_amount: number | null
+          hourly_rate: number | null
           id: string
           is_visible_to_client: boolean
           organization_id: string
           party_type: string | null
           person_id: string | null
           priority: string
+          retainer_amount: number | null
           status: string
           title: string
           title_ar: string | null
@@ -2272,9 +2279,11 @@ export type Database = {
         }
         Insert: {
           assigned_to?: string | null
+          billing_type?: string | null
           case_id?: string | null
           completed_at?: string | null
           completed_steps?: number
+          contingency_percentage?: number | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -2283,12 +2292,17 @@ export type Database = {
           entity_id?: string | null
           errand_number: string
           errand_type: string
+          estimated_value?: number | null
+          estimated_value_currency?: string | null
+          fixed_fee_amount?: number | null
+          hourly_rate?: number | null
           id?: string
           is_visible_to_client?: boolean
           organization_id: string
           party_type?: string | null
           person_id?: string | null
           priority?: string
+          retainer_amount?: number | null
           status?: string
           title: string
           title_ar?: string | null
@@ -2297,9 +2311,11 @@ export type Database = {
         }
         Update: {
           assigned_to?: string | null
+          billing_type?: string | null
           case_id?: string | null
           completed_at?: string | null
           completed_steps?: number
+          contingency_percentage?: number | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -2308,12 +2324,17 @@ export type Database = {
           entity_id?: string | null
           errand_number?: string
           errand_type?: string
+          estimated_value?: number | null
+          estimated_value_currency?: string | null
+          fixed_fee_amount?: number | null
+          hourly_rate?: number | null
           id?: string
           is_visible_to_client?: boolean
           organization_id?: string
           party_type?: string | null
           person_id?: string | null
           priority?: string
+          retainer_amount?: number | null
           status?: string
           title?: string
           title_ar?: string | null
@@ -4007,6 +4028,7 @@ export type Database = {
           person_id: string | null
           start_time: string | null
           status: string
+          task_id: string | null
           timer_started_at: string | null
           total_amount: number | null
           updated_at: string
@@ -4036,6 +4058,7 @@ export type Database = {
           person_id?: string | null
           start_time?: string | null
           status?: string
+          task_id?: string | null
           timer_started_at?: string | null
           total_amount?: number | null
           updated_at?: string
@@ -4065,6 +4088,7 @@ export type Database = {
           person_id?: string | null
           start_time?: string | null
           status?: string
+          task_id?: string | null
           timer_started_at?: string | null
           total_amount?: number | null
           updated_at?: string
