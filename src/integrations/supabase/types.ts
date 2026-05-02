@@ -4417,6 +4417,10 @@ export type Database = {
     }
     Functions: {
       _ai_key_passphrase: { Args: never; Returns: string }
+      assert_case_has_client_party: {
+        Args: { _case_id: string }
+        Returns: undefined
+      }
       check_entity_duplicates: {
         Args: {
           _company_name: string
