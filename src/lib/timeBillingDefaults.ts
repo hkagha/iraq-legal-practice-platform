@@ -63,7 +63,7 @@ export async function resolveTimeBillingDefaults(params: {
     const [{ data: e }, activeRate] = await Promise.all([
       supabase
         .from('errands' as any)
-        .select('billing_type, hourly_rate, currency')
+        .select('billing_type, hourly_rate, estimated_value_currency')
         .eq('id', params.errandId)
         .maybeSingle(),
       getActiveBillingRate({ organizationId: params.organizationId, userId: params.userId }),
@@ -73,7 +73,7 @@ export async function resolveTimeBillingDefaults(params: {
     return {
       is_billable: isBillable,
       billing_rate: isBillable ? (Number((e as any)?.hourly_rate) || activeRate.rate || null) : null,
-      billing_rate_currency: activeRate.currency || (e as any)?.currency || 'IQD',
+      billing_rate_currency: activeRate.currency || (e as any)?.estimated_value_currency || 'IQD',
     };
   }
 
