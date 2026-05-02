@@ -122,6 +122,5 @@ export async function createTrustTransaction(input: {
 }
 
 export async function deleteTrustTransaction(id: string): Promise<void> {
-  const { error } = await supabase.from('trust_transactions' as any).delete().eq('id', id);
-  if (error) throw error;
+  throw new Error('Trust transactions cannot be deleted. Create a reversing entry instead.');
 }
