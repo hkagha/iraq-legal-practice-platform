@@ -389,13 +389,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "calendar_events_errand_id_fkey"
-            columns: ["errand_id"]
-            isOneToOne: false
-            referencedRelation: "errands"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "calendar_events_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
@@ -1633,6 +1626,13 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "documents_corrected_text_updated_by_fkey"
+            columns: ["corrected_text_updated_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "documents_entity_id_fkey"
             columns: ["entity_id"]
             isOneToOne: false
@@ -1672,6 +1672,13 @@ export type Database = {
             columns: ["person_id"]
             isOneToOne: false
             referencedRelation: "persons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "documents_reviewed_by_fkey"
+            columns: ["reviewed_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
