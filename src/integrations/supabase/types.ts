@@ -389,13 +389,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "calendar_events_errand_id_fkey"
-            columns: ["errand_id"]
-            isOneToOne: false
-            referencedRelation: "errands"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "calendar_events_organization_id_fkey"
             columns: ["organization_id"]
             isOneToOne: false
@@ -1461,10 +1454,6 @@ export type Database = {
           ai_summary: string | null
           ai_tags: string[] | null
           case_id: string | null
-          corrected_text: string | null
-          corrected_text_updated_at: string | null
-          corrected_text_updated_by: string | null
-          corrected_text_version: number
           created_at: string
           description: string | null
           description_ar: string | null
@@ -1493,9 +1482,6 @@ export type Database = {
           parent_document_id: string | null
           party_type: string | null
           person_id: string | null
-          review_status: string
-          reviewed_at: string | null
-          reviewed_by: string | null
           search_tsv: unknown
           status: string
           tags: string[] | null
@@ -1520,10 +1506,6 @@ export type Database = {
           ai_summary?: string | null
           ai_tags?: string[] | null
           case_id?: string | null
-          corrected_text?: string | null
-          corrected_text_updated_at?: string | null
-          corrected_text_updated_by?: string | null
-          corrected_text_version?: number
           created_at?: string
           description?: string | null
           description_ar?: string | null
@@ -1552,9 +1534,6 @@ export type Database = {
           parent_document_id?: string | null
           party_type?: string | null
           person_id?: string | null
-          review_status?: string
-          reviewed_at?: string | null
-          reviewed_by?: string | null
           search_tsv?: unknown
           status?: string
           tags?: string[] | null
@@ -1579,10 +1558,6 @@ export type Database = {
           ai_summary?: string | null
           ai_tags?: string[] | null
           case_id?: string | null
-          corrected_text?: string | null
-          corrected_text_updated_at?: string | null
-          corrected_text_updated_by?: string | null
-          corrected_text_version?: number
           created_at?: string
           description?: string | null
           description_ar?: string | null
@@ -1611,9 +1586,6 @@ export type Database = {
           parent_document_id?: string | null
           party_type?: string | null
           person_id?: string | null
-          review_status?: string
-          reviewed_at?: string | null
-          reviewed_by?: string | null
           search_tsv?: unknown
           status?: string
           tags?: string[] | null
