@@ -1,10 +1,13 @@
 import { useEffect, useState } from 'react';
-import { Sparkles, RefreshCw, Loader2, Users as UsersIcon, Building2, MapPin, Tag, CalendarDays, Scale, Hash, Coins, Gavel } from 'lucide-react';
+import { Sparkles, RefreshCw, Loader2, Users as UsersIcon, Building2, MapPin, Tag, CalendarDays, Scale, Hash, Coins, Gavel, Pencil } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { reindexDocument } from '@/lib/documentIndexing';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { FormTextarea } from '@/components/ui/FormTextarea';
 
 interface Props {
   document: any;
@@ -19,9 +22,16 @@ export default function DocumentAIIndexPanel({ document, onChanged }: Props) {
   const { language } = useLanguage();
   const isAR = language === 'ar';
   const [busy, setBusy] = useState(false);
+  const [savingCorrection, setSavingCorrection] = useState(false);
+  const [correctionOpen, setCorrectionOpen] = useState(false);
+  const [correctionText, setCorrectionText] = useState('');
   const [localStatus, setLocalStatus] = useState<string>(document?.indexing_status || 'pending');
 
   useEffect(() => { setLocalStatus(document?.indexing_status || 'pending'); }, [document?.id, document?.indexing_status]);
+
+  useEffect(() => {
+    setCorrectionText(document?.corrected_text || document?.extracted_text || '');
+  }, [document?.id, document?.corrected_text, document?.extracted_text]);
 
   const handleReindex = async () => {
     if (!document?.id) return;
@@ -37,6 +47,25 @@ export default function DocumentAIIndexPanel({ document, onChanged }: Props) {
     setBusy(false);
   };
 
+  const handleSaveCorrection = async () => {
+    if (!document?.id) return;
+    setSavingCorrection(true);
+    const { error } = await supabase
+      .from('documents')
+      .update({ corrected_text: correctionText } as any)
+      .eq('id', document.id);
+    setSavingCorrection(false);
+
+    if (error) {
+      toast.error(error.message);
+      return;
+    }
+
+    toast.success(isAR ? 'تم حفظ النص المصحح' : 'Corrected text saved');
+    setCorrectionOpen(false);
+    onChanged?.();
+  };
+
   const summary = document?.ai_summary as string | null;
   const docType = document?.ai_doc_type as string | null;
   const people = (document?.ai_people || []) as string[];
@@ -50,6 +79,9 @@ export default function DocumentAIIndexPanel({ document, onChanged }: Props) {
   const parties = (Array.isArray(document?.ai_parties) ? document.ai_parties : []) as PartyRef[];
   const lang = document?.ai_language as string | null;
   const err = document?.indexing_error as string | null;
+  const extractedText = document?.extracted_text as string | null;
+  const correctedText = document?.corrected_text as string | null;
+  const searchableText = correctedText || extractedText;
 
   const status = localStatus;
   const isDone = status === 'done';
@@ -57,6 +89,7 @@ export default function DocumentAIIndexPanel({ document, onChanged }: Props) {
   const isFailed = status === 'failed';
 
   return (
+    <>
     <div className="border border-border rounded-md bg-card/50">
       <div className="flex items-center justify-between px-4 py-3 border-b border-border">
         <div className="flex items-center gap-2">
@@ -106,6 +139,28 @@ export default function DocumentAIIndexPanel({ document, onChanged }: Props) {
           <div>
             <div className="eyebrow text-muted-foreground mb-1">{isAR ? 'ملخص' : 'Summary'}</div>
             <p className="text-body-md text-foreground/90 leading-relaxed">{summary}</p>
+          </div>
+        )}
+
+        {searchableText && (
+          <div className="border border-border rounded-md overflow-hidden">
+            <div className="flex items-center justify-between px-3 py-2 bg-muted/50 border-b border-border">
+              <div>
+                <div className="eyebrow text-muted-foreground">{isAR ? 'النص القابل للبحث' : 'Searchable text'}</div>
+                <div className="text-[11px] text-muted-foreground">
+                  {correctedText
+                    ? (isAR ? `نسخة مصححة ${document?.corrected_text_version || 1}` : `Corrected version ${document?.corrected_text_version || 1}`)
+                    : (isAR ? 'النص الأصلي المستخرج آلياً' : 'Original extracted OCR text')}
+                </div>
+              </div>
+              <Button variant="outline" size="sm" onClick={() => setCorrectionOpen(true)}>
+                <Pencil className="h-3.5 w-3.5 me-1.5" />
+                {isAR ? 'تصحيح النص' : 'Correct text'}
+              </Button>
+            </div>
+            <pre className="max-h-44 overflow-auto whitespace-pre-wrap p-3 text-body-sm leading-relaxed text-muted-foreground bg-card">
+              {searchableText.slice(0, 3000)}{searchableText.length > 3000 ? '\n…' : ''}
+            </pre>
           </div>
         )}
 
@@ -197,6 +252,37 @@ export default function DocumentAIIndexPanel({ document, onChanged }: Props) {
         )}
       </div>
     </div>
+    <Dialog open={correctionOpen} onOpenChange={setCorrectionOpen}>
+      <DialogContent className="max-w-3xl max-h-[88vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>{isAR ? 'تصحيح النص المستخرج' : 'Correct extracted text'}</DialogTitle>
+        </DialogHeader>
+        <div className="space-y-3">
+          <p className="text-body-sm text-muted-foreground">
+            {isAR
+              ? 'يُحفظ النص المصحح كنسخة منفصلة، ويبقى النص الأصلي المستخرج محفوظاً للرجوع إليه.'
+              : 'The corrected text is saved separately; the original extracted text remains preserved.'}
+          </p>
+          <FormTextarea
+            value={correctionText}
+            onChange={(event) => setCorrectionText(event.target.value)}
+            rows={18}
+            dir={isAR ? 'rtl' : 'auto'}
+            className="font-mono text-body-sm"
+          />
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setCorrectionOpen(false)}>
+            {isAR ? 'إلغاء' : 'Cancel'}
+          </Button>
+          <Button onClick={handleSaveCorrection} disabled={savingCorrection}>
+            {savingCorrection && <Loader2 className="h-4 w-4 me-1.5 animate-spin" />}
+            {isAR ? 'حفظ النص المصحح' : 'Save corrected text'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+    </>
   );
 }
 

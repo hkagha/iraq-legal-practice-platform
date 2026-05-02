@@ -100,7 +100,7 @@ export default function DocumentArchivePage() {
 
     if (search.trim()) {
       const s = search.trim();
-      q = q.or(`file_name.ilike.%${s}%,title.ilike.%${s}%,ai_summary.ilike.%${s}%,ai_doc_type.ilike.%${s}%,extracted_text.ilike.%${s}%`);
+      q = q.or(`file_name.ilike.%${s}%,title.ilike.%${s}%,ai_summary.ilike.%${s}%,ai_doc_type.ilike.%${s}%,extracted_text.ilike.%${s}%,corrected_text.ilike.%${s}%`);
     }
 
     // AND-combine multiple facets across kinds (multi-tag filtering)
