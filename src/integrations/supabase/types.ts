@@ -2929,6 +2929,7 @@ export type Database = {
           is_active: boolean
           letterhead_url: string | null
           logo_url: string | null
+          main_admin_id: string | null
           max_storage_mb: number
           max_users: number
           name: string
@@ -2992,6 +2993,7 @@ export type Database = {
           is_active?: boolean
           letterhead_url?: string | null
           logo_url?: string | null
+          main_admin_id?: string | null
           max_storage_mb?: number
           max_users?: number
           name: string
@@ -3055,6 +3057,7 @@ export type Database = {
           is_active?: boolean
           letterhead_url?: string | null
           logo_url?: string | null
+          main_admin_id?: string | null
           max_storage_mb?: number
           max_users?: number
           name?: string
@@ -4473,6 +4476,10 @@ export type Database = {
       }
       set_org_ai_key: {
         Args: { _org_id: string; _plaintext: string }
+        Returns: undefined
+      }
+      transfer_main_admin: {
+        Args: { _new_admin_id: string }
         Returns: undefined
       }
       user_can_access_case: {
