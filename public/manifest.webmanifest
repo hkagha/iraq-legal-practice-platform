@@ -1,0 +1,27 @@
+{
+  "name": "Qanuni - Iraq Legal Practice Management",
+  "short_name": "Qanuni",
+  "description": "Bilingual case, errand, billing, and document management for Iraqi law firms.",
+  "lang": "en",
+  "dir": "auto",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "theme_color": "#12312B",
+  "background_color": "#F7F5EF",
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
