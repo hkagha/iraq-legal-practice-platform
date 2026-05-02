@@ -23,6 +23,8 @@ export default function ConflictCheckerPage() {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [taxId, setTaxId] = useState('');
+  const [nationalId, setNationalId] = useState('');
+  const [companyRegistrationNumber, setCompanyRegistrationNumber] = useState('');
   const [running, setRunning] = useState(false);
   const [results, setResults] = useState<ConflictMatch[] | null>(null);
   const [history, setHistory] = useState<any[]>([]);
@@ -50,10 +52,13 @@ export default function ConflictCheckerPage() {
     setRunning(true);
     try {
       const r = await runConflictCheck({
+        organization_id: profile?.organization_id || undefined,
         query_name: name,
         query_phone: phone || undefined,
         query_email: email || undefined,
         query_tax_id: taxId || undefined,
+        query_national_id: nationalId || undefined,
+        query_company_registration_number: companyRegistrationNumber || undefined,
       });
       setResults(r.matches);
     } catch (e: any) {
@@ -128,6 +133,14 @@ export default function ConflictCheckerPage() {
               <label className="text-body-sm font-medium block mb-1">{t('Tax ID', 'الرقم الضريبي')}</label>
               <Input value={taxId} onChange={(e) => setTaxId(e.target.value)} />
             </div>
+            <div>
+              <label className="text-body-sm font-medium block mb-1">{t('National ID', 'رقم الهوية')}</label>
+              <Input value={nationalId} onChange={(e) => setNationalId(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-body-sm font-medium block mb-1">{t('Company registration no.', 'رقم تسجيل الشركة')}</label>
+              <Input value={companyRegistrationNumber} onChange={(e) => setCompanyRegistrationNumber(e.target.value)} />
+            </div>
           </div>
           <div className="flex gap-2">
             <Button onClick={handleRun} disabled={running} className="gap-2">
@@ -179,6 +192,15 @@ export default function ConflictCheckerPage() {
                     </div>
                     <div className="flex gap-2">
                       <Badge variant="outline">{m.type}</Badge>
+                      {m.severity && (
+                        <Badge variant={m.severity === 'direct' ? 'destructive' : m.severity === 'possible' ? 'secondary' : 'outline'}>
+                          {m.severity === 'direct'
+                            ? t('Direct', 'مباشر')
+                            : m.severity === 'possible'
+                            ? t('Possible', 'محتمل')
+                            : t('Info', 'معلومة')}
+                        </Badge>
+                      )}
                       <Badge variant="secondary">{m.match_reason}</Badge>
                     </div>
                   </li>

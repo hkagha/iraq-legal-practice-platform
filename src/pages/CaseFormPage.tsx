@@ -104,13 +104,15 @@ export default function CaseFormPage() {
 
   const findClientConflicts = async (clientParties: DraftParty[]): Promise<ConflictMatch[]> => {
     const matches: ConflictMatch[] = [];
+    const activeCaseStatuses = ['intake', 'pending_conflict_review', 'active', 'on_hold', 'pending_judgment', 'appeal', 'enforcement'];
 
     for (const party of clientParties) {
       const baseQuery = supabase
         .from('case_parties')
         .select('id, role, case_id, cases!inner(id, case_number, title, status)')
         .neq('role', 'client')
-        .not('cases.status', 'in', '("closed","archived")');
+        .eq('organization_id', profile!.organization_id!)
+        .in('cases.status', activeCaseStatuses);
 
       const { data, error } = party.ref.partyType === 'person'
         ? await baseQuery.eq('person_id', party.ref.personId!)
@@ -126,6 +128,28 @@ export default function CaseFormPage() {
           name: party.ref.displayName,
           detail: c?.case_number || c?.title,
           match_reason: `${(row as any).role}_on_active_case`,
+          severity: 'direct',
+        });
+      }
+
+      const namePattern = `%${party.ref.displayName}%`;
+      const { data: legacyCases, error: legacyErr } = await supabase
+        .from('cases')
+        .select('id, case_number, title, opposing_party_name, opposing_party_name_ar')
+        .eq('organization_id', profile!.organization_id!)
+        .in('status', activeCaseStatuses)
+        .or(`opposing_party_name.ilike.${namePattern},opposing_party_name_ar.ilike.${namePattern}`)
+        .limit(10);
+      if (legacyErr) throw legacyErr;
+
+      for (const c of legacyCases || []) {
+        matches.push({
+          type: 'case_party',
+          id: c.id,
+          name: party.ref.displayName,
+          detail: c.case_number || c.title,
+          match_reason: 'legacy_opposing_party_on_active_case',
+          severity: 'direct',
         });
       }
     }
