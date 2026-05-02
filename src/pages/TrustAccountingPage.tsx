@@ -117,9 +117,9 @@ export default function TrustAccountingPage() {
       toast.success(t('Transaction recorded', 'تم تسجيل الحركة'));
       setOpenTx(false);
       setTxAmount(''); setTxRef(''); setTxNotes('');
-      const [list, t] = await Promise.all([listTrustAccounts(), listTrustTransactions(selected.id)]);
+      const [list, txList] = await Promise.all([listTrustAccounts(), listTrustTransactions(selected.id)]);
       setAccounts(list);
-      setTxs(t);
+      setTxs(txList);
     } catch (e: any) {
       toast.error(e.message || t('Failed to record transaction', 'تعذر تسجيل الحركة'));
     }
