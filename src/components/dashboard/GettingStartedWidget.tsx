@@ -110,7 +110,7 @@ export default function GettingStartedWidget() {
     load();
   }, [profile?.organization_id, profile?.id, profile?.role]);
 
-  const orgProfileDone = Boolean(organization?.phone && (organization as any)?.city);
+  const orgProfileDone = Boolean((organization as any)?.phone && (organization as any)?.city);
 
   const items = useMemo<ChecklistItem[]>(() => [
     {
