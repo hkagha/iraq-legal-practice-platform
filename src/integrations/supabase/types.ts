@@ -2135,6 +2135,68 @@ export type Database = {
           },
         ]
       }
+      errand_team_members: {
+        Row: {
+          assigned_at: string
+          assigned_by: string | null
+          created_at: string
+          errand_id: string
+          id: string
+          organization_id: string
+          role: string
+          user_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by?: string | null
+          created_at?: string
+          errand_id: string
+          id?: string
+          organization_id: string
+          role?: string
+          user_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string | null
+          created_at?: string
+          errand_id?: string
+          id?: string
+          organization_id?: string
+          role?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "errand_team_members_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "errand_team_members_errand_id_fkey"
+            columns: ["errand_id"]
+            isOneToOne: false
+            referencedRelation: "errands"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "errand_team_members_organization_id_fkey"
+            columns: ["organization_id"]
+            isOneToOne: false
+            referencedRelation: "organizations"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "errand_team_members_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       errand_templates: {
         Row: {
           category: string
@@ -2436,6 +2498,7 @@ export type Database = {
           discount_amount: number
           due_date: string | null
           entity_id: string | null
+          errand_id: string | null
           id: string
           invoice_number: string
           issue_date: string
@@ -2461,6 +2524,7 @@ export type Database = {
           discount_amount?: number
           due_date?: string | null
           entity_id?: string | null
+          errand_id?: string | null
           id?: string
           invoice_number: string
           issue_date?: string
@@ -2486,6 +2550,7 @@ export type Database = {
           discount_amount?: number
           due_date?: string | null
           entity_id?: string | null
+          errand_id?: string | null
           id?: string
           invoice_number?: string
           issue_date?: string
@@ -2522,6 +2587,13 @@ export type Database = {
             columns: ["entity_id"]
             isOneToOne: false
             referencedRelation: "entities"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invoices_errand_id_fkey"
+            columns: ["errand_id"]
+            isOneToOne: false
+            referencedRelation: "errands"
             referencedColumns: ["id"]
           },
           {
@@ -4218,6 +4290,10 @@ export type Database = {
       }
       get_user_org_id: { Args: { _user_id: string }; Returns: string }
       get_user_role: { Args: { _user_id: string }; Returns: string }
+      has_org_finance_access: {
+        Args: { _org_id: string; _user_id: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -4247,6 +4323,10 @@ export type Database = {
       }
       portal_user_can_access_entity: {
         Args: { _entity_id: string }
+        Returns: boolean
+      }
+      portal_user_can_access_errand: {
+        Args: { _errand_id: string }
         Returns: boolean
       }
       portal_user_can_access_person: {
