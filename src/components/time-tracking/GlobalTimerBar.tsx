@@ -1,7 +1,7 @@
 import { useTimer } from '@/contexts/TimerContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
-import { Square, Pause, Clock } from 'lucide-react';
+import { Square, Clock } from 'lucide-react';
 
 function fmt(seconds: number) {
   const h = Math.floor(seconds / 3600);
@@ -11,7 +11,7 @@ function fmt(seconds: number) {
 }
 
 export default function GlobalTimerBar() {
-  const { isRunning, elapsedSeconds, activeTimer, stopTimer, pauseTimer } = useTimer();
+  const { isRunning, elapsedSeconds, activeTimer, stopTimer } = useTimer();
   const { language } = useLanguage();
   const t = (en: string, ar: string) => language === 'ar' ? ar : en;
 
@@ -23,11 +23,15 @@ export default function GlobalTimerBar() {
       <span className="font-mono text-body-sm font-semibold tabular-nums">{fmt(elapsedSeconds)}</span>
       <span className="text-body-sm truncate max-w-[40vw]">{activeTimer.description}</span>
       <div className="flex items-center gap-2 ms-auto">
-        <Button size="sm" variant="ghost" onClick={pauseTimer} className="text-accent-foreground hover:bg-accent-foreground/10 h-8">
-          <Pause className="h-3.5 w-3.5 me-1" />
-          {t('Pause', 'إيقاف مؤقت')}
-        </Button>
-        <Button size="sm" variant="ghost" onClick={stopTimer} className="text-accent-foreground hover:bg-accent-foreground/10 h-8">
+        <Button
+          size="sm"
+          variant="ghost"
+          onClick={() => {
+            const confirmed = window.confirm(t('Stop and save this time entry?', 'هل تريد إيقاف المؤقت وحفظ سجل الوقت؟'));
+            if (confirmed) void stopTimer();
+          }}
+          className="text-accent-foreground hover:bg-accent-foreground/10 h-8"
+        >
           <Square className="h-3.5 w-3.5 me-1" />
           {t('Stop & Save', 'إيقاف وحفظ')}
         </Button>

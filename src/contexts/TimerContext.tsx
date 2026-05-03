@@ -31,8 +31,6 @@ interface TimerContextValue {
   activeTimer: ActiveTimer | null;
   startTimer: (opts: StartTimerOpts) => Promise<StartTimerResult>;
   stopTimer: () => Promise<void>;
-  pauseTimer: () => Promise<void>;
-  resumeTimer: () => Promise<void>;
   refresh: () => Promise<void>;
 }
 
@@ -42,8 +40,6 @@ const TimerContext = createContext<TimerContextValue>({
   activeTimer: null,
   startTimer: async () => ({ ok: false }),
   stopTimer: async () => {},
-  pauseTimer: async () => {},
-  resumeTimer: async () => {},
   refresh: async () => {},
 });
 
@@ -172,30 +168,6 @@ export function TimerProvider({ children }: { children: ReactNode }) {
     setElapsedSeconds(0);
   }, [activeTimer]);
 
-  const pauseTimer = useCallback(async () => {
-    if (!activeTimer) return;
-    const startMs = new Date(activeTimer.timer_started_at).getTime();
-    const minutes = Math.max(1, Math.round((Date.now() - startMs) / 60000));
-    const { error } = await supabase
-      .from('time_entries')
-      .update({
-        is_timer_running: false,
-        timer_started_at: null,
-        duration_minutes: minutes,
-      })
-      .eq('id', activeTimer.id);
-    if (error) {
-      toast.error(error.message);
-      return;
-    }
-    setActiveTimer(null);
-    setElapsedSeconds(0);
-  }, [activeTimer]);
-
-  const resumeTimer = useCallback(async () => {
-    // No-op (paused entries are saved as drafts; user starts a new one)
-  }, []);
-
   return (
     <TimerContext.Provider value={{
       isRunning: !!activeTimer,
@@ -203,8 +175,6 @@ export function TimerProvider({ children }: { children: ReactNode }) {
       activeTimer,
       startTimer,
       stopTimer,
-      pauseTimer,
-      resumeTimer,
       refresh,
     }}>
       {children}
