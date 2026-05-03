@@ -84,8 +84,8 @@ export default function ChangePasswordPage() {
           </h1>
           <p className="text-body-sm text-muted-foreground">
             {isEN
-              ? 'Your account was created with an administrator-set password. Please replace it before continuing.'
-              : 'تم إنشاء حسابك بكلمة مرور عيّنها المسؤول. يرجى استبدالها قبل المتابعة.'}
+              ? 'Your account was created with an administrator-set password. You can replace it here.'
+              : 'تم إنشاء حسابك بكلمة مرور عيّنها المسؤول. يمكنك استبدالها هنا.'}
           </p>
         </div>
 

@@ -13,6 +13,7 @@ import EventFormModal from '@/components/calendar/EventFormModal';
 import ClientFormSlideOver from '@/components/clients/ClientFormSlideOver';
 import AIChatPanel from '@/components/ai/AIChatPanel';
 import CommandPalette from '@/components/CommandPalette';
+import PasswordReminderBanner from '@/components/auth/PasswordReminderBanner';
 
 export default function MainLayout() {
   const navigate = useNavigate();
@@ -44,6 +45,7 @@ export default function MainLayout() {
 
   return (
     <div className="min-h-screen flex flex-col w-full bg-background">
+      <PasswordReminderBanner />
       {isImpersonating && (
         <div className="bg-warning text-warning-foreground px-4 py-2 text-body-sm font-semibold flex items-center justify-center gap-3 z-50">
           <span>⚠️ {isEN ? 'VIEWING AS' : 'يتم العرض كـ'}: {impersonatedOrgName}</span>

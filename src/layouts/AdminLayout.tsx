@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
+import PasswordReminderBanner from '@/components/auth/PasswordReminderBanner';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   LayoutDashboard, Building, Users, BarChart3, DollarSign,
@@ -123,6 +124,7 @@ export default function AdminLayout() {
 
       {/* Content */}
       <div className="flex-1 flex flex-col min-w-0">
+        <PasswordReminderBanner />
         {/* Header */}
         <header className="h-14 bg-card border-b flex items-center justify-between px-6 shrink-0">
           <div className="text-body-sm text-muted-foreground">{isEN ? 'Platform Administration' : 'إدارة المنصة'}</div>
