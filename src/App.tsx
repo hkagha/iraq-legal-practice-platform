@@ -67,6 +67,7 @@ const ClientAnalyticsReport = React.lazy(() => import('@/pages/ClientAnalyticsRe
 const TimeUtilizationReport = React.lazy(() => import('@/pages/TimeUtilizationReport'));
 const BillingAgingReport = React.lazy(() => import('@/pages/BillingAgingReport'));
 const SettingsPage = React.lazy(() => import('@/pages/SettingsPage'));
+const ChangePasswordPage = React.lazy(() => import('@/pages/ChangePasswordPage'));
 const AIDocumentDraftPage = React.lazy(() => import('@/pages/AIDocumentDraftPage'));
 const AILegalResearchPage = React.lazy(() => import('@/pages/AILegalResearchPage'));
 const AITranslatePage = React.lazy(() => import('@/pages/AITranslatePage'));
@@ -134,6 +135,9 @@ const App = () => (
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
                 <Route path="/admin/login" element={<AdminLoginPage />} />
                 <Route path="/portal/login" element={<PortalLoginPage />} />
+
+                <Route path="/change-password" element={<ProtectedRoute><ChangePasswordPage /></ProtectedRoute>} />
+
                 {/* Protected main routes */}
                 <Route element={<ProtectedRoute allowedRoles={['firm_admin', 'lawyer', 'paralegal', 'secretary', 'accountant']}><MainLayout /></ProtectedRoute>}>
                   <Route path="/dashboard" element={<DashboardPage />} />

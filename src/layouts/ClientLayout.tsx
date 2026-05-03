@@ -1,11 +1,10 @@
-import { useState, useEffect } from 'react';
 import { Outlet, NavLink, useLocation, useNavigate } from 'react-router-dom';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePortalOrg } from '@/contexts/PortalOrgContext';
 import {
   LayoutDashboard, Scale, FileCheck, FileText, MessageSquare,
-  Receipt, User, LogOut, Globe, ChevronDown, Building, Check, Loader2, KeyRound, X,
+  Receipt, User, LogOut, Globe, ChevronDown, Building, Check, Loader2,
 } from 'lucide-react';
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
@@ -25,55 +24,20 @@ const portalNav = [
 
 export default function ClientLayout() {
   const { t, isRTL, language, setLanguage } = useLanguage();
-  const { profile, organization, signOut, getFullName, getInitials } = useAuth();
+  const { organization, signOut, getFullName, getInitials } = useAuth();
   const { linkedOrgs, activeOrg, hasMultipleOrgs, switchOrg, isSwitching } = usePortalOrg();
   const location = useLocation();
   const navigate = useNavigate();
 
-  const [showPasswordReminder, setShowPasswordReminder] = useState(false);
   const isEN = language === 'en';
-
-  useEffect(() => {
-    if (!profile) return;
-    const dismissed = sessionStorage.getItem('qanuni_password_reminder_dismissed');
-    if ((profile as any).password_set_by_admin && !dismissed) {
-      setShowPasswordReminder(true);
-    } else {
-      setShowPasswordReminder(false);
-    }
-  }, [profile]);
 
   const handleSignOut = async () => {
     await signOut();
     navigate('/portal/login');
   };
 
-  function dismissPasswordReminder() {
-    sessionStorage.setItem('qanuni_password_reminder_dismissed', 'true');
-    setShowPasswordReminder(false);
-  }
-
   return (
     <div className="min-h-screen flex flex-col bg-secondary/30">
-      {showPasswordReminder && (
-        <div className="bg-info/10 border-b border-info/20 px-4 py-2.5 flex items-center justify-center gap-3 z-50">
-          <KeyRound className="h-4 w-4 text-info shrink-0" />
-          <span className="text-body-sm text-info">
-            {isEN
-              ? 'Your password was set by an administrator. We recommend changing it to something personal.'
-              : 'تم تعيين كلمة المرور بواسطة المسؤول. ننصحك بتغييرها إلى كلمة مرور خاصة بك.'}
-          </span>
-          <button
-            onClick={() => { dismissPasswordReminder(); navigate('/portal/profile'); }}
-            className="text-body-sm font-medium text-info hover:underline whitespace-nowrap"
-          >
-            {isEN ? 'Change Password' : 'تغيير كلمة المرور'}
-          </button>
-          <button onClick={dismissPasswordReminder} className="text-info/60 hover:text-info ms-1">
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-      )}
       {/* Switching overlay */}
       {isSwitching && (
         <div className="fixed inset-0 bg-background/60 z-50 flex items-center justify-center">

@@ -59,6 +59,9 @@ export default function ProtectedRoute({ children, allowedRoles }: ProtectedRout
     if (location.pathname.startsWith('/portal')) {
       return <Navigate to="/dashboard" replace />;
     }
+    if (profile.password_set_by_admin && location.pathname !== '/change-password') {
+      return <Navigate to="/change-password" state={{ from: location }} replace />;
+    }
     // Role gating, when provided.
     if (allowedRoles && !allowedRoles.includes(profile.role)) {
       // While impersonating, a platform admin should be allowed into firm-staff routes.

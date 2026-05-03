@@ -4,7 +4,6 @@ import AppSidebar from '@/components/AppSidebar';
 import TopHeader from '@/components/TopHeader';
 import GlobalTimerBar from '@/components/time-tracking/GlobalTimerBar';
 import { useImpersonation } from '@/contexts/ImpersonationContext';
-import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { logAdminAction } from '@/lib/adminAudit';
 import KeyboardShortcuts from '@/components/KeyboardShortcuts';
@@ -14,11 +13,9 @@ import EventFormModal from '@/components/calendar/EventFormModal';
 import ClientFormSlideOver from '@/components/clients/ClientFormSlideOver';
 import AIChatPanel from '@/components/ai/AIChatPanel';
 import CommandPalette from '@/components/CommandPalette';
-import { KeyRound, X } from 'lucide-react';
 
 export default function MainLayout() {
   const navigate = useNavigate();
-  const { profile } = useAuth();
   const { language } = useLanguage();
   const isEN = language === 'en';
   const [collapsed, setCollapsed] = useState(() => {
@@ -28,17 +25,6 @@ export default function MainLayout() {
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [showEventModal, setShowEventModal] = useState(false);
   const [showClientForm, setShowClientForm] = useState(false);
-  const [showPasswordReminder, setShowPasswordReminder] = useState(false);
-
-  useEffect(() => {
-    if (!profile) return;
-    const dismissed = sessionStorage.getItem('qanuni_password_reminder_dismissed');
-    if (profile.password_set_by_admin && !dismissed) {
-      setShowPasswordReminder(true);
-    } else {
-      setShowPasswordReminder(false);
-    }
-  }, [profile]);
 
   useEffect(() => {
     localStorage.setItem('qanuni_sidebar_collapsed', String(collapsed));
@@ -54,34 +40,10 @@ export default function MainLayout() {
   const handleLogTime = useCallback(() => navigate('/time-tracking'), [navigate]);
   const handleNewClient = useCallback(() => setShowClientForm(true), []);
 
-  function dismissPasswordReminder() {
-    sessionStorage.setItem('qanuni_password_reminder_dismissed', 'true');
-    setShowPasswordReminder(false);
-  }
-
   const { isImpersonating, impersonatedOrgName, impersonatedOrgId, originalAdminId, endImpersonation } = useImpersonation();
 
   return (
     <div className="min-h-screen flex flex-col w-full bg-background">
-      {showPasswordReminder && (
-        <div className="bg-info/10 border-b border-info/20 px-4 py-2.5 flex items-center justify-center gap-3 z-50">
-          <KeyRound className="h-4 w-4 text-info shrink-0" />
-          <span className="text-body-sm text-info">
-            {isEN
-              ? 'Your password was set by an administrator. We recommend changing it to something personal.'
-              : 'تم تعيين كلمة المرور بواسطة المسؤول. ننصحك بتغييرها إلى كلمة مرور خاصة بك.'}
-          </span>
-          <button
-            onClick={() => { dismissPasswordReminder(); navigate('/settings'); }}
-            className="text-body-sm font-medium text-info hover:underline whitespace-nowrap"
-          >
-            {isEN ? 'Change Password' : 'تغيير كلمة المرور'}
-          </button>
-          <button onClick={dismissPasswordReminder} className="text-info/60 hover:text-info ms-1">
-            <X className="h-4 w-4" />
-          </button>
-        </div>
-      )}
       {isImpersonating && (
         <div className="bg-warning text-warning-foreground px-4 py-2 text-body-sm font-semibold flex items-center justify-center gap-3 z-50">
           <span>⚠️ {isEN ? 'VIEWING AS' : 'يتم العرض كـ'}: {impersonatedOrgName}</span>
