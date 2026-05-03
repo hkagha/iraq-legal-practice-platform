@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { PageHeader } from '@/components/ui/PageHeader';
 import { cn } from '@/lib/utils';
 import {
-  Building, Palette, Receipt, Hash, Users, Shield, Mail,
+  Building, Palette, Receipt, Hash, Users, Shield,
   User, Lock, Bell, Globe, CreditCard, Download, AlertTriangle, Sparkles,
 } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -14,7 +14,6 @@ import BillingConfigSettings from '@/components/settings/BillingConfigSettings';
 import NumberingSettings from '@/components/settings/NumberingSettings';
 import TeamMembersSection from '@/components/settings/TeamMembersSection';
 import RolesPermissionsSection from '@/components/settings/RolesPermissionsSection';
-import InvitationsSection from '@/components/settings/InvitationsSection';
 import MyProfileSection from '@/components/settings/MyProfileSection';
 import SecuritySection from '@/components/settings/SecuritySection';
 import NotificationPrefsSection from '@/components/settings/NotificationPrefsSection';
@@ -26,7 +25,7 @@ import AIConfigSettings from '@/components/settings/AIConfigSettings';
 
 type SectionKey = 
   | 'general' | 'branding' | 'billingConfig' | 'numbering'
-  | 'teamMembers' | 'rolesPermissions' | 'invitations'
+  | 'teamMembers' | 'rolesPermissions'
   | 'myProfile' | 'security' | 'notificationPrefs' | 'languageAppearance'
   | 'subscription' | 'aiConfig' | 'dataExport' | 'dangerZone';
 
@@ -56,7 +55,6 @@ const navGroups: NavGroup[] = [
     items: [
       { key: 'teamMembers', icon: Users },
       { key: 'rolesPermissions', icon: Shield },
-      { key: 'invitations', icon: Mail },
     ],
   },
   {
@@ -101,7 +99,6 @@ export default function SettingsPage() {
       case 'numbering': return <NumberingSettings />;
       case 'teamMembers': return <TeamMembersSection />;
       case 'rolesPermissions': return <RolesPermissionsSection />;
-      case 'invitations': return <InvitationsSection />;
       case 'myProfile': return <MyProfileSection />;
       case 'security': return <SecuritySection />;
       case 'notificationPrefs': return <NotificationPrefsSection />;

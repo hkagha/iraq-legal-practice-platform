@@ -22,7 +22,6 @@ import LoginPage from "@/pages/LoginPage";
 import StaffLoginPage from "@/pages/StaffLoginPage";
 import ForgotPasswordPage from "@/pages/ForgotPasswordPage";
 import NotFound from "./pages/NotFound";
-import InviteAcceptPage from "@/pages/InviteAcceptPage";
 import AdminLoginPage from '@/pages/admin/AdminLoginPage';
 import PortalLoginPage from '@/pages/portal/PortalLoginPage';
 
@@ -133,7 +132,6 @@ const App = () => (
                 <Route path="/login/staff" element={<StaffLoginPage />} />
                 <Route path="/register" element={<Navigate to="/login/staff" replace />} />
                 <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-                <Route path="/invite/:token" element={<InviteAcceptPage />} />
                 <Route path="/admin/login" element={<AdminLoginPage />} />
                 <Route path="/portal/login" element={<PortalLoginPage />} />
                 {/* Protected main routes */}

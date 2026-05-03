@@ -256,7 +256,7 @@ const TABS: TabContent[] = [
       {
         heading: { en: '9. Settings & administration', ar: '٩. الإعدادات والإدارة' },
         items: [
-          { en: 'Firm admins manage members, roles (Admin, Lawyer, Paralegal, Secretary, Accountant), and invitations from "Settings → Team".', ar: 'يدير مدراء المكتب الأعضاء والأدوار (مدير، محامٍ، مساعد، سكرتير، محاسب) والدعوات من "الإعدادات ← الفريق".' },
+          { en: 'Firm admins manage members and roles (Admin, Lawyer, Paralegal, Secretary, Accountant) from "Settings → Team".', ar: 'يدير مدراء المكتب الأعضاء والأدوار (مدير، محامٍ، مساعد، سكرتير، محاسب) من "الإعدادات ← الفريق".' },
           { en: 'Invitations are token-based and expire after 7 days. Roles control what each user can see and do.', ar: 'الدعوات قائمة على رمز وتنتهي خلال 7 أيام. تتحكم الأدوار بما يراه كل مستخدم وما يستطيع فعله.' },
           { en: 'Configure language, branding, default currency, work week, taxes, and AI provider from Settings.', ar: 'تُضبط اللغة والهوية البصرية والعملة الافتراضية وأسبوع العمل والضرائب ومزود الذكاء الاصطناعي من الإعدادات.' },
         ],
