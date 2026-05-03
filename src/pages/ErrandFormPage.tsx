@@ -20,8 +20,12 @@ import type { PartyRef } from '@/types/parties';
 const ERRAND_TYPES = ['government_registration', 'license_renewal', 'document_authentication', 'court_filing', 'permit_application', 'tax_filing', 'other'];
 const STATUSES = ['intake', 'in_progress', 'waiting_on_client', 'waiting_on_authority', 'completed', 'cancelled', 'archived'];
 const PRIORITIES = ['low', 'normal', 'high', 'urgent'];
-const BILLING_TYPES = ['fixed_fee', 'hourly', 'retainer', 'contingency', 'pro_bono'];
+const BILLING_TYPES = ['fixed_fee', 'hourly', 'pro_bono', 'non_billable'];
 const CURRENCIES = ['IQD', 'USD'];
+
+function normalizeBillingType(value?: string | null) {
+  return value && BILLING_TYPES.includes(value) ? value : 'fixed_fee';
+}
 
 export default function ErrandFormPage() {
   const { id } = useParams<{ id: string }>();
@@ -53,8 +57,6 @@ export default function ErrandFormPage() {
     billing_type: 'fixed_fee',
     hourly_rate: '',
     fixed_fee_amount: '',
-    retainer_amount: '',
-    contingency_percentage: '',
     estimated_value: '',
     estimated_value_currency: 'IQD',
   });
@@ -83,11 +85,9 @@ export default function ErrandFormPage() {
           case_id: data.case_id || '',
           assigned_to: data.assigned_to || '',
           is_visible_to_client: data.is_visible_to_client ?? false,
-          billing_type: data.billing_type || 'fixed_fee',
+          billing_type: normalizeBillingType(data.billing_type),
           hourly_rate: data.hourly_rate?.toString() || '',
           fixed_fee_amount: data.fixed_fee_amount?.toString() || '',
-          retainer_amount: data.retainer_amount?.toString() || '',
-          contingency_percentage: data.contingency_percentage?.toString() || '',
           estimated_value: data.estimated_value?.toString() || '',
           estimated_value_currency: data.estimated_value_currency || 'IQD',
         });
@@ -149,11 +149,10 @@ export default function ErrandFormPage() {
         party_type: party?.partyType || null,
         person_id: party?.partyType === 'person' ? party.personId : null,
         entity_id: party?.partyType === 'entity' ? party.entityId : null,
-        billing_type: form.billing_type,
+        billing_type: normalizeBillingType(form.billing_type),
         hourly_rate: form.hourly_rate ? parseFloat(form.hourly_rate) : null,
         fixed_fee_amount: form.fixed_fee_amount ? parseFloat(form.fixed_fee_amount) : null,
-        retainer_amount: form.retainer_amount ? parseFloat(form.retainer_amount) : null,
-        contingency_percentage: form.contingency_percentage ? parseFloat(form.contingency_percentage) : null,
+        retainer_amount: null,
         estimated_value: form.estimated_value ? parseFloat(form.estimated_value) : null,
         estimated_value_currency: form.estimated_value_currency,
         organization_id: profile.organization_id,
@@ -275,9 +274,8 @@ export default function ErrandFormPage() {
                     ? ({
                         fixed_fee: 'أتعاب مقطوعة',
                         hourly: 'بالساعة',
-                        retainer: 'دفعة مقدمة',
-                        contingency: 'نسبة من النتيجة',
                         pro_bono: 'دون أتعاب',
+                        non_billable: 'غير قابل للفوترة',
                       } as Record<string, string>)[type]
                     : type.replace(/_/g, ' '),
                 }))}
@@ -298,16 +296,6 @@ export default function ErrandFormPage() {
             {form.billing_type === 'fixed_fee' && (
               <FormField label={lang === 'ar' ? 'الأتعاب المقطوعة' : 'Fixed fee amount'}>
                 <FormInput type="number" min="0" step="0.01" value={form.fixed_fee_amount} onChange={(e) => setForm({ ...form, fixed_fee_amount: e.target.value })} />
-              </FormField>
-            )}
-            {form.billing_type === 'retainer' && (
-              <FormField label={lang === 'ar' ? 'مبلغ الدفعة المقدمة' : 'Retainer amount'}>
-                <FormInput type="number" min="0" step="0.01" value={form.retainer_amount} onChange={(e) => setForm({ ...form, retainer_amount: e.target.value })} />
-              </FormField>
-            )}
-            {form.billing_type === 'contingency' && (
-              <FormField label={lang === 'ar' ? 'النسبة المئوية' : 'Contingency percentage'}>
-                <FormInput type="number" min="0" max="100" step="0.01" value={form.contingency_percentage} onChange={(e) => setForm({ ...form, contingency_percentage: e.target.value })} />
               </FormField>
             )}
             <FormField label={lang === 'ar' ? 'القيمة المقدرة' : 'Estimated value'}>

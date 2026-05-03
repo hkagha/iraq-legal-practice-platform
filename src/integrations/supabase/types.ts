@@ -2322,7 +2322,6 @@ export type Database = {
           case_id: string | null
           completed_at: string | null
           completed_steps: number
-          contingency_percentage: number | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -2354,7 +2353,6 @@ export type Database = {
           case_id?: string | null
           completed_at?: string | null
           completed_steps?: number
-          contingency_percentage?: number | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -2386,7 +2384,6 @@ export type Database = {
           case_id?: string | null
           completed_at?: string | null
           completed_steps?: number
-          contingency_percentage?: number | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -4264,6 +4261,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           currency: string
+          errand_id: string | null
           id: string
           invoice_id: string | null
           notes: string | null
@@ -4279,6 +4277,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           currency?: string
+          errand_id?: string | null
           id?: string
           invoice_id?: string | null
           notes?: string | null
@@ -4294,6 +4293,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           currency?: string
+          errand_id?: string | null
           id?: string
           invoice_id?: string | null
           notes?: string | null
@@ -4304,6 +4304,13 @@ export type Database = {
           trust_account_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "trust_transactions_errand_id_fkey"
+            columns: ["errand_id"]
+            isOneToOne: false
+            referencedRelation: "errands"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "trust_transactions_trust_account_id_fkey"
             columns: ["trust_account_id"]

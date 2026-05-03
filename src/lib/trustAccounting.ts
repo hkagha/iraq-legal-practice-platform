@@ -34,6 +34,7 @@ export interface TrustTransaction {
   reference: string | null;
   invoice_id: string | null;
   case_id: string | null;
+  errand_id: string | null;
   notes: string | null;
   created_by: string | null;
   created_at: string;
@@ -97,6 +98,7 @@ export async function createTrustTransaction(input: {
   reference?: string | null;
   invoice_id?: string | null;
   case_id?: string | null;
+  errand_id?: string | null;
   notes?: string | null;
   created_by?: string | null;
 }): Promise<TrustTransaction> {
@@ -112,6 +114,7 @@ export async function createTrustTransaction(input: {
       reference: input.reference ?? null,
       invoice_id: input.invoice_id ?? null,
       case_id: input.case_id ?? null,
+      errand_id: input.errand_id ?? null,
       notes: input.notes ?? null,
       created_by: input.created_by ?? null,
     })
