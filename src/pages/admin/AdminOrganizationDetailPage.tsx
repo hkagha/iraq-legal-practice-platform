@@ -16,8 +16,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { toast } from 'sonner';
 
 interface OrgDetail {
-  id: string; name: string; name_ar: string; subscription_tier: string; subscription_status: string;
-  is_active: boolean; created_at: string; max_users: number; phone: string | null; email: string | null;
+  id: string; name: string; name_ar: string;
+  is_active: boolean; created_at: string; phone: string | null; email: string | null;
   website: string | null; city: string | null; governorate: string | null; default_currency: string | null;
   default_hourly_rate: number | null; tax_rate: number | null; payment_terms_days: number | null;
   case_prefix: string | null; errand_prefix: string | null; invoice_prefix: string | null;
@@ -108,7 +108,9 @@ export default function AdminOrganizationDetailPage() {
             <h1 className="text-display-sm text-foreground">{org.name}</h1>
             {org.name_ar && <p className="text-body-md text-muted-foreground">{org.name_ar}</p>}
             <div className="flex items-center gap-2 mt-1">
-              <span className="text-body-sm px-2 py-0.5 rounded-full bg-accent/10 text-accent">{org.subscription_tier}</span>
+              <span className="text-body-sm px-2 py-0.5 rounded-full bg-accent/10 text-accent">
+                {isEN ? 'Full access' : 'وصول كامل'}
+              </span>
               <span className={`text-body-sm px-2 py-0.5 rounded-full ${org.is_active ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
                 {org.is_active ? (isEN ? 'Active' : 'نشط') : (isEN ? 'Inactive' : 'غير نشط')}
               </span>
@@ -220,11 +222,10 @@ export default function AdminOrganizationDetailPage() {
 
         <TabsContent value="billing" className="mt-4 space-y-4">
           <div className="bg-card border rounded-lg p-5">
-            <h3 className="text-heading-sm text-foreground mb-3">{isEN ? 'Subscription' : 'الاشتراك'}</h3>
+            <h3 className="text-heading-sm text-foreground mb-3">{isEN ? 'Pilot Access' : 'الوصول التجريبي'}</h3>
             <div className="grid grid-cols-2 gap-3 text-body-sm">
-              <div><span className="text-muted-foreground">{isEN ? 'Plan' : 'الخطة'}:</span> <span className="font-medium capitalize">{org.subscription_tier}</span></div>
-              <div><span className="text-muted-foreground">{isEN ? 'Status' : 'الحالة'}:</span> <span className="font-medium capitalize">{org.subscription_status}</span></div>
-              <div><span className="text-muted-foreground">{isEN ? 'Max Users' : 'أقصى مستخدمين'}:</span> <span className="font-medium">{org.max_users}</span></div>
+              <div><span className="text-muted-foreground">{isEN ? 'Product access' : 'الوصول للمنتج'}:</span> <span className="font-medium">{isEN ? 'Full product' : 'المنتج الكامل'}</span></div>
+              <div><span className="text-muted-foreground">{isEN ? 'Organization status' : 'حالة المؤسسة'}:</span> <span className="font-medium">{org.is_active ? (isEN ? 'Active' : 'نشطة') : (isEN ? 'Inactive' : 'غير نشطة')}</span></div>
               <div><span className="text-muted-foreground">{isEN ? 'Total Revenue' : 'إجمالي الإيرادات'}:</span> <span className="font-medium">${stats.revenue.toLocaleString()}</span></div>
             </div>
           </div>

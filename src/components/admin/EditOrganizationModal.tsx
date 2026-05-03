@@ -6,7 +6,6 @@ import { logAdminAction } from '@/lib/adminAudit';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { FormField } from '@/components/ui/FormField';
 import { FormInput } from '@/components/ui/FormInput';
-import { FormSelect } from '@/components/ui/FormSelect';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Loader2 } from 'lucide-react';
@@ -40,9 +39,7 @@ export default function EditOrganizationModal({ open, orgId, onClose, onSuccess 
     setSaving(true);
     try {
       const { error } = await supabase.from('organizations').update({
-        name: form.name, name_ar: form.name_ar, subscription_tier: form.subscription_tier,
-        subscription_status: form.subscription_status, max_users: form.max_users,
-        max_storage_mb: form.max_storage_mb, phone: form.phone, email: form.email,
+        name: form.name, name_ar: form.name_ar, phone: form.phone, email: form.email,
         website: form.website, city: form.city, governorate: form.governorate, is_active: form.is_active,
         ai_platform_disabled_by_admin: !!form.ai_platform_disabled_by_admin,
       } as any).eq('id', orgId);
@@ -62,21 +59,10 @@ export default function EditOrganizationModal({ open, orgId, onClose, onSuccess 
         <div className="space-y-4">
           <FormField label={isEN ? 'Name' : 'الاسم'}><FormInput value={form.name || ''} onChange={e => set('name', e.target.value)} /></FormField>
           <FormField label={isEN ? 'Name (Arabic)' : 'الاسم (عربي)'}><FormInput value={form.name_ar || ''} onChange={e => set('name_ar', e.target.value)} dir="rtl" /></FormField>
-          <div className="grid grid-cols-2 gap-3">
-            <FormField label={isEN ? 'Plan' : 'الخطة'}>
-              <FormSelect value={form.subscription_tier || 'starter'} onValueChange={v => set('subscription_tier', v)} options={[
-                { value: 'starter', label: 'Starter' }, { value: 'professional', label: 'Professional' }, { value: 'enterprise', label: 'Enterprise' },
-              ]} />
-            </FormField>
-            <FormField label={isEN ? 'Subscription Status' : 'حالة الاشتراك'}>
-              <FormSelect value={form.subscription_status || 'active'} onValueChange={v => set('subscription_status', v)} options={[
-                { value: 'trial', label: 'Trial' }, { value: 'active', label: 'Active' }, { value: 'past_due', label: 'Past Due' }, { value: 'cancelled', label: 'Cancelled' }, { value: 'suspended', label: 'Suspended' },
-              ]} />
-            </FormField>
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <FormField label={isEN ? 'Max Users' : 'الحد الأقصى للمستخدمين'}><FormInput type="number" value={form.max_users || 10} onChange={e => set('max_users', parseInt(e.target.value))} /></FormField>
-            <FormField label={isEN ? 'Max Storage (MB)' : 'أقصى تخزين (ميغابايت)'}><FormInput type="number" value={form.max_storage_mb || 1024} onChange={e => set('max_storage_mb', parseInt(e.target.value))} /></FormField>
+          <div className="rounded-lg border border-accent/20 bg-accent/5 p-3 text-body-sm text-muted-foreground">
+            {isEN
+              ? 'All organizations currently receive full product access. Commercial plan controls are intentionally hidden for phase one.'
+              : 'تحصل جميع المؤسسات حالياً على وصول كامل إلى المنتج. تم إخفاء أدوات الخطط التجارية عمداً في المرحلة الأولى.'}
           </div>
           <FormField label={isEN ? 'Phone' : 'الهاتف'}><PhoneInput value={form.phone || ''} onChange={v => set('phone', v)} /></FormField>
           <FormField label={isEN ? 'Email' : 'البريد'}><FormInput value={form.email || ''} onChange={e => set('email', e.target.value)} /></FormField>

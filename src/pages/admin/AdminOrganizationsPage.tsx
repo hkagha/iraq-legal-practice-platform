@@ -15,8 +15,8 @@ import { ConfirmDialog } from '@/components/ui/ConfirmDialog';
 import { HelpButton } from '@/components/ui/HelpButton';
 
 interface OrgWithStats {
-  id: string; name: string; name_ar: string; subscription_tier: string; subscription_status: string;
-  is_active: boolean; created_at: string; max_users: number;
+  id: string; name: string; name_ar: string;
+  is_active: boolean; created_at: string;
   userCount: number; caseCount: number; errandCount: number; docCount: number;
 }
 
@@ -32,7 +32,6 @@ export default function AdminOrganizationsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [planFilter, setPlanFilter] = useState('all');
   const [showCreate, setShowCreate] = useState(false);
   const [editOrgId, setEditOrgId] = useState<string | null>(null);
   const [deleteOrg, setDeleteOrg] = useState<OrgWithStats | null>(null);
@@ -93,7 +92,6 @@ export default function AdminOrganizationsPage() {
   const filtered = orgs.filter(o => {
     if (statusFilter === 'active' && !o.is_active) return false;
     if (statusFilter === 'inactive' && o.is_active) return false;
-    if (planFilter !== 'all' && o.subscription_tier !== planFilter) return false;
     if (search) {
       const q = search.toLowerCase();
       return o.name.toLowerCase().includes(q) || o.name_ar?.toLowerCase().includes(q);
@@ -103,11 +101,6 @@ export default function AdminOrganizationsPage() {
 
   const paged = filtered.slice(0, (page + 1) * PAGE_SIZE);
   const hasMore = paged.length < filtered.length;
-
-  const planBadge = (plan: string) => {
-    const colors: Record<string, string> = { starter: 'bg-muted text-muted-foreground', professional: 'bg-info/10 text-info', enterprise: 'bg-accent/10 text-accent' };
-    return <span className={`text-body-sm px-2 py-0.5 rounded-full ${colors[plan] || colors.starter}`}>{plan}</span>;
-  };
 
   return (
     <div className="space-y-6">
@@ -129,10 +122,6 @@ export default function AdminOrganizationsPage() {
           <Search className="absolute start-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input value={search} onChange={e => setSearch(e.target.value)} placeholder={isEN ? 'Search organizations...' : 'بحث...'} className="w-full h-10 ps-9 pe-3 rounded-lg border border-border bg-card text-body-md focus:outline-none focus:ring-2 focus:ring-primary/20" />
         </div>
-        <select value={planFilter} onChange={e => setPlanFilter(e.target.value)} className="h-10 rounded-lg border border-border bg-card px-3 text-body-md">
-          <option value="all">{isEN ? 'All Plans' : 'كل الخطط'}</option>
-          <option value="starter">Starter</option><option value="professional">Professional</option><option value="enterprise">Enterprise</option>
-        </select>
         <select value={statusFilter} onChange={e => setStatusFilter(e.target.value)} className="h-10 rounded-lg border border-border bg-card px-3 text-body-md">
           <option value="all">{isEN ? 'All Status' : 'كل الحالات'}</option>
           <option value="active">{isEN ? 'Active' : 'نشط'}</option><option value="inactive">{isEN ? 'Inactive' : 'غير نشط'}</option>
@@ -155,7 +144,9 @@ export default function AdminOrganizationsPage() {
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 flex-wrap">
                       <h3 className="text-heading-sm text-foreground truncate">{org.name}</h3>
-                      {planBadge(org.subscription_tier)}
+                      <span className="text-body-sm px-2 py-0.5 rounded-full bg-accent/10 text-accent">
+                        {isEN ? 'Full access' : 'وصول كامل'}
+                      </span>
                       <span className={`text-body-sm px-2 py-0.5 rounded-full ${org.is_active ? 'bg-success/10 text-success' : 'bg-muted text-muted-foreground'}`}>
                         {org.is_active ? (isEN ? 'Active' : 'نشط') : (isEN ? 'Inactive' : 'غير نشط')}
                       </span>

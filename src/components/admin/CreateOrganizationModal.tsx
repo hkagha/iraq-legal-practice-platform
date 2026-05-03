@@ -7,7 +7,6 @@ import { createUserWithPassword } from '@/lib/passwordService';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { FormField } from '@/components/ui/FormField';
 import { FormInput } from '@/components/ui/FormInput';
-import { FormSelect } from '@/components/ui/FormSelect';
 import { Button } from '@/components/ui/button';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
@@ -21,7 +20,6 @@ export default function CreateOrganizationModal({ open, onClose, onSuccess }: Pr
   const isEN = language === 'en';
   const [orgName, setOrgName] = useState('');
   const [orgNameAr, setOrgNameAr] = useState('');
-  const [plan, setPlan] = useState('professional');
   const [adminEmail, setAdminEmail] = useState('');
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
@@ -29,7 +27,7 @@ export default function CreateOrganizationModal({ open, onClose, onSuccess }: Pr
   const [tempPassword, setTempPassword] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const reset = () => { setOrgName(''); setOrgNameAr(''); setPlan('professional'); setAdminEmail(''); setFirstName(''); setLastName(''); setPhone(''); setTempPassword(''); };
+  const reset = () => { setOrgName(''); setOrgNameAr(''); setAdminEmail(''); setFirstName(''); setLastName(''); setPhone(''); setTempPassword(''); };
 
   const handleSubmit = async () => {
     if (!orgName || !adminEmail || !firstName || !lastName || !tempPassword || tempPassword.length < 8) return;
@@ -38,7 +36,10 @@ export default function CreateOrganizationModal({ open, onClose, onSuccess }: Pr
       // 1. Create org
       const slug = `${orgName.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${Date.now().toString(36)}`;
       const { data: org, error: orgError } = await supabase.from('organizations').insert({
-        name: orgName, name_ar: orgNameAr || orgName, slug, subscription_tier: plan, subscription_status: 'active', is_active: true,
+        name: orgName, name_ar: orgNameAr || orgName, slug,
+        subscription_tier: 'enterprise', subscription_status: 'active',
+        max_users: 999, max_storage_mb: 100000,
+        is_active: true,
       } as any).select().single();
       if (orgError) throw orgError;
 
@@ -78,11 +79,11 @@ export default function CreateOrganizationModal({ open, onClose, onSuccess }: Pr
           <FormField label={isEN ? 'Organization Name (Arabic)' : 'اسم المؤسسة (عربي)'}>
             <FormInput value={orgNameAr} onChange={e => setOrgNameAr(e.target.value)} dir="rtl" />
           </FormField>
-          <FormField label={isEN ? 'Plan' : 'الخطة'} required>
-            <FormSelect value={plan} onValueChange={setPlan} options={[
-              { value: 'starter', label: 'Starter' }, { value: 'professional', label: 'Professional' }, { value: 'enterprise', label: 'Enterprise' },
-            ]} />
-          </FormField>
+          <div className="rounded-lg border border-accent/20 bg-accent/5 p-3 text-body-sm text-muted-foreground">
+            {isEN
+              ? 'Phase one organizations receive full product access by default.'
+              : 'تحصل المؤسسات في المرحلة الأولى على وصول كامل إلى المنتج افتراضياً.'}
+          </div>
           <div className="h-px bg-border my-2" />
           <p className="text-body-sm font-semibold text-muted-foreground">{isEN ? 'First Admin User' : 'المستخدم المسؤول الأول'}</p>
           <FormField label={isEN ? 'Admin Email' : 'البريد الإلكتروني'} required>
